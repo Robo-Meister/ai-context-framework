@@ -1,6 +1,6 @@
 import unittest
 
-from ContextAi.core.trust_module import TrustModule
+from core.trust_module import TrustModule
 
 
 class TestTrustModule(unittest.TestCase):

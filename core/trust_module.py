@@ -1,7 +1,6 @@
 from typing import Dict, List, Optional, Any
 import numpy as np
 
-
 class TrustModule:
     def __init__(self, weights: Dict[str, float], distance_method: str = "cosine", parser=None):
         """

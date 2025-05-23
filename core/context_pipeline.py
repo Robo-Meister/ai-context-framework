@@ -1,9 +1,9 @@
 from collections import defaultdict
 from typing import List
 
-from ContextAi.core.categorizer import Categorizer
-from ContextAi.core.deduplicator import Deduplicator
-from ContextAi.core.fuser import Fuser
+from core.categorizer import Categorizer
+from core.deduplicator import Deduplicator
+from core.fuser import Fuser
 
 
 class ContextPipeline:

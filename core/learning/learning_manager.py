@@ -2,10 +2,10 @@ from typing import List
 
 from torch import optim
 
-from ContextAi.core.learning.complex_net import ComplexNet
+from core.learning.complex_net import ComplexNet
 import torch.nn as nn
 import torch
-from ContextAi.core.trust_module import TrustModule
+from core.trust_module import TrustModule
 
 
 class LearningManager:

@@ -1,17 +1,23 @@
 import threading
 
-import redis
+try:
+    import redis
+except ImportError:
+    redis = None  # or handle this differently, e.g. raise error on usage
 import uuid
 import json
 from typing import Callable, List
 from datetime import datetime
-import ContextAi.objects.context_data as ContextData
-import ContextAi.objects.context_query as ContextQuery
+import objects.context_data as ContextData
+import objects.context_query as ContextQuery
 
 # Assuming ContextQuery and ContextData are already defined as in previous message
 
 class RedisContextProvider:
     def __init__(self, redis_url: str, key_prefix: str = "context:"):
+        if redis is None:
+            raise ImportError("Redis package is required for RedisContextProvider. "
+                              "Install it with `pip install my_package[redis]`.")
         self.redis = redis.Redis.from_url(redis_url, decode_responses=True)
         self.key_prefix = key_prefix
         self.subscribers: dict[uuid.UUID, Callable[[ContextData], None]] = {}
@@ -107,46 +113,3 @@ class RedisContextProvider:
         except Exception as e:
             print(f"Failed to push context {context_id}: {e}")
 
-
-# provider = RedisContextProvider("redis://localhost")
-#
-# # Fetching
-# query = ContextQuery(
-#     roles=["operator"],
-#     time_range=(datetime(2025, 5, 1), datetime(2025, 5, 21)),
-#     scope="robot_arm",
-#     data_type="sensor"
-# )
-# fetched = provider.fetch_context(query)
-#
-# # Subscribing
-# def on_new_context(ctx: ContextData):
-#     print("🔔 Context arrived:", ctx)
-#
-# provider.subscribe_context(on_new_context)
-# provider.push_context("9c0fe3ab-e78b-4da7-9b50-c4df96fae7b4")
-
-
-# from datetime import datetime
-# import redis
-# import uuid
-#
-# r = redis.Redis.from_url("redis://localhost", decode_responses=True)
-# context_id = str(uuid.uuid4())
-#
-# ingest_context(
-#     redis_conn=r,
-#     context_id=context_id,
-#     payload={"sensor": "temperature", "value": 24.5},
-#     timestamp=datetime.utcnow(),
-#     metadata={"unit": "C", "location": "lab"},
-#     source_id="sensor_12",
-#     confidence=0.97
-# )
-
-provider = RedisContextProvider("redis://localhost")
-
-def on_context(ctx: ContextData):
-    print("⚡ Live context received:", ctx)
-
-provider.subscribe_context(on_context)

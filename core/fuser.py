@@ -1,10 +1,6 @@
-from datetime import time
-from typing import List, Dict, Tuple
+from typing import List, Dict
 
-import ContextAi.objects.context_data as ContextData
-import ContextAi.objects.fused_context as FusedContext
-from ContextAi.common.types.ScopeRoleKey import ScopeRoleKey
-# ScopeRoleKey = Tuple[str, str, str]  # Example: (role, time_bucket, situation)
+from common.types.ScopeRoleKey import ScopeRoleKey
 
 
 class Fuser:

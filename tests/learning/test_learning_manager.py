@@ -1,7 +1,7 @@
 import pytest
 
-from ContextAi.core.learning.learning_manager import LearningManager
-from ContextAi.parser.log_parser import LogParser
+from core.learning.learning_manager import LearningManager
+from parser.log_parser import LogParser
 
 sample_logs = [
     "2025-05-21T09:15:23 ERROR Admin failed login attempt on server1",

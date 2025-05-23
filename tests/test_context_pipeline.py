@@ -1,10 +1,10 @@
 import unittest
 
-from ContextAi.core.context_pipeline import ContextPipeline
-from ContextAi.core.categorizer import Categorizer
-from ContextAi.core.deduplicator import Deduplicator
-from ContextAi.core.fuser import Fuser
-from ContextAi.providers.mock_context_provider import MockContextProvider
+from core.context_pipeline import ContextPipeline
+from core.categorizer import Categorizer
+from core.deduplicator import Deduplicator
+from core.fuser import Fuser
+from providers.mock_context_provider import MockContextProvider
 
 class TestContextPipeline(unittest.TestCase):
     def test_context_pipeline(self):

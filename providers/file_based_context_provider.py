@@ -3,8 +3,8 @@ import os
 import uuid
 from typing import Optional, Callable, List
 from datetime import datetime
-import ContextAi.objects.context_data as ContextData
-import ContextAi.objects.context_query as ContextQuery
+import objects.context_data as ContextData
+import objects.context_query as ContextQuery
 class FileBasedContextProvider:
     def __init__(self, folder_path: str):
         self.folder_path = folder_path

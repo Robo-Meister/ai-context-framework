@@ -1,5 +1,5 @@
 from datetime import datetime
-from ContextAi.interfaces.context_provider import ContextProvider
+from interfaces.context_provider import ContextProvider
 
 class Categorizer:
     def __init__(self, context_provider: ContextProvider):

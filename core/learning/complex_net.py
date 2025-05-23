@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch
 
-from ContextAi.core.learning.complex_linear import ComplexLinear
+from core.learning.complex_linear import ComplexLinear
 
 
 class ComplexNet(nn.Module):

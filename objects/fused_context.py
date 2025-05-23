@@ -1,6 +1,6 @@
 from typing import Dict, List, Any, NamedTuple
 
-from ContextAi.common.types.ScopeRoleKey import ScopeRoleKey
+from common.types.ScopeRoleKey import ScopeRoleKey
 
 
 class FusedContext(NamedTuple):

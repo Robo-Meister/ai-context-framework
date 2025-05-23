@@ -1,5 +1,4 @@
-# vector_comparer.py
-import numpy as np
+# vector_normalizer.py
 
 class VectorNormalizer:
     def __init__(self):

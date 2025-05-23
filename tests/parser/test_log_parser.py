@@ -1,7 +1,7 @@
 import unittest
 from datetime import datetime
 
-from ContextAi.parser.log_parser import LogParser
+from parser.log_parser import LogParser
 
 
 class TestLogParser(unittest.TestCase):

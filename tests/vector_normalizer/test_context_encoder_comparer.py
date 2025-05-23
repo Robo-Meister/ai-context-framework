@@ -1,6 +1,6 @@
 import unittest
-from ContextAi.core.vector_normalizer.context_encoder import ContextEncoder
-from ContextAi.core.vector_normalizer.vector_comparer import VectorComparer
+from core.vector_normalizer.context_encoder import ContextEncoder
+from core.vector_normalizer.vector_comparer import VectorComparer
 
 class TestContextEncoderComparer(unittest.TestCase):
     def setUp(self):
@@ -26,5 +26,3 @@ class TestContextEncoderComparer(unittest.TestCase):
         self.assertTrue(0.0 <= cosine_sim <= 1.0)
         self.assertGreater(euclidean_dist, 0)
 
-if __name__ == '__main__':
-    unittest.main()

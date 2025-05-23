@@ -1,4 +1,4 @@
-from vector_comparer import VectorComparer
+from  core.vector_normalizer.vector_comparer import VectorComparer
 class ContextEncoder:
     def __init__(self):
         self.time_map = {

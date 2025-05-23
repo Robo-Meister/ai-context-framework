@@ -43,7 +43,7 @@
   <div class="section" id="overview">
     <h2>1. Overview</h2>
     <p>
-      The Contextual AI Module is responsible for message understanding, role-based context mapping, and intelligent distance-based relevance handling. This system integrates with Redis and File-based backends and supports fusion, deduplication, and semantic categorization.
+      The Contextual AI Module is responsible for message understanding, role-based context mapping, and intelligent distance-based relevance handling. This system integrates with Redis and file-based backends and supports fusion, deduplication, and semantic categorization.
     </p>
   </div>
 
@@ -104,18 +104,18 @@
     <h2>5. Extending the System</h2>
     <p>You can extend the module with additional providers or processors:</p>
     <ul>
-      <li><strong>Add a new ContextProvider:</strong> Implement <code>ContextProvider</code> interface</li>
-      <li><strong>Plug in Vector Search Engines:</strong> Integrate FAISS, RedisVector, or similar</li>
-      <li><strong>Define New Roles/Layers:</strong> Update the role schema registry</li>
+      <li><strong>Add a new ContextProvider:</strong> Implement the <code>ContextProvider</code> interface.</li>
+      <li><strong>Plug in Vector Search Engines:</strong> Integrate FAISS, RedisVector, or similar.</li>
+      <li><strong>Define New Roles/Layers:</strong> Update the role schema registry.</li>
     </ul>
   </div>
 
   <div class="section" id="next">
     <h2>6. Next Steps</h2>
     <ul>
-      <li>Define a role schema JSON</li>
-      <li>Implement vector normalization</li>
-      <li>Plug in time-decay and ANN search</li>
+      <li>Define a role schema JSON.</li>
+      <li>Implement vector normalization.</li>
+      <li>Plug in time-decay and approximate nearest neighbor (ANN) search.</li>
     </ul>
   </div>
 

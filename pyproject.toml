@@ -1,3 +1,16 @@
 [build-system]
 requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "my_package"
+version = "0.1.0"
+description = "A short description of my package"
+readme = "README.md"
+requires-python = ">=3.6"
+authors = [{name = "Paweł Nowak", email = "pawel.nowak@robo-meister.com"}]
+license = {text = "MIT"}
+dependencies = [
+    # "requests>=2.20.0",
+]
+homepage = "https://github.com/Robo-Meister/ai-context-framework.git"
