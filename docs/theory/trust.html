@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Contextual AI Trust & Weight Model Documentation</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 2rem;
+    line-height: 1.6;
+    max-width: 900px;
+  }
+  h1, h2, h3 {
+    color: #2c3e50;
+  }
+  code {
+    background-color: #f4f4f4;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 2rem 0;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+  th {
+    background-color: #ecf0f1;
+  }
+  .formula {
+    background-color: #f9f9f9;
+    border-left: 4px solid #2980b9;
+    padding: 1rem;
+    margin: 1rem 0;
+    font-family: monospace;
+    font-size: 1.1rem;
+  }
+  .note {
+    font-style: italic;
+    color: #555;
+  }
+</style>
+</head>
+<body>
+
+<h1>Contextual AI Trust & Weight Model Documentation</h1>
+
+<p>This document describes the model to calculate <strong>trust</strong> and <strong>weight</strong> of contextual AI messages, enabling robust context handling and privacy-aware sharing.</p>
+
+<hr />
+
+<h2>Legend</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Term</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Context Layer</code></td>
+      <td>A specific category of contextual information (e.g., role, environment, mood).</td>
+    </tr>
+    <tr>
+      <td><code>Weight (w<sub>i</sub>)</code></td>
+      <td>Numeric importance assigned to a context layer.</td>
+    </tr>
+    <tr>
+      <td><code>Presence (p<sub>i</sub>)</code></td>
+      <td>Indicator (1 or 0) whether the context layer is present.</td>
+    </tr>
+    <tr>
+      <td><code>Label</code></td>
+      <td>Optional user-defined tag applied to a message, with higher weight.</td>
+    </tr>
+    <tr>
+      <td><code>Trust</code></td>
+      <td>Score representing completeness and reliability of provided context.</td>
+    </tr>
+    <tr>
+      <td><code>Adjusted Weight</code></td>
+      <td>Final weight of a message factoring in trust score.</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2>Model Description</h2>
+
+<h3>1. Trust Score Calculation</h3>
+<p>The <strong>trust score</strong> measures how complete and reliable the context is, based on how many layers are present and their assigned weights.</p>
+
+<div class="formula">
+  Trust = (∑ w<sub>i</sub> × p<sub>i</sub>) / (∑ w<sub>i</sub>)<br/>
+  where:<br/>
+  w<sub>i</sub> = weight of context layer i<br/>
+  p<sub>i</sub> = presence (1 if present, 0 if absent) of context layer i
+</div>
+
+<h3>2. Labels as High-Weight Context</h3>
+<p>Labels are optional tags that users can assign explicitly. They carry a higher weight, making them strong signals in context calculations.</p>
+
+<ul>
+  <li>Label weight (W<sub>L</sub>) > any single context layer weight</li>
+  <li>Labels help anchor messages strongly within the context cloud</li>
+</ul>
+
+<h3>3. Adjusted Weight Calculation</h3>
+<p>The <strong>adjusted weight</strong> of a message is the product of its base weight and trust score:</p>
+
+<div class="formula">
+  Adjusted Weight = Weight × Trust
+</div>
+
+<p>This ensures that messages with richer context have more influence in AI decision-making.</p>
+
+<h3>4. Sharing Threshold</h3>
+<p>Only messages with a trust score above a preset minimum threshold are eligible for sharing or contributing to the global context pool, to maintain data quality and privacy.</p>
+
+<h3>5. Dynamic Trust Tuning</h3>
+<p>Trust scores can be updated dynamically based on feedback or repeated successful use, allowing the system to learn which context is truly reliable.</p>
+
+<hr />
+
+<h2>Example: Trust Calculation</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Context Layer</th>
+      <th>Weight (w<sub>i</sub>)</th>
+      <th>Presence (p<sub>i</sub>)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Role</td><td>0.2</td><td>1</td></tr>
+    <tr><td>Environment</td><td>0.2</td><td>1</td></tr>
+    <tr><td>Network Data</td><td>0.15</td><td>0</td></tr>
+    <tr><td>Input Data</td><td>0.15</td><td>1</td></tr>
+    <tr><td>Timeframe</td><td>0.1</td><td>1</td></tr>
+    <tr><td>Mood</td><td>0.1</td><td>0</td></tr>
+    <tr><td>Label</td><td>0.1</td><td>1</td></tr>
+  </tbody>
+</table>
+
+<div class="formula">
+  Trust = (0.2 + 0.2 + 0 + 0.15 + 0.1 + 0 + 0.1) / 1 = 0.75
+</div>
+
+---
+
+<h2>Next Steps & Suggestions</h2>
+<ul>
+  <li>Define precise weights for each context layer based on domain knowledge</li>
+  <li>Implement threshold-based sharing control</li>
+  <li>Enable user-driven label assignment with UX safeguards</li>
+  <li>Develop feedback loop to dynamically adjust trust</li>
+</ul>
+
+<hr />
+
+<p class="note"><strong>Note:</strong> This model is a foundational framework designed to support scalable and privacy-aware contextual AI systems.</p>
+
+</body>
+</html>

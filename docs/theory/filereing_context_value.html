@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contextual AI Alignment System (CAS)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: #f9f9f9;
+      color: #333;
+    }
+    header {
+      background: #3f51b5;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    nav {
+      background: #e0e0e0;
+      padding: 1rem;
+    }
+    nav a {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #3f51b5;
+      text-decoration: none;
+    }
+    .container {
+      display: flex;
+    }
+    main {
+      padding: 2rem;
+      max-width: 800px;
+    }
+    section {
+      margin-bottom: 2rem;
+    }
+    code, pre {
+      background: #efefef;
+      padding: 0.5rem;
+      display: block;
+      margin: 1rem 0;
+    }
+    .equation {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 1.1em;
+      background: #fff;
+      padding: 0.8rem;
+      border-left: 4px solid #3f51b5;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Contextual AI Alignment System (CAS)</h1>
+  </header>
+  <div class="container">
+    <nav>
+      <a href="#intro">Introduction</a>
+      <a href="#formula">CAS Formula</a>
+      <a href="#alignment">Context Alignment</a>
+      <a href="#trust">Trust Score</a>
+      <a href="#layers">Context Layers</a>
+      <a href="#combined">Final CAS Equation</a>
+      <a href="#improvements">Advanced Improvements</a>
+    </nav>
+    <main>
+      <section id="intro">
+        <h2>Introduction</h2>
+        <p>
+          The Contextual AI Alignment System is designed to select or rank past data or messages based on how well they match the current context, considering multiple factors like similarity, trust, and context richness.
+        </p>
+      </section>
+
+      <section id="formula">
+        <h2>CAS Formula</h2>
+        <p>Contextual Alignment Score is calculated as:</p>
+        <div class="equation">
+          CAS = w₁ · C<sub>align</sub> + w₂ · T<sub>source</sub> + w₃ · L<sub>context</sub><br>
+          with: w₁ + w₂ + w₃ = 1
+        </div>
+      </section>
+
+      <section id="alignment">
+        <h2>1. Context Alignment</h2>
+        <p>Measures how close the current request is to a stored message in a vector space.</p>
+        <div class="equation">
+          C<sub>align</sub>(i) = 1 - ||q - mᵢ|| / d<sub>max</sub>
+        </div>
+        <p>
+          Where <code>q</code> is the current context vector and <code>mᵢ</code> is the message vector. Distance can be Euclidean, cosine, etc.
+        </p>
+      </section>
+
+      <section id="trust">
+        <h2>2. Trust Score</h2>
+        <p>Reflects the reliability of the message source.</p>
+        <div class="equation">
+          T<sub>source</sub> = sigmoid(a · R + b · A)
+        </div>
+        <p>
+          R = role trust, A = accuracy history. A sigmoid function maps it into [0, 1].
+        </p>
+      </section>
+
+      <section id="layers">
+        <h2>3. Context Layers</h2>
+        <p>Quantifies how many types of context are present.</p>
+        <div class="equation">
+          L<sub>context</sub> = used layers / total layers
+        </div>
+        <p>
+          More layers = richer context = higher alignment accuracy.
+        </p>
+      </section>
+
+      <section id="combined">
+        <h2>Final CAS Equation</h2>
+        <p>Putting everything together:</p>
+        <div class="equation">
+          CAS(i) = w₁ · (1 - ||q - mᵢ|| / d<sub>max</sub>) + w₂ · T<sub>source</sub> + w₃ · L<sub>context</sub>
+        </div>
+        <p>
+          Use this score to rank memory items or determine relevance in AI workflows.
+        </p>
+      </section>
+
+      <section id="improvements">
+        <h2>Advanced Improvements</h2>
+        <ul>
+          <li>Kalman filters to refine the evolving query vector</li>
+          <li>Neural networks to learn trust patterns</li>
+          <li>Reinforcement Learning to optimize message selection over time</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

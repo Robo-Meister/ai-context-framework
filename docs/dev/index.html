@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contextual AI - Developer Documentation</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 2rem;
+      line-height: 1.6;
+      max-width: 960px;
+      color: #2c3e50;
+    }
+    h1, h2, h3 {
+      color: #34495e;
+      margin-top: 2rem;
+    }
+    pre, code {
+      background-color: #f4f4f4;
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-family: Consolas, monospace;
+    }
+    .section {
+      margin-bottom: 3rem;
+    }
+    .note {
+      background: #e8f4fc;
+      border-left: 5px solid #3498db;
+      padding: 1rem;
+      margin: 1.5rem 0;
+    }
+    ul {
+      margin-left: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🧠 Contextual AI: Developer Documentation</h1>
+
+  <div class="section" id="overview">
+    <h2>1. Overview</h2>
+    <p>
+      The Contextual AI Module is responsible for message understanding, role-based context mapping, and intelligent distance-based relevance handling. This system integrates with Redis and File-based backends and supports fusion, deduplication, and semantic categorization.
+    </p>
+  </div>
+
+  <div class="section" id="architecture">
+    <h2>2. Architecture</h2>
+    <ul>
+      <li><strong>Input:</strong> Raw messages or event logs</li>
+      <li><strong>Context Providers:</strong> RedisContextProvider, FileBasedContextProvider</li>
+      <li><strong>Core Modules:</strong> Fuser, Deduplicator, Categorizer</li>
+      <li><strong>Distance Engine:</strong> Vector-based comparison using Cosine/Euclidean metrics</li>
+    </ul>
+  </div>
+
+  <div class="section" id="components">
+    <h2>3. Core Components</h2>
+
+    <h3>3.1 Fuser</h3>
+    <p>
+      Combines similar messages based on context distance and predefined merge logic.
+    </p>
+
+    <h3>3.2 Deduplicator</h3>
+    <p>
+      Removes duplicate or redundant messages based on hash, timestamp, or semantic match.
+    </p>
+
+    <h3>3.3 Categorizer</h3>
+    <p>
+      Classifies messages into predefined categories using either rule-based logic or AI models.
+    </p>
+
+    <h3>3.4 ContextProvider</h3>
+    <p>
+      Abstract interface for accessing context. Implementations:
+    </p>
+    <ul>
+      <li><code>RedisContextProvider</code>: Uses Redis to store and retrieve context vectors.</li>
+      <li><code>FileBasedContextProvider</code>: Simple filesystem-based storage for development or testing.</li>
+    </ul>
+  </div>
+
+  <div class="section" id="distance">
+    <h2>4. Distance Calculation</h2>
+    <p>
+      Context vectors are compared using the following metrics:
+    </p>
+    <ul>
+      <li><strong>Euclidean Distance</strong>: <code>d = sqrt(∑ (x_i - y_i)²)</code></li>
+      <li><strong>Cosine Distance</strong>: <code>1 - (X · Y) / (||X|| × ||Y||)</code></li>
+    </ul>
+
+    <div class="note">
+      Role weighting is supported. Each dimension in the context vector can be scaled using domain-specific importance weights.
+    </div>
+  </div>
+
+  <div class="section" id="extending">
+    <h2>5. Extending the System</h2>
+    <p>You can extend the module with additional providers or processors:</p>
+    <ul>
+      <li><strong>Add a new ContextProvider:</strong> Implement <code>ContextProvider</code> interface</li>
+      <li><strong>Plug in Vector Search Engines:</strong> Integrate FAISS, RedisVector, or similar</li>
+      <li><strong>Define New Roles/Layers:</strong> Update the role schema registry</li>
+    </ul>
+  </div>
+
+  <div class="section" id="next">
+    <h2>6. Next Steps</h2>
+    <ul>
+      <li>Define a role schema JSON</li>
+      <li>Implement vector normalization</li>
+      <li>Plug in time-decay and ANN search</li>
+    </ul>
+  </div>
+
+</body>
+</html>

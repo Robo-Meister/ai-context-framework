@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Contextual AI - Architecture</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background: #ffffff; color: #333; }
+    h1, h2 { color: #2c3e50; }
+    ul { margin-left: 1.2rem; }
+    section { margin-bottom: 2rem; }
+    code { background: #eee; padding: 0.2rem 0.4rem; }
+  </style>
+</head>
+<body>
+  <h1>Contextual AI - Architecture Overview</h1>
+
+  <section>
+    <h2>Core Components</h2>
+    <ul>
+      <li><strong>Context Mapper:</strong> Collects and indexes input across time, space, user, device, and network state.</li>
+      <li><strong>Trust & Role Engine:</strong> Calculates trust scores from source roles, labels, and historical accuracy.</li>
+      <li><strong>Distance Calculator:</strong> Computes similarity using weighted multidimensional distance.</li>
+      <li><strong>Contextual Memory:</strong> Stores past queries, roles, and outputs along with meta-context.</li>
+      <li><strong>Policy Evaluator:</strong> Matches current input to expected outcomes or behavior trees.</li>
+      <li><strong>Neural Reweighting Engine:</strong> Uses small neural networks to learn importance of layers dynamically.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Optional Components</h2>
+    <ul>
+      <li><strong>Reinforcement Learning Module:</strong> Improves output selection via feedback on usefulness and alignment.</li>
+      <li><strong>Kalman Filter Layer:</strong> Refines estimations over time as new context arrives.</li>
+      <li><strong>Mood Layer:</strong> Adds emotional weight based on sentiment or pattern recognition.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Architecture Connections</h2>
+    <ul>
+      <li>Inputs → <code>Context Mapper</code> → <code>Distance Calculator</code> & <code>Trust Engine</code></li>
+      <li>Context Layers → Combined via <code>Neural Reweighting</code></li>
+      <li>Outputs Ranked → Based on CAS Score</li>
+      <li>Logs stored → <code>Contextual Memory</code> for later recall</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Modularity & Integration</h2>
+    <p>The architecture is modular and compatible with:</p>
+    <ul>
+      <li>Chatbots / ERP / IoT Systems</li>
+      <li>External APIs (via adapters)</li>
+      <li>Edge devices (e.g. robotic systems)</li>
+    </ul>
+  </section>
+</body>
+</html>
