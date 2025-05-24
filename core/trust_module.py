@@ -98,3 +98,5 @@ class TrustModule:
         context = self.parser.transform(log_line)  # Use the parser to get context
         features = self.extract_numeric_features(context)
         return features, context['score']
+    def extract_features(self, context: dict) -> List[float]:
+        return self.extract_numeric_features(context)

@@ -1,16 +1,22 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="cotext-ai",  # your package name, must be unique on PyPI
-    version="0.1.0",  # initial version
-    packages=find_packages(),  # auto-detect packages
+    name="ai_context",  # your package name, must be unique on PyPI
+    version="0.1.0",
+    packages=find_packages(),
 
     install_requires=[
-        "numpy>=1.20.0",
+        "numpy>=2.2.6",
+        "torch>=2.7.0",
+        "sympy>=1.14.0",
     ],
     extras_require={
-        "redis": ["redis>=4.0.0"],
-        "dev": ["pytest", "mypy", "black"],  # optional dev deps
+        "redis": ["redis>=6.1.0"],
+        "dev": [
+            "pytest>=8.3.5",
+            "mypy",
+            "black"
+        ],  # optional dev deps
     },
     author="Paweł Nowak",
     author_email="pawel.nowak@robo-meister.com",
