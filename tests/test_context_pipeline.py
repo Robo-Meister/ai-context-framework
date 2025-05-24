@@ -1,6 +1,6 @@
 import unittest
 
-from core.context_pipeline import ContextPipeline
+from pipelines.context_pipeline import ContextPipeline
 from providers.mock_context_provider import MockContextProvider
 
 class TestContextPipeline(unittest.TestCase):

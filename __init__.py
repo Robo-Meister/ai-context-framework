@@ -1,6 +1,6 @@
 from core.cache_manager import CacheManager
 from core.ai_inference import AIInferenceEngine
-from core.context_pipeline import ContextPipeline
+from pipelines.context_pipeline import ContextPipeline
 from core.fuser import Fuser
 from core.context_manager import ContextManager
 from core.policy_evaluator import PolicyEvaluator
