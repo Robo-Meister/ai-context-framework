@@ -21,8 +21,9 @@ This modular architecture is designed to evolve alongside AI needs, helping to r
 - Smart Deduplication: Basic and fuzzy matching to merge similar data
 - Flexible Categorization: Group context by roles and scopes
 - Context Fusion: Aggregate and weigh data for downstream AI
-- Cache Management: Efficient reuse and invalidation of context data *(planned)*
-- AI Inference & Learning Hooks: Modular integration points for custom AI logic and model updates *(planned)*
+- Context Memory (with Cache Management): Efficient reuse and invalidation of context data and history data *(planned)*
+- Distributed Context Sync & Network Communication: Synchronize context state across nodes, support multi-agent collaboration, and enable context-aware messaging *(planned)*
+- AI Inference & Learning Hooks: Modular integration points for custom AI logic and model updates
 
 ## Project Structure
 
