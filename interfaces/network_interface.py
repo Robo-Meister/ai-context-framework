@@ -1,16 +1,20 @@
-class NetworkInterface:
-    """
-    Abstract network interface to send/receive context data and messages
-    between distributed components.
-    """
-    def send(self, destination: str, message: dict) -> bool:
-        """
-        Send a message to the given destination node.
-        """
-        raise NotImplementedError
+# interfaces/network_interface.py
+from abc import ABC, abstractmethod
 
-    def receive(self) -> dict:
-        """
-        Blocking or async receive to get incoming messages.
-        """
-        raise NotImplementedError
+
+class NetworkInterface(ABC):
+    @abstractmethod
+    def send(self, recipient_id: str, message: dict):
+        pass
+
+    @abstractmethod
+    def broadcast(self, message: dict):
+        pass
+
+    @abstractmethod
+    def receive(self):
+        pass
+
+    @abstractmethod
+    def start_listening(self, _on_network_message):
+        pass

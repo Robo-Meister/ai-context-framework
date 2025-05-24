@@ -34,24 +34,17 @@ This modular architecture is designed to evolve alongside AI needs, helping to r
 ├── pyproject.toml
 ├── setup.py
 ├── core/
-│   ├── cache_manager.py            # Cache management (placeholder)
-│   ├── ai_inference.py             # AI inference engine (placeholder)
-│   ├── categorizer.py
-│   ├── context_pipeline.py
-│   ├── deduplicator.py
-│   ├── detach.py
-│   ├── fuser.py
+│   ├── filters/
 │   ├── learning/
-│   ├── trust_module.py
 │   └── vector_normalizer/
 ├── common/
 │   └── types/
+├── inference/
 ├── interfaces/
+├── network/
 ├── objects/
 ├── parser/
 ├── providers/
-├── examples/
-│   └── example.py
 ├── documentation/
 │   ├── dev/
 │   └── theory/

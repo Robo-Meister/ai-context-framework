@@ -1,9 +1,6 @@
 import unittest
 
 from core.context_pipeline import ContextPipeline
-from core.categorizer import Categorizer
-from core.deduplicator import Deduplicator
-from core.fuser import Fuser
 from providers.mock_context_provider import MockContextProvider
 
 class TestContextPipeline(unittest.TestCase):
@@ -12,7 +9,7 @@ class TestContextPipeline(unittest.TestCase):
         # pipeline = ContextPipeline(
         #     context_provider=mock_provider,
         #     categorizer=Categorizer(mock_provider),
-        #     deduplicator=Deduplicator(time_threshold_sec=300, fuzzy_threshold=0.7),
+        #     deduplicator=FuzzyDeduplicator(time_threshold_sec=300, fuzzy_threshold=0.7),
         #     fuser=Fuser()
         # )
         pipeline = ContextPipeline(context_provider=mock_provider)

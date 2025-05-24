@@ -4,8 +4,10 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 import json
 
+from interfaces.deduplicator_strategy import DeduplicationStrategy
 
-class Deduplicator:
+
+class FuzzyDeduplicator(DeduplicationStrategy):
     def __init__(
         self,
         time_threshold_sec: int = 5,
