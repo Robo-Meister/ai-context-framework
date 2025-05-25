@@ -14,6 +14,7 @@ class PolicyEvaluator:
         self.rules.append(rule_callable)
 
     def evaluate(self, context: dict, prediction: dict) -> (bool, dict):
+    # def evaluate(self, context_item: Dict[str, Any], prediction: dict) -> (bool, dict):
         """
         Evaluate all rules; return (passed, possibly modified prediction).
         If any rule returns False, fail the policy check.
