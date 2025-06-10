@@ -1,40 +1,40 @@
 from typing import List, Dict
+import math
 
-from torch import optim
-
-from core.learning.complex_net import ComplexNet
-import torch.nn as nn
-import torch
 from core.trust_module import TrustModule
-from inference.complex_inference import ComplexAIInferenceEngine
 from interfaces.learning_interface import LearningInterface
 
 
 class LearningManager(LearningInterface):
-    def __init__(self, input_size: int, hidden_size: int = 16, output_size: int = 1, lr: float = 0.01, parser=None):
-        self.inference_engine = ComplexAIInferenceEngine(input_size, hidden_size, output_size)
-        self.model = self.inference_engine.get_model()
-        self.loss_fn = nn.MSELoss()
-        self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
+    """Lightweight learning manager using a simple logistic model."""
+
+    def __init__(self, input_size: int, hidden_size: int = 16, output_size: int = 1, lr: float = 0.1, parser=None):
+        self.input_size = input_size
+        self.lr = lr
+        # Simple weights and bias for logistic regression
+        self.weights = [0.0 for _ in range(input_size)]
+        self.bias = 0.0
         self.history = []
-        self.trust_module = TrustModule(weights={"trust": 1.0, "role": 1.0, "time": 1.0, "frequency": 1.0}, parser= parser)
+        self.trust_module = TrustModule(weights={"trust": 1.0, "role": 1.0, "time": 1.0, "frequency": 1.0}, parser=parser)
 
-    def _to_complex_tensor(self, features: List[float]) -> torch.Tensor:
-        real = torch.tensor(features, dtype=torch.float32)
-        imag = torch.zeros_like(real)
-        return torch.complex(real, imag)
-    def train_step(self, x: List[float], y_true: float):
-        self.model.train()
-        z = self._to_complex_tensor(x)
-        output = self.model(z)
-        target = torch.tensor([y_true], dtype=torch.float32)
+    def _forward(self, x: List[float]) -> float:
+        z = self.bias + sum(w * xi for w, xi in zip(self.weights, x))
+        # Sigmoid activation to keep output in [0,1]
+        return 1.0 / (1.0 + math.exp(-z))
 
-        loss = self.loss_fn(torch.abs(output), target)
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
-        self.history.append(loss.item())
-        return loss.item()
+    def train_step(self, x: List[float], y_true: float) -> float:
+        """Perform one gradient descent step."""
+        y_pred = self._forward(x)
+        error = y_pred - y_true
+
+        grad = error * y_pred * (1.0 - y_pred)
+        for i, xi in enumerate(x):
+            self.weights[i] -= self.lr * grad * xi
+        self.bias -= self.lr * grad
+
+        loss = error * error
+        self.history.append(float(loss))
+        return float(loss)
     # def predict(self, input_data: dict) -> dict:
     #     return self.inference_engine.infer(input_data)
     #
@@ -51,11 +51,7 @@ class LearningManager(LearningInterface):
         return {"score": score}
 
     def predict_from_vector(self, x: List[float]) -> float:
-        self.model.eval()
-        with torch.no_grad():
-            z = self._to_complex_tensor(x)
-            output = self.model(z)
-            return torch.abs(output).item()
+        return self._forward(x)
 
     def predict_from_context(self, input_data: dict) -> dict:
         features = self.trust_module.extract_numeric_features(input_data)

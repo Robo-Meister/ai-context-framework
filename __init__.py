@@ -1,5 +1,4 @@
 from core.cache_manager import CacheManager
-from core.ai_inference import AIInferenceEngine
 from pipelines.context_pipeline import ContextPipeline
 from core.fuser import Fuser
 from core.context_manager import ContextManager
@@ -10,7 +9,6 @@ from interfaces.network_interface import NetworkInterface
 
 __all__ = [
     "CacheManager",
-    "AIInferenceEngine",
     "ContextPipeline",
     "Fuser",
     "ContextManager",
