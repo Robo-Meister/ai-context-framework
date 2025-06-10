@@ -1,12 +1,15 @@
-from sympy.printing.pytorch import torch
+import torch
+import torch.nn as nn
 
 from core.learning.complex_net import ComplexNet
 from interfaces.inference_engine import AIInferenceEngine
 
 
 class ComplexAIInferenceEngine(AIInferenceEngine):
-    def __init__(self, input_size, hidden_size=16, output_size=1):
+    def __init__(self, input_size, hidden_size=16, output_size=1, lr: float = 0.01):
         self.model = ComplexNet(input_size, hidden_size, output_size)
+        self.loss_fn = nn.MSELoss()
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
 
     def infer(self, input_data: dict) -> dict:
         # Convert input dict to tensor (you decide input format)
@@ -23,12 +26,23 @@ class ComplexAIInferenceEngine(AIInferenceEngine):
         return loss
 
     def _preprocess(self, input_data):
-        # Convert dict to tensor, e.g. torch.tensor([...])
-        pass
+        # Expect input_data to contain a list of numeric features
+        features = input_data.get("features", [])
+        real = torch.tensor(features, dtype=torch.float32)
+        imag = torch.zeros_like(real)
+        return torch.complex(real, imag)
 
     def _train_step(self, input_data, target):
         # One step of training returning loss float
-        pass
+        self.model.train()
+        x = self._preprocess(input_data)
+        y_true = torch.tensor([target], dtype=torch.float32)
+        output = self.model(x)
+        loss = self.loss_fn(torch.abs(output), y_true)
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+        return loss.item()
 
     def get_model(self):
         return self.model
