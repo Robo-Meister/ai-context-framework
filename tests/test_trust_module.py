@@ -14,6 +14,14 @@ class TestTrustModule(unittest.TestCase):
         }
         self.tm = TrustModule(weights=self.weights, distance_method="cosine")
 
+    def test_load_examples(self):
+        examples = [
+            {"role": 0.9, "location": 0.8, "time": 0.0, "device": 0.7, "action": 0.1},
+            {"role": 0.8, "location": 0.7, "time": 0.2, "device": 0.6, "action": 0.2},
+        ]
+        self.tm.load_examples(examples)
+        self.assertEqual(len(self.tm.memory), 2)
+
     def test_base_trust_score(self):
         ctx = {
             "role": True,
