@@ -60,6 +60,10 @@ class TrustModule:
         """
         self.memory.append(context)
 
+    def load_examples(self, examples: List[Dict[str, float]]):
+        """Load multiple trusted contexts at once."""
+        self.memory.extend(examples)
+
     def get_max_similarity(self, context: Dict[str, float]) -> float:
         """
         Compare given context against all in memory and return max similarity score

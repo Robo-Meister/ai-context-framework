@@ -21,6 +21,7 @@ This modular architecture is designed to evolve alongside AI needs, helping to r
 - Smart Deduplication: Basic and fuzzy matching to merge similar data
 - Flexible Categorization: Group context by roles and scopes
 - Context Fusion: Aggregate and weigh data for downstream AI
+- Customizable Trust Weights: Adjust context layer weights (role, environment, network, device, location, etc.) to fit your domain
 - Context Memory (with Cache Management): Efficient reuse and invalidation of context data and history data *(planned)*
 - Distributed Context Sync & Network Communication: Synchronize context state across nodes, support multi-agent collaboration, and enable context-aware messaging *(planned)*
 - AI Inference & Learning Hooks: Modular integration points for custom AI logic and model updates
@@ -70,10 +71,22 @@ This modular architecture is designed to evolve alongside AI needs, helping to r
    venv\Scripts\activate     # Windows
    ```
 3. Install dependencies (to be updated)
-    ```bash
-   pip install -r requirements.txt
-   Start by implementing your own ContextProvider or test the provided Redis provider.
-   ```
+```bash
+pip install -r requirements.txt
+Start by implementing your own ContextProvider or test the provided Redis provider.
+```
+
+### Loading Example Contexts
+
+```python
+from core.trust_module import TrustModule
+
+tm = TrustModule(weights={"role": 0.4, "location": 0.2, "device": 0.15, "action": 0.15, "time": 0.1})
+tm.load_examples([
+    {"role": 0.9, "location": 0.8, "time": 0.2, "device": 0.7, "action": 0.1},
+    {"role": 0.8, "location": 0.7, "time": 0.1, "device": 0.6, "action": 0.2},
+])
+```
    
 ## Contributing
 

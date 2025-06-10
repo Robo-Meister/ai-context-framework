@@ -1,13 +1,16 @@
 class ContextProvider:
     def __init__(self):
+        # Weights sum to 1.0
         self.context_weights = {
-            "role": 0.2,
-            "environment": 0.2,
-            "network": 0.15,
-            "input": 0.15,
+            "role": 0.18,
+            "environment": 0.18,
+            "network": 0.12,
+            "input": 0.12,
             "timeframe": 0.1,
-            "mood": 0.1,
-            "label": 0.1  # Optional but powerful
+            "mood": 0.08,
+            "label": 0.1,  # Optional but powerful
+            "device": 0.06,
+            "location": 0.06,
         }
 
     def calculate_trust(self, context_data: dict) -> float:
