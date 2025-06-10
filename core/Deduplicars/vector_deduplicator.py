@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List
 
 from scipy.spatial.distance import cosine
@@ -6,13 +5,30 @@ import numpy as np
 
 from core.filters.kalman_filter import KalmanFilter
 from interfaces.deduplicator_strategy import DeduplicationStrategy
+from typing import Optional, Callable
+from datetime import datetime, timedelta
 
 
 class VectorDeduplicator(DeduplicationStrategy):
-    def __init__(self, kalman_filter: KalmanFilter, vector_similarity_threshold=0.1, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(
+        self,
+        kalman_filter: KalmanFilter,
+        time_threshold_sec: int = 5,
+        vector_similarity_threshold: float = 0.1,
+        merge_rule: Optional[Callable[[dict, dict], dict]] = None,
+    ):
         self.kalman_filter = kalman_filter
         self.vector_similarity_threshold = vector_similarity_threshold
+        self.time_threshold = timedelta(seconds=time_threshold_sec)
+        self.merge_rule = merge_rule or self.default_merge_rule
+
+    def default_merge_rule(self, a: dict, b: dict) -> dict:
+        if a.get("confidence", 0) > b.get("confidence", 0):
+            return a
+        elif b.get("confidence", 0) > a.get("confidence", 0):
+            return b
+        else:
+            return a if a.get("timestamp", datetime.min) >= b.get("timestamp", datetime.min) else b
 
     def vector_similarity(self, v1, v2):
         # cosine similarity distance (0=identical)
