@@ -48,6 +48,10 @@ class AIInferenceEngine:
                 "confidence": 1.0,  # Placeholder, can implement confidence logic
             }
 
+    def predict(self, input_data: dict) -> dict:
+        """Public prediction API delegating to :meth:`infer`."""
+        return self.infer(input_data)
+
     def train(self, input_data: dict, target: float) -> float:
         """
         Train the model on input data with given target value.
@@ -75,3 +79,23 @@ class AIInferenceEngine:
         self.optimizer.step()
 
         return loss.item()
+
+    def replace_model(self, model: nn.Module, lr: float):
+        """Replace the underlying model and reinitialize optimizer and loss."""
+        self.model = model
+        self.model.to(self.device)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
+        self.loss_fn = nn.MSELoss()
+
+    def save_model(self, path: str):
+        """Persist the current model to ``path`` using :func:`torch.save`."""
+        if self.model is None:
+            raise RuntimeError("No model to save")
+        torch.save(self.model.state_dict(), path)
+
+    def load_model(self, path: str):
+        """Load model weights from ``path`` using :func:`torch.load`."""
+        if self.model is None:
+            raise RuntimeError("Model not initialized")
+        state = torch.load(path, map_location=self.device)
+        self.model.load_state_dict(state)

@@ -67,6 +67,20 @@
 
   <h3>AIInference</h3>
   <p>Handles AI decision-making and prediction engines.</p>
+  <pre><code>class AIInferenceEngine:
+    def infer(self, input_data: dict) -> dict:
+        ...
+    def predict(self, input_data: dict) -> dict:
+        return self.infer(input_data)
+    def train(self, input_data: dict, target: float) -> float:
+        ...
+    def replace_model(self, model, lr: float):
+        ...
+    def save_model(self, path: str):
+        ...
+    def load_model(self, path: str):
+        ...
+  </code></pre>
 
   <h2>Example Usage</h2>
   <pre><code>from providers.redis_context_provider import RedisContextProvider
