@@ -22,7 +22,7 @@ This modular architecture is designed to evolve alongside AI needs, helping to r
 - Flexible Categorization: Group context by roles and scopes
 - Context Fusion: Aggregate and weigh data for downstream AI
 - Context Memory (with Cache Management): Efficient reuse and invalidation of context data and history data *(planned)*
-- Distributed Context Sync & Network Communication: Synchronize context state across nodes, support multi-agent collaboration, and enable context-aware messaging *(planned)*
+- Distributed Context Sync & Network Communication: Synchronize context state across nodes, support multi-agent collaboration, and enable context-aware messaging. Basic support provided via `NetworkManager`, `SimpleNetworkMock`, and `DistributedContextManager`. See `docs/dev/network.html` for details.
 - AI Inference & Learning Hooks: Modular integration points for custom AI logic and model updates
 
 ## Project Structure
