@@ -6,12 +6,14 @@ from core.learning.complex_net import ComplexNet
 import torch.nn as nn
 import torch
 from core.trust_module import TrustModule
-from inference.complex_inference import ComplexAIInferenceEngine
 from interfaces.learning_interface import LearningInterface
 
 
 class LearningManager(LearningInterface):
     def __init__(self, input_size: int, hidden_size: int = 16, output_size: int = 1, lr: float = 0.01, parser=None):
+        # Import here to avoid a circular dependency during tests
+        from inference.complex_inference import ComplexAIInferenceEngine
+
         self.inference_engine = ComplexAIInferenceEngine(input_size, hidden_size, output_size)
         self.model = self.inference_engine.get_model()
         self.loss_fn = nn.MSELoss()
