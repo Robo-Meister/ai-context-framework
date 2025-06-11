@@ -1,3 +1,33 @@
+🔬 Priority 4: Provider Abstractions & Expansion
+
+# 9. KafkaContextProvider (Basic Ingest Only)
+✅ Read from Kafka topic, deserialize, store internally or forward to context engine
+⏳ No pub/sub or feedback loop yet
+🔧 Why: Prepares ground for high-velocity, scalable deployments.
+🚧 Priority 5: Preparation for Extensibility & Learning
+
+# 13. Robo Connector Context Parser
+✅ Reads and converts Robo Connector format to your internal format
+✅ Optional export
+⛔️ Public release TBD
+🔧 Why: Allows seamless bridge between ecosystem tools and native context logic.
+# 16. Packaging Improvements & PyPI Publishing
+⏳ Finalize module layout and import paths (see **Phase 2** in [Roadmap](../../Roadmap.md))
+⏳ Provide `extras_require` for optional dependencies
+⏳ Build and upload distribution artifacts to PyPI
+🔧 Why: Makes installation and distribution straightforward for users.
+# 17. CI/CD Pipeline Integration
+⏳ Add GitHub Actions workflow for linting, tests and packaging
+⏳ Automate PyPI deployment on version tags (Phase 2 milestone)
+🔧 Why: Ensures consistent releases and quick feedback on pull requests.
+# 18. Documentation Site & Community Tooling
+⏳ Publish a docs site with mkdocs or docsify (refer to **Phase 5** in [Roadmap](../../Roadmap.md))
+⏳ Showcase examples and plugin discovery helpers
+⏳ Add issue and PR templates to grow community engagement
+🔧 Why: Phase 5 focuses on user adoption and community growth.
+
+## Completed
+
 # 🥇 Priority 1: Core Debugging Infrastructure
 
 1. Context Inspector API
@@ -33,8 +63,6 @@
 ✅ Capture matching similarity score
 ✅ (Later) Tie to Robo Connector flow matching engine
 🔧 Why: Explains why something happened — a major ask in audits or validation.
-🔬 Priority 4: Provider Abstractions & Expansion
-
 # 7. Standardized Context Provider Interface
 ✅ Formal interface (BaseContextProvider)
 ✅ Existing RedisContextProvider refactored to implement it
@@ -45,10 +73,6 @@
 ✅ Use for dev, testing, and minimal setups
 ✅ Support filtering and similarity search
 🔧 Why: Reduces friction for newcomers and local testing.
-# 9. KafkaContextProvider (Basic Ingest Only)
-✅ Read from Kafka topic, deserialize, store internally or forward to context engine
-⏳ No pub/sub or feedback loop yet
-🔧 Why: Prepares ground for high-velocity, scalable deployments.
 # 10. Role Schema JSON Definition
 ✅ Describe standard role fields and metadata
 ✅ Publish example schema file
@@ -57,18 +81,11 @@
 ✅ Apply time-decay weighting for older context
 ✅ Integrate approximate nearest neighbor indexes
 🔧 Why: Improves relevance and speeds up context lookups.
-🚧 Priority 5: Preparation for Extensibility & Learning
-
 # 12. Model Interface for Inference & Feedback
 ✅ Abstract NN behind interface (e.g. ContextEncoderInterface)
 ✅ Swap in local model, OpenAI, or any provider
 ✅ (Later) Feedback hook: “was this match correct?”
 🔧 Why: Critical to enable learning, personalization, or modular deployments.
-# 13. Robo Connector Context Parser
-✅ Reads and converts Robo Connector format to your internal format
-✅ Optional export
-⛔️ Public release TBD
-🔧 Why: Allows seamless bridge between ecosystem tools and native context logic.
 # 🔌 14. Context Relay / ContextBus (Internal Mesh)
 ✅ Accept context from multiple sources (Redis, Kafka, Memory, etc.)
 ✅ Relay/mirror context to other nodes (via HTTP, gRPC, or message broker)
@@ -83,23 +100,6 @@
 ✅ Allow action broadcasting / event chaining
 🔧 Why: Turns your system into a live graph of interconnected services — critical for Robo Assistant, swarm logic, and long-term Neuraflow.
 📌 Suggestion: Add to Priority 5, after filter + trigger tracing.
-
-# 16. Packaging Improvements & PyPI Publishing
-⏳ Finalize module layout and import paths (see **Phase 2** in [Roadmap](../../Roadmap.md))
-⏳ Provide `extras_require` for optional dependencies
-⏳ Build and upload distribution artifacts to PyPI
-🔧 Why: Makes installation and distribution straightforward for users.
-
-# 17. CI/CD Pipeline Integration
-⏳ Add GitHub Actions workflow for linting, tests and packaging
-⏳ Automate PyPI deployment on version tags (Phase 2 milestone)
-🔧 Why: Ensures consistent releases and quick feedback on pull requests.
-
-# 18. Documentation Site & Community Tooling
-⏳ Publish a docs site with mkdocs or docsify (refer to **Phase 5** in [Roadmap](../../Roadmap.md))
-⏳ Showcase examples and plugin discovery helpers
-⏳ Add issue and PR templates to grow community engagement
-🔧 Why: Phase 5 focuses on user adoption and community growth.
 
 # 19. CLI for Manual Ingestion & Querying (Roadmap Phase 3 - Plugin & Provider Expansion)
 ✅ Provide `context add` and `context query` commands
