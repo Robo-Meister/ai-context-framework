@@ -17,6 +17,11 @@ from pipelines import ContextPipeline, FeedbackPipeline
 from providers import MemoryContextProvider
 from network import NetworkManager, SimpleNetworkMock, ContextBus
 from interfaces import NetworkInterface
+try:
+    from . import cli as cli
+except Exception:  # pragma: no cover - fallback when not imported as package
+    import importlib
+    cli = importlib.import_module("cli")
 
 __all__ = [
     "__version__",
@@ -35,4 +40,5 @@ __all__ = [
     "SimpleNetworkMock",
     "ContextBus",
     "NetworkInterface",
+    "cli",
 ]
