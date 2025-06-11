@@ -2,7 +2,6 @@ from typing import List, Dict
 
 from torch import optim
 
-from core.learning.complex_net import ComplexNet
 import torch.nn as nn
 import torch
 from core.trust_module import TrustModule

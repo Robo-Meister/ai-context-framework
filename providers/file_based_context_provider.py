@@ -3,12 +3,13 @@ import os
 import uuid
 from typing import Optional, Callable, List
 from datetime import datetime
-import objects.context_data as ContextData
-import objects.context_query as ContextQuery
+from objects.context_data import ContextData, SubscriptionHandle
+from objects.context_query import ContextQuery
+
 class FileBasedContextProvider:
     def __init__(self, folder_path: str):
         self.folder_path = folder_path
-        self.subscribers: dict[ContextData.SubscriptionHandle, Callable[[ContextData], None]] = {}
+        self.subscribers: dict[SubscriptionHandle, Callable[[ContextData], None]] = {}
 
     def fetch_context(self, query_params: ContextQuery) -> List[ContextData]:
         results = []
@@ -41,7 +42,7 @@ class FileBasedContextProvider:
             "context": cd.payload,
             "confidence": cd.confidence,
         }
-    def subscribe_context(self, callback: Callable[[ContextData], None]) -> ContextData.SubscriptionHandle:
+    def subscribe_context(self, callback: Callable[[ContextData], None]) -> SubscriptionHandle:
         handle = uuid.uuid4()
         self.subscribers[handle] = callback
         return handle

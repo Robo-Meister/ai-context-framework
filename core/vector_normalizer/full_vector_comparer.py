@@ -1,15 +1,15 @@
 from core.vector_normalizer.context_encoder import ContextEncoder
 from core.vector_normalizer.vector_comparer import VectorComparer
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Union
 from core.trust_module import TrustModule
 
 
 class FullVectorComparer:
     """Compare full context dictionaries using vector encoding and trust weight."""
 
-    def __init__(self, weights: List[float] | None = None,
-                 encoder: ContextEncoder | None = None,
-                 trust_module: TrustModule | None = None):
+    def __init__(self, weights: Union[List[float], None] = None,
+                 encoder: Union[ContextEncoder, None] = None,
+                 trust_module: Union[TrustModule, None] = None):
         self.encoder = encoder or ContextEncoder()
         self.vector_comparer = VectorComparer(weights=weights)
         self.trust_module = trust_module

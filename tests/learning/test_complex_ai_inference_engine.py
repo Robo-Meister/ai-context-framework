@@ -9,14 +9,14 @@ class TestComplexAIInferenceEngine:
         data = {"features": [0.2, 0.1, -0.3]}
         target = 0.6
 
-        pred_before = engine.predict(data)["prediction"]
+        pred_before = engine.predict(data)["prediction"].real
         loss_before = (pred_before - target) ** 2
 
         for _ in range(200):
             loss = engine.train(data, target)
             assert loss >= 0
 
-        pred_after = engine.predict(data)["prediction"]
+        pred_after = engine.predict(data)["prediction"].real
         loss_after = (pred_after - target) ** 2
 
         assert loss_after < loss_before

@@ -8,8 +8,8 @@ import uuid
 import json
 from typing import Callable, List
 from datetime import datetime
-import objects.context_data as ContextData
-import objects.context_query as ContextQuery
+from objects.context_data import ContextData
+from objects.context_query import ContextQuery
 
 # Assuming ContextQuery and ContextData are already defined as in previous message
 
