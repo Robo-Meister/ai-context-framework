@@ -83,3 +83,25 @@
 ✅ Allow action broadcasting / event chaining
 🔧 Why: Turns your system into a live graph of interconnected services — critical for Robo Assistant, swarm logic, and long-term Neuraflow.
 📌 Suggestion: Add to Priority 5, after filter + trigger tracing.
+
+# 16. CLI for Manual Ingestion & Querying (Roadmap Phase 3 - Plugin & Provider Expansion)
+✅ Provide `context add` and `context query` commands
+✅ Works with any BaseContextProvider
+🔧 Why: Enables quick manual testing and debugging.
+
+# 17. FileContextProvider (JSON) (Roadmap Phase 3 - Plugin & Provider Expansion)
+✅ Persist context entries to local JSON files
+✅ Useful for demos and offline experiments
+
+# 18. SQLiteContextProvider (Roadmap Phase 3 - Plugin & Provider Expansion)
+✅ Lightweight SQL-backed provider for local storage
+✅ Reuse existing filter and query logic
+
+# 19. HTTPContextProvider (REST) (Roadmap Phase 3 - Plugin & Provider Expansion)
+✅ POST/GET endpoints for remote ingestion and retrieval
+✅ Bridge external services with context engine
+
+# 20. Provider Pub/Sub & Broadcast Enhancements (Roadmap Phase 3 - Plugin & Provider Expansion)
+✅ Unified publish/subscribe hooks in BaseContextProvider
+✅ Broadcast context updates across providers
+🔧 Why: Completes subscription support in Phase 3.
