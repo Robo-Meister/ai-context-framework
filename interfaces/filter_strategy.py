@@ -1,6 +1,7 @@
-from typing import List
+import numpy as np
 
 
 class FilterStrategy:
-    def apply(self, vector: List[float]) -> List[float]:
+    def apply(self, vector: np.ndarray) -> np.ndarray:
+        """Apply filter to a vector and return the filtered vector."""
         raise NotImplementedError()
