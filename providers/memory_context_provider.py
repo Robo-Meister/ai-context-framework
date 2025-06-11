@@ -1,18 +1,19 @@
 import uuid
 from datetime import datetime
-from typing import Callable, List, Union, Union
+from typing import List, Union
 
 from core.cache_manager import CacheManager
 from objects.context_data import ContextData
 from objects.context_query import ContextQuery
+from .base_context_provider import BaseContextProvider
 
 
-class MemoryContextProvider:
+class MemoryContextProvider(BaseContextProvider):
     """In-memory context provider using :class:`CacheManager`."""
 
     def __init__(self):
+        super().__init__()
         self.cache = CacheManager()
-        self.subscribers: dict[uuid.UUID, Callable[[ContextData], None]] = {}
 
     def ingest_context(
             self,
@@ -36,8 +37,7 @@ class MemoryContextProvider:
             content=(metadata or {}).get("content", ""),
         )
         self.cache.set(context_id, cd, ttl)
-        for cb in self.subscribers.values():
-            cb(cd)
+        super().publish_context(cd)
         return context_id
 
     def fetch_context(self, query_params: ContextQuery) -> List[ContextData]:
@@ -53,23 +53,6 @@ class MemoryContextProvider:
     def get_context(self, query: ContextQuery) -> List[dict]:
         raw = self.fetch_context(query)
         return [self._to_dict(cd) for cd in raw]
-
-    def subscribe_context(self, callback: Callable[[ContextData], None]) -> uuid.UUID:
-        handle = uuid.uuid4()
-        self.subscribers[handle] = callback
-        return handle
-
-    def publish_context(
-        self,
-        payload: dict,
-        timestamp: Union[datetime, None] = None,
-        metadata: Union[dict, None] = None,
-        source_id: str = "memory",
-        confidence: float = 1.0,
-        ttl: Union[int, None] = None,
-    ):
-        """Convenience wrapper around ``ingest_context`` for push scenarios."""
-        self.ingest_context(payload, timestamp, metadata, source_id, confidence, ttl)
 
     def _to_dict(self, cd: ContextData) -> dict:
         return {

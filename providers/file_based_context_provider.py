@@ -1,15 +1,16 @@
 import json
 import os
 import uuid
-from typing import Optional, Callable, List
+from typing import Optional, List
 from datetime import datetime
-from objects.context_data import ContextData, SubscriptionHandle
+from objects.context_data import ContextData
 from objects.context_query import ContextQuery
+from .base_context_provider import BaseContextProvider
 
-class FileBasedContextProvider:
+class FileBasedContextProvider(BaseContextProvider):
     def __init__(self, folder_path: str):
+        super().__init__()
         self.folder_path = folder_path
-        self.subscribers: dict[SubscriptionHandle, Callable[[ContextData], None]] = {}
 
     def fetch_context(self, query_params: ContextQuery) -> List[ContextData]:
         results = []
@@ -42,15 +43,9 @@ class FileBasedContextProvider:
             "context": cd.payload,
             "confidence": cd.confidence,
         }
-    def subscribe_context(self, callback: Callable[[ContextData], None]) -> SubscriptionHandle:
-        handle = uuid.uuid4()
-        self.subscribers[handle] = callback
-        return handle
-
     def publish_context(self, data: ContextData):
-        # This would be called internally or externally to simulate a live stream
-        for cb in self.subscribers.values():
-            cb(data)
+        """Broadcast file-based context data to subscribers and peers."""
+        super().publish_context(data)
 
 # provider = FileBasedContextProvider("./log_folder")
 #
