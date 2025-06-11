@@ -2,14 +2,17 @@
 
 from core.context_manager import ContextManager
 from interfaces.network_interface import NetworkInterface
+from core.context_hooks import ContextHookManager
 
 
 class DistributedContextManager:
     """Combine a :class:`ContextManager` with a network backend."""
+
     def __init__(self, context_manager: ContextManager, network: NetworkInterface):
         """Create the manager and begin listening for network updates."""
         self.context_manager = context_manager
         self.network = network
+        self.hooks = ContextHookManager()
 
         self.network.start_listening(self._on_network_message)
 
@@ -17,6 +20,11 @@ class DistributedContextManager:
         """Update locally and broadcast the change to peers."""
         self.context_manager.update_context(key, value)
         self.network.send("all_nodes", {"key": key, "value": value})
+        self.hooks.trigger(key, value, self.network)
+
+    def register_hook(self, condition, action):
+        """Register a network-aware context hook."""
+        self.hooks.register_hook(condition, action)
 
     def receive_updates(self):
         """Manually pull and apply a single pending update if present."""
@@ -26,6 +34,7 @@ class DistributedContextManager:
             key = data.get("key")
             value = data.get("value")
             self.context_manager.update_context(key, value)
+            self.hooks.trigger(key, value, self.network)
             print(f"Context updated from network: {key} -> {value}")
 
     # Optionally expose ContextManager methods here as needed
@@ -46,4 +55,5 @@ class DistributedContextManager:
         key = message.get("key")
         value = message.get("value")
         self.context_manager.update_context(key, value)
+        self.hooks.trigger(key, value, self.network)
         print(f"Context updated from network: {key} -> {value}")
