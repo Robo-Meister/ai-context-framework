@@ -10,6 +10,8 @@ from .policy_evaluator import PolicyEvaluator
 from .categorizer import Categorizer
 from .context_filer import ContextFilter
 from .trust_module import TrustModule
+from .time_decay_scorer import TimeDecayScorer
+from .ann_index import ANNIndex
 
 __all__ = [
     "CacheManager",
@@ -22,4 +24,6 @@ __all__ = [
     "Categorizer",
     "ContextFilter",
     "TrustModule",
+    "TimeDecayScorer",
+    "ANNIndex",
 ]
