@@ -95,6 +95,8 @@ We welcome contributions of all kinds — feature ideas, bug fixes, documentatio
 
 Please fork the repo, create a feature branch, and open a pull request. Use issues for discussion and tracking.
 
+For an outline of ongoing development plans and upcoming features, see [docs/dev/TECHNICAL_ROADMAP.md](docs/dev/TECHNICAL_ROADMAP.md).
+
 ## License
 
 MIT License — see LICENSE file.
