@@ -17,47 +17,59 @@
 ✅ Flag in provider whether to use it
 ✅ Dump raw vs filtered output for debug
 🔧 Why: Adds signal smoothing, suppresses noise in evolving context streams.
+# 4. Vector Normalization Implementation
+✅ Normalize embeddings to unit vectors
+✅ Enforce consistent magnitude across providers
+🔧 Why: Ensures stable similarity calculations.
 🥉 Priority 3: Trust + Flow Debugging
 
-# 4. Trust Calculation Trace
+# 5. Trust Calculation Trace
 ✅ Output intermediate trust values
 ✅ Identify influence of actor history, vector similarity, and metadata
 ✅ Enable override for testing
 🔧 Why: Trust drift or anomalies are hard to diagnose without this.
-# 5. Context Trigger Flow Tracing
+# 6. Context Trigger Flow Tracing
 ✅ Record “context → matched rule → trigger fired”
 ✅ Capture matching similarity score
 ✅ (Later) Tie to Robo Connector flow matching engine
 🔧 Why: Explains why something happened — a major ask in audits or validation.
 🔬 Priority 4: Provider Abstractions & Expansion
 
-# 6. Standardized Context Provider Interface
+# 7. Standardized Context Provider Interface
 ✅ Formal interface (BaseContextProvider)
 ✅ Existing RedisContextProvider refactored to implement it
 ✅ Hooks for filtering and post-processing
 🔧 Why: Enables plug-in logic for Redis/Kafka/Static/Memory/etc.
-# 7. Cache/MemoryContextProvider (In-Memory Only)
+# 8. Cache/MemoryContextProvider (In-Memory Only)
 ✅ No Redis/Kafka dependency
 ✅ Use for dev, testing, and minimal setups
 ✅ Support filtering and similarity search
 🔧 Why: Reduces friction for newcomers and local testing.
-# 8. KafkaContextProvider (Basic Ingest Only)
+# 9. KafkaContextProvider (Basic Ingest Only)
 ✅ Read from Kafka topic, deserialize, store internally or forward to context engine
 ⏳ No pub/sub or feedback loop yet
 🔧 Why: Prepares ground for high-velocity, scalable deployments.
+# 10. Role Schema JSON Definition
+✅ Describe standard role fields and metadata
+✅ Publish example schema file
+🔧 Why: Provides consistent role handling across providers and tools.
+# 11. Time-Decay & ANN Search Support
+✅ Apply time-decay weighting for older context
+✅ Integrate approximate nearest neighbor indexes
+🔧 Why: Improves relevance and speeds up context lookups.
 🚧 Priority 5: Preparation for Extensibility & Learning
 
-# 9. Model Interface for Inference & Feedback
+# 12. Model Interface for Inference & Feedback
 ✅ Abstract NN behind interface (e.g. ContextEncoderInterface)
 ✅ Swap in local model, OpenAI, or any provider
 ✅ (Later) Feedback hook: “was this match correct?”
 🔧 Why: Critical to enable learning, personalization, or modular deployments.
-# 10. Robo Connector Context Parser
+# 13. Robo Connector Context Parser
 ✅ Reads and converts Robo Connector format to your internal format
 ✅ Optional export
 ⛔️ Public release TBD
 🔧 Why: Allows seamless bridge between ecosystem tools and native context logic.
-# 🔌 11. Context Relay / ContextBus (Internal Mesh)
+# 🔌 14. Context Relay / ContextBus (Internal Mesh)
 ✅ Accept context from multiple sources (Redis, Kafka, Memory, etc.)
 ✅ Relay/mirror context to other nodes (via HTTP, gRPC, or message broker)
 ✅ Optional: context filtering before relaying
@@ -65,7 +77,7 @@
 🔧 Why: Enables distributed agents or Robo Assistants to share situational data in real-time.
 📌 Suggestion: Add to Priority 3 or 4, as it's foundational for scaling and very reusable.
 
-# 🧠 12. Network-Aware Context Hooks
+# 🧠 15. Network-Aware Context Hooks
 ✅ Define external hooks/triggers based on context change
 ✅ Push matched context (or diff) to other services
 ✅ Allow action broadcasting / event chaining
