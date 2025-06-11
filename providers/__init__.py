@@ -7,6 +7,7 @@ from .redis_context_provider import RedisContextProvider
 from .mock_context_provider import MockContextProvider
 from .simple_context_provider import SimpleContextProvider
 from .http_context_provider import HTTPContextProvider
+from .sqlite_context_provider import SQLiteContextProvider
 
 __all__ = [
     "MemoryContextProvider",
@@ -15,4 +16,5 @@ __all__ = [
     "MockContextProvider",
     "SimpleContextProvider",
     "HTTPContextProvider",
+    "SQLiteContextProvider",
 ]
