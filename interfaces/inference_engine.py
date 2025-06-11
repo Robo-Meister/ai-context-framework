@@ -28,3 +28,15 @@ class AIInferenceEngine(ABC):
         By default, training is unsupported.
         """
         raise NotImplementedError("train method not implemented for this engine")
+
+    def replace_model(self, model, lr: float):
+        """Optional: Replace the underlying model and optimizer."""
+        raise NotImplementedError("replace_model not implemented for this engine")
+
+    def save_model(self, path: str):
+        """Optional: Persist the current model to ``path``."""
+        raise NotImplementedError("save_model not implemented for this engine")
+
+    def load_model(self, path: str):
+        """Optional: Load model weights from ``path``."""
+        raise NotImplementedError("load_model not implemented for this engine")

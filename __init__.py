@@ -1,5 +1,8 @@
 from core.cache_manager import CacheManager
-from core.ai_inference import AIInferenceEngine
+try:
+    from core.ai_inference import AIInferenceEngine
+except Exception:  # pragma: no cover - optional dependency may be missing
+    AIInferenceEngine = None
 from pipelines.context_pipeline import ContextPipeline
 from pipelines.feedback_pipeline import FeedbackPipeline
 from core.fuser import Fuser

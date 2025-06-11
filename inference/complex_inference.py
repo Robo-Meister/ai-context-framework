@@ -46,3 +46,18 @@ class ComplexAIInferenceEngine(AIInferenceEngine):
 
     def get_model(self):
         return self.model
+
+    def replace_model(self, model: nn.Module, lr: float = 0.01):
+        """Replace the underlying model and optimizer."""
+        self.model = model
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
+        self.loss_fn = nn.MSELoss()
+
+    def save_model(self, path: str):
+        """Persist the current model to ``path``."""
+        torch.save(self.model.state_dict(), path)
+
+    def load_model(self, path: str):
+        """Load model weights from ``path``."""
+        state = torch.load(path)
+        self.model.load_state_dict(state)

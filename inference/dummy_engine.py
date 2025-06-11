@@ -17,3 +17,15 @@ class DummyAIInferenceEngine(AIInferenceEngine):
     def train(self, input_data: dict, target: float) -> float:
         # No training, just return 0 loss
         return 0.0
+
+    def replace_model(self, model, lr: float):
+        # Dummy engine has no model to replace
+        pass
+
+    def save_model(self, path: str):
+        # Nothing to save for the dummy engine
+        pass
+
+    def load_model(self, path: str):
+        # Nothing to load for the dummy engine
+        pass
