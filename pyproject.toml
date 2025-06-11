@@ -15,4 +15,5 @@ dependencies = [
     "torch>=2.7.0",
     "sympy>=1.14.0",
 ]
-homepage = "https://github.com/Robo-Meister/ai-context-framework"
+[project.urls]
+Homepage = "https://github.com/Robo-Meister/ai-context-framework"

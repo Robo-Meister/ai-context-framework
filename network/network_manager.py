@@ -33,7 +33,7 @@ class NetworkManager(NetworkInterface):
                 if self.on_message_callback:
                     self.on_message_callback(message)
             else:
-                time.sleep(0.1)  # avoid busy waiting
+                time.sleep(0.01)  # avoid busy waiting
 
     def start_listening(self, on_message_callback):
         """Begin asynchronously listening for incoming messages."""

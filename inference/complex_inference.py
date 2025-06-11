@@ -15,7 +15,9 @@ class ComplexAIInferenceEngine(AIInferenceEngine):
         # Convert input dict to tensor (you decide input format)
         x = self._preprocess(input_data)
         y_pred = self.model(x)
-        return {"prediction": y_pred.item(), "confidence": 1.0}
+        # Return magnitude as a real-valued prediction
+        prediction = torch.abs(y_pred).item()
+        return {"prediction": prediction, "confidence": 1.0}
 
     def predict(self, input_data: dict) -> dict:
         return self.infer(input_data)
