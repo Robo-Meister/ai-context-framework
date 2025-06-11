@@ -10,11 +10,29 @@ readme = "README.md"
 requires-python = ">=3.6"
 authors = [{name = "Paweł Nowak", email = "pawel.nowak@robo-meister.com"}]
 license = {text = "MIT"}
+keywords = ["ai", "context", "framework"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
 dependencies = [
     "numpy>=2.2.6",
     "torch>=2.7.0",
     "sympy>=1.14.0",
 ]
 
+[project.optional-dependencies]
+redis = ["redis>=6.1.0"]
+dev = [
+    "pytest>=8.3.5",
+    "mypy",
+    "black",
+]
+
 [project.urls]
 Homepage = "https://github.com/Robo-Meister/ai-context-framework"
+Repository = "https://github.com/Robo-Meister/ai-context-framework"
+
