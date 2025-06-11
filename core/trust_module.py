@@ -87,13 +87,31 @@ class TrustModule:
         return combined_trust
 
     def extract_numeric_features(self, context: Dict[str, Any]) -> List[float]:
-        # Turn context into numeric vector
-        timestamp_score = context.get('timestamp').timestamp() % 86400 / 86400 if context.get('timestamp') else 0.5
-        role_score = len(context.get('roles', [])) / 3.0  # Max 3 known roles
-        situation_score = len(context.get('situations', [])) / 5.0  # Includes log level
-        content_length = len(context.get('content', '')) / 100.0
+        """Turn parsed log context into a numeric vector.
 
-        return [timestamp_score, role_score, situation_score, content_length]
+        The previous implementation only counted how many situations/log levels
+        were detected which often produced identical values for very different
+        log lines (e.g. an ``INFO`` line and an ``ERROR`` line would both yield
+        ``situation_score = 0.4`` when two tags were present).  This made it hard
+        for the learning model to distinguish between high and low trust logs.
+
+        To give the model a stronger training signal we now incorporate the
+        parser's computed ``score`` as a severity feature.  This value ranges
+        roughly between ``0.5`` for informational logs and ``0.9`` for error
+        logs and therefore provides a clear separation during training while
+        keeping the overall feature vector length unchanged.
+        """
+
+        timestamp_score = (
+            context.get("timestamp").timestamp() % 86400 / 86400
+            if context.get("timestamp")
+            else 0.5
+        )
+        role_score = len(context.get("roles", [])) / 3.0  # Max 3 known roles
+        severity_score = context.get("score", 0.5)  # Derived from log level
+        content_length = len(context.get("content", "")) / 100.0
+
+        return [timestamp_score, role_score, severity_score, content_length]
 
     def extract_features_and_score(self, log_line: str) -> (List[float], float):
         if self.parser is None:
