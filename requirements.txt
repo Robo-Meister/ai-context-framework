@@ -4,3 +4,4 @@ redis==6.1.0
 setuptools==80.8.0
 sympy==1.14.0
 torch==2.7.0
+annoy==1.17.3
