@@ -25,12 +25,12 @@ Add CI/CD pipeline for testing & publishing (e.g., GitHub Actions)
 # 📦 Phase 3: Plugin & Provider Expansion
 Target: v0.3.x
 Add additional context providers:
-File-based JSON storage
-SQLite/local database
-HTTP/REST ingestion
+File-based JSON storage *(see Technical Roadmap #14)*
+SQLite/local database *(see Technical Roadmap #15)*
+HTTP/REST ingestion *(see Technical Roadmap #16)*
 Standardize provider interface (abstract base class)
-Add subscription/broadcast support to all providers
-CLI for manual ingestion and querying
+Add subscription/broadcast support to all providers *(see Technical Roadmap #17)*
+CLI for manual ingestion and querying *(see Technical Roadmap #13)*
 # 📊 Phase 4: Analytics & Monitoring
 Target: v0.4.x
 Track context usage and metadata stats
