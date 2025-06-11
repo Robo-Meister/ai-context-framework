@@ -4,6 +4,7 @@
 from .cache_manager import CacheManager
 from .context_manager import ContextManager
 from .distributed_context_manager import DistributedContextManager
+from .context_hooks import ContextHookManager, ContextHook
 from .fuser import Fuser
 from .policy_evaluator import PolicyEvaluator
 from .categorizer import Categorizer
@@ -14,6 +15,8 @@ __all__ = [
     "CacheManager",
     "ContextManager",
     "DistributedContextManager",
+    "ContextHookManager",
+    "ContextHook",
     "Fuser",
     "PolicyEvaluator",
     "Categorizer",

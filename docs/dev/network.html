@@ -78,9 +78,18 @@ manager.update_context("task", {"status": "in_progress"})
 # ... other nodes receive the update ...
 </code></pre>
 
+<h2>ContextBus</h2>
 <p>
-Future work will introduce custom protocols and hooks at the context layer for
-more advanced swarm intelligence scenarios.
+  <code>ContextBus</code> mirrors context updates across multiple network backends
+  and can optionally filter updates before relaying them. It enables real-time
+  multi-node cooperation.
+</p>
+
+<h2>Network-Aware Hooks</h2>
+<p>
+  Hooks can be registered on <code>DistributedContextManager</code> and are
+  triggered whenever context updates occur. These hooks can broadcast new events
+  to the network or invoke external services.
 </p>
 
 </body>
