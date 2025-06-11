@@ -33,6 +33,12 @@ setup(
         "Topic :: Software Development :: Libraries :: Artificial Intelligence",
     ],
 
+    entry_points={
+        "console_scripts": [
+            "context=ai_context.cli:main",
+        ]
+    },
+
     python_requires='>=3.6',
     include_package_data=True,  # to include files from MANIFEST.in if needed
 )
