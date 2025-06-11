@@ -84,24 +84,42 @@
 🔧 Why: Turns your system into a live graph of interconnected services — critical for Robo Assistant, swarm logic, and long-term Neuraflow.
 📌 Suggestion: Add to Priority 5, after filter + trigger tracing.
 
-# 16. CLI for Manual Ingestion & Querying (Roadmap Phase 3 - Plugin & Provider Expansion)
+# 16. Packaging Improvements & PyPI Publishing
+⏳ Finalize module layout and import paths (see **Phase 2** in [Roadmap](../../Roadmap.md))
+⏳ Provide `extras_require` for optional dependencies
+⏳ Build and upload distribution artifacts to PyPI
+🔧 Why: Makes installation and distribution straightforward for users.
+
+# 17. CI/CD Pipeline Integration
+⏳ Add GitHub Actions workflow for linting, tests and packaging
+⏳ Automate PyPI deployment on version tags (Phase 2 milestone)
+🔧 Why: Ensures consistent releases and quick feedback on pull requests.
+
+# 18. Documentation Site & Community Tooling
+⏳ Publish a docs site with mkdocs or docsify (refer to **Phase 5** in [Roadmap](../../Roadmap.md))
+⏳ Showcase examples and plugin discovery helpers
+⏳ Add issue and PR templates to grow community engagement
+🔧 Why: Phase 5 focuses on user adoption and community growth.
+
+# 19. CLI for Manual Ingestion & Querying (Roadmap Phase 3 - Plugin & Provider Expansion)
 ✅ Provide `context add` and `context query` commands
 ✅ Works with any BaseContextProvider
 🔧 Why: Enables quick manual testing and debugging.
 
-# 17. FileContextProvider (JSON) (Roadmap Phase 3 - Plugin & Provider Expansion)
+# 20. FileContextProvider (JSON) (Roadmap Phase 3 - Plugin & Provider Expansion)
 ✅ Persist context entries to local JSON files
 ✅ Useful for demos and offline experiments
 
-# 18. SQLiteContextProvider (Roadmap Phase 3 - Plugin & Provider Expansion)
+# 21. SQLiteContextProvider (Roadmap Phase 3 - Plugin & Provider Expansion)
 ✅ Lightweight SQL-backed provider for local storage
 ✅ Reuse existing filter and query logic
 
-# 19. HTTPContextProvider (REST) (Roadmap Phase 3 - Plugin & Provider Expansion)
+# 22. HTTPContextProvider (REST) (Roadmap Phase 3 - Plugin & Provider Expansion)
 ✅ POST/GET endpoints for remote ingestion and retrieval
 ✅ Bridge external services with context engine
 
-# 20. Provider Pub/Sub & Broadcast Enhancements (Roadmap Phase 3 - Plugin & Provider Expansion)
+# 23. Provider Pub/Sub & Broadcast Enhancements (Roadmap Phase 3 - Plugin & Provider Expansion)
 ✅ Unified publish/subscribe hooks in BaseContextProvider
 ✅ Broadcast context updates across providers
 🔧 Why: Completes subscription support in Phase 3.
+
