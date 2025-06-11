@@ -71,3 +71,20 @@
 ✅ Allow action broadcasting / event chaining
 🔧 Why: Turns your system into a live graph of interconnected services — critical for Robo Assistant, swarm logic, and long-term Neuraflow.
 📌 Suggestion: Add to Priority 5, after filter + trigger tracing.
+
+# 13. Packaging Improvements & PyPI Publishing
+⏳ Finalize module layout and import paths (see **Phase 2** in [Roadmap](../../Roadmap.md))
+⏳ Provide `extras_require` for optional dependencies
+⏳ Build and upload distribution artifacts to PyPI
+🔧 Why: Makes installation and distribution straightforward for users.
+
+# 14. CI/CD Pipeline Integration
+⏳ Add GitHub Actions workflow for linting, tests and packaging
+⏳ Automate PyPI deployment on version tags (Phase 2 milestone)
+🔧 Why: Ensures consistent releases and quick feedback on pull requests.
+
+# 15. Documentation Site & Community Tooling
+⏳ Publish a docs site with mkdocs or docsify (refer to **Phase 5** in [Roadmap](../../Roadmap.md))
+⏳ Showcase examples and plugin discovery helpers
+⏳ Add issue and PR templates to grow community engagement
+🔧 Why: Phase 5 focuses on user adoption and community growth.
