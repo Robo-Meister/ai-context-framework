@@ -1,17 +1,18 @@
-from core.cache_manager import CacheManager
-try:
+from core import (
+    CacheManager,
+    ContextManager,
+    DistributedContextManager,
+    Fuser,
+    PolicyEvaluator,
+)
+try:  # pragma: no cover - optional dependency may be missing
     from core.ai_inference import AIInferenceEngine
 except Exception:  # pragma: no cover - optional dependency may be missing
     AIInferenceEngine = None
-from pipelines.context_pipeline import ContextPipeline
-from pipelines.feedback_pipeline import FeedbackPipeline
-from core.fuser import Fuser
-from core.context_manager import ContextManager
-from providers.memory_context_provider import MemoryContextProvider
-from core.policy_evaluator import PolicyEvaluator
-from network.network_manager import NetworkManager
-from network.simple_network import SimpleNetworkMock
-from interfaces.network_interface import NetworkInterface
+from pipelines import ContextPipeline, FeedbackPipeline
+from providers import MemoryContextProvider
+from network import NetworkManager, SimpleNetworkMock
+from interfaces import NetworkInterface
 
 __all__ = [
     "CacheManager",
@@ -20,6 +21,7 @@ __all__ = [
     "FeedbackPipeline",
     "Fuser",
     "ContextManager",
+    "DistributedContextManager",
     "MemoryContextProvider",
     "PolicyEvaluator",
     "NetworkManager",
