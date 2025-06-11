@@ -1,7 +1,6 @@
 from typing import List
 
-from scipy.spatial.distance import cosine
-import numpy as np
+import math
 
 from core.filters.kalman_filter import KalmanFilter
 from interfaces.deduplicator_strategy import DeduplicationStrategy
@@ -31,14 +30,20 @@ class VectorDeduplicator(DeduplicationStrategy):
             return a if a.get("timestamp", datetime.min) >= b.get("timestamp", datetime.min) else b
 
     def vector_similarity(self, v1, v2):
-        # cosine similarity distance (0=identical)
-        return cosine(v1, v2)
+        # cosine distance (0=identical)
+        dot = sum(x * y for x, y in zip(v1, v2))
+        norm1 = math.sqrt(sum(x * x for x in v1))
+        norm2 = math.sqrt(sum(x * x for x in v2))
+        if norm1 == 0 or norm2 == 0:
+            return 1.0
+        cosine_sim = dot / (norm1 * norm2)
+        return 1 - cosine_sim
 
     def deduplicate(self, items: List[dict]) -> List[dict]:
         # Apply Kalman filter to numeric vectors in each item
         for item in items:
-            vector = np.array(item.get('vector', []))
-            if vector.size > 0:
+            vector = item.get('vector', [])
+            if len(vector) > 0:
                 filtered_vector = self.kalman_filter.apply(vector)
                 item['filtered_vector'] = filtered_vector
             else:

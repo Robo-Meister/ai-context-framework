@@ -1,5 +1,5 @@
 # vector_comparer.py
-import numpy as np
+import math
 
 class VectorComparer:
     def __init__(self, weights: list = None):
@@ -8,9 +8,10 @@ class VectorComparer:
     def cosine_similarity(self, vec_a: list, vec_b: list) -> float:
         a = self._weighted(vec_a)
         b = self._weighted(vec_b)
-        dot = np.dot(a, b)
-        norm_a = np.linalg.norm(a)
-        norm_b = np.linalg.norm(b)
+
+        dot = sum(x * y for x, y in zip(a, b))
+        norm_a = math.sqrt(sum(x * x for x in a))
+        norm_b = math.sqrt(sum(x * x for x in b))
         if norm_a == 0 or norm_b == 0:
             return 0.0
         return dot / (norm_a * norm_b)
@@ -18,9 +19,10 @@ class VectorComparer:
     def euclidean_distance(self, vec_a: list, vec_b: list) -> float:
         a = self._weighted(vec_a)
         b = self._weighted(vec_b)
-        return np.linalg.norm(np.array(a) - np.array(b))
+        diff = [x - y for x, y in zip(a, b)]
+        return math.sqrt(sum(d * d for d in diff))
 
-    def _weighted(self, vec: list) -> np.ndarray:
+    def _weighted(self, vec: list) -> list:
         if not self.weights:
-            return np.array(vec)
-        return np.array([v * w for v, w in zip(vec, self.weights)])
+            return list(vec)
+        return [v * w for v, w in zip(vec, self.weights)]
