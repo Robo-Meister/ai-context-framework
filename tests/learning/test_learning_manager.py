@@ -1,5 +1,8 @@
 import pytest
 
+torch = pytest.importorskip("torch")
+pytest.importorskip("torch.nn")
+
 from core.learning.learning_manager import LearningManager
 from parser.log_parser import LogParser
 

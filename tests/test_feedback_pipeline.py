@@ -1,4 +1,8 @@
 import unittest
+import pytest
+
+torch = pytest.importorskip("torch")
+pytest.importorskip("torch.nn")
 
 from pipelines.feedback_pipeline import FeedbackPipeline
 from parser.log_parser import LogParser

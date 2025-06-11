@@ -1,5 +1,7 @@
 import pytest
 
+torch = pytest.importorskip("torch")
+pytest.importorskip("torch.nn")
 from inference.complex_inference import ComplexAIInferenceEngine
 
 

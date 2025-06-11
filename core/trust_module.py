@@ -34,20 +34,19 @@ class TrustModule:
         """
         # Convert to vectors aligned by keys
         keys = sorted(set(ctx1.keys()) | set(ctx2.keys()))
-        v1 = np.array([ctx1.get(k, 0.0) for k in keys])
-        v2 = np.array([ctx2.get(k, 0.0) for k in keys])
+        v1 = np.array([ctx1.get(k, 0.0) for k in keys], dtype=float)
+        v2 = np.array([ctx2.get(k, 0.0) for k in keys], dtype=float)
 
         if self.distance_method == "cosine":
-            dot = np.dot(v1, v2)
+            dot_val = float(np.dot(v1, v2))
             norm1 = np.linalg.norm(v1)
             norm2 = np.linalg.norm(v2)
             if norm1 == 0 or norm2 == 0:
                 return 0.0
-            return dot / (norm1 * norm2)
+            return dot_val / (norm1 * norm2)
 
         elif self.distance_method == "euclidean":
             dist = np.linalg.norm(v1 - v2)
-            # Convert distance to similarity [0..1], assuming max dist  = sqrt(len(keys))
             max_dist = np.sqrt(len(keys))
             return max(0.0, 1 - dist / max_dist)
 
