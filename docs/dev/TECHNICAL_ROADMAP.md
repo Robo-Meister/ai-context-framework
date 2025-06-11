@@ -123,3 +123,9 @@
 ✅ Broadcast context updates across providers
 🔧 Why: Completes subscription support in Phase 3.
 
+## 📦 Release & Community Infrastructure
+
+Packaging, automated publishing and a public documentation hub will make the project easier to consume and contribute to. The tasks above align with key roadmap phases:
+
+- **Phase 2: Stabilization & Distribution** – lines 13–24 in [Roadmap](../../Roadmap.md#L13-L24) describe finalizing the package layout, publishing to PyPI and adding CI/CD workflows. Tasks **16** and **17** deliver these goals.
+- **Phase 5: Community & Growth** – lines 40–46 in [Roadmap](../../Roadmap.md#L40-L46) cover launching a docs site and other community tooling. Task **18** implements this milestone.
