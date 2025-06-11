@@ -1,3 +1,5 @@
+__version__ = "0.1.0"
+
 from core import (
     CacheManager,
     ContextManager,
@@ -15,6 +17,7 @@ from network import NetworkManager, SimpleNetworkMock
 from interfaces import NetworkInterface
 
 __all__ = [
+    "__version__",
     "CacheManager",
     "AIInferenceEngine",
     "ContextPipeline",
