@@ -22,7 +22,7 @@ setup(
     },
     author="Paweł Nowak",
     author_email="pawel.nowak@robo-meister.com",
-    description="Contextual AI module for intelligent message understanding, role-based context mapping, and semantic processing.",
+    description="A Context-Aware AI Engine for decision automation, workflow reasoning, and dynamic task orchestration",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/Robo-Meister/ai-context-framework.git",

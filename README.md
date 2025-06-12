@@ -1,6 +1,19 @@
-# AI Context Framework
+# CAIEngine
 
-A modular Python framework to collect, deduplicate, categorize, fuse, and leverage contextual data for smarter AI inference — emphasizing role, time, and situation awareness.
+A Context-Aware AI Engine for decision automation, workflow reasoning, and dynamic task orchestration.
+
+CAIEngine (Context-Aware Intelligence Engine) provides a flexible AI orchestration layer for intelligent automation.
+
+It enables:
+- Context-driven task routing
+- Real-time decision-making
+- Modular integration with business workflows, robots, or services
+- Event-driven execution with deep context tracing
+- Support for AI model orchestration, reasoning, and suggestions
+
+Use CAIEngine to build intelligent agents that understand *who*, *what*, *why*, and *when* — and take the right action.
+
+Designed for modern systems that blend humans, AI, and devices.
 
 ## Overview
 
