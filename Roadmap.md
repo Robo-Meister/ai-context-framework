@@ -44,3 +44,4 @@ Support for custom vector comparison strategies
 Optional lightweight UI for browsing context history
 Developer guide for custom integrations
 Launch landing page & documentation site (e.g., with mkdocs or docsify)
+Goal-driven feedback loop for adjusting actions toward target context states *(see Technical Roadmap #24)*

@@ -121,6 +121,9 @@
 ✅ Unified publish/subscribe hooks in BaseContextProvider
 ✅ Broadcast context updates across providers
 🔧 Why: Completes subscription support in Phase 3.
+# 24. Goal-Driven Feedback Loop
+⏳ Analyze history and current actions to nudge context toward user-defined goals
+🔧 Why: Enables proactive course correction toward desired states.
 
 ## 📦 Release & Community Infrastructure
 
