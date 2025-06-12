@@ -10,9 +10,10 @@ from objects.context_query import ContextQuery
 from providers.base_context_provider import BaseContextProvider
 
 try:  # pragma: no cover - optional dependency may be missing
-    from kafka import KafkaConsumer
+    from kafka import KafkaConsumer, KafkaProducer
 except Exception:  # pragma: no cover - optional dependency may be missing
     KafkaConsumer = None
+    KafkaProducer = None
 
 
 class KafkaContextProvider(BaseContextProvider):
@@ -24,6 +25,8 @@ class KafkaContextProvider(BaseContextProvider):
         bootstrap_servers: str = "localhost:9092",
         group_id: Optional[str] = None,
         auto_start: bool = True,
+        publish_topic: Optional[str] = None,
+        feedback_topic: Optional[str] = None,
     ):
         if KafkaConsumer is None:
             raise ImportError(
@@ -41,6 +44,16 @@ class KafkaContextProvider(BaseContextProvider):
             auto_offset_reset="earliest",
             enable_auto_commit=True,
         )
+        self.publish_topic = publish_topic
+        self.feedback_topic = feedback_topic
+        self.producer = None
+        if publish_topic or feedback_topic:
+            if KafkaProducer is None:
+                raise ImportError(
+                    "kafka-python package is required for KafkaContextProvider. "
+                    "Install it with `pip install ai_context[kafka]`."
+                )
+            self.producer = KafkaProducer(bootstrap_servers=bootstrap_servers)
         self.cache = CacheManager()
         self._thread: Optional[threading.Thread] = None
         if auto_start:
@@ -106,6 +119,12 @@ class KafkaContextProvider(BaseContextProvider):
         )
         self.cache.set(context_id, cd, ttl)
         super().publish_context(cd)
+        if self.publish_topic and self.producer:
+            try:
+                msg = json.dumps({"payload": payload, "metadata": metadata or {}}).encode()
+                self.producer.send(self.publish_topic, msg)
+            except Exception:
+                pass
         return context_id
 
     def fetch_context(self, query_params: ContextQuery) -> List[ContextData]:
@@ -132,3 +151,12 @@ class KafkaContextProvider(BaseContextProvider):
             "context": cd.payload,
             "confidence": cd.confidence,
         }
+
+    def send_feedback(self, message: dict) -> None:
+        """Publish a feedback message to the feedback topic."""
+        if not self.feedback_topic or not self.producer:
+            return
+        try:
+            self.producer.send(self.feedback_topic, json.dumps(message).encode())
+        except Exception:
+            pass
