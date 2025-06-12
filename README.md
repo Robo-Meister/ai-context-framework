@@ -1,5 +1,9 @@
 # CAIEngine
 
+[![Test Suite](https://github.com/Robo-Meister/ai-context-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/Robo-Meister/ai-context-framework/actions/workflows/tests.yml)
+[![codecov](https://codecov.io/gh/Robo-Meister/ai-context-framework/branch/main/graph/badge.svg)](https://codecov.io/gh/Robo-Meister/ai-context-framework)
+[![Coverage Status](coverage.svg)](https://github.com/Robo-Meister/ai-context-framework/actions/workflows/tests.yml)
+
 A Context-Aware AI Engine for decision automation, workflow reasoning, and dynamic task orchestration.
 
 CAIEngine (Context-Aware Intelligence Engine) provides a flexible AI orchestration layer for intelligent automation.
