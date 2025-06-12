@@ -12,6 +12,7 @@ from .context_filer import ContextFilter
 from .trust_module import TrustModule
 from .time_decay_scorer import TimeDecayScorer
 from .ann_index import ANNIndex
+from .goal_feedback_loop import GoalDrivenFeedbackLoop
 
 __all__ = [
     "CacheManager",
@@ -26,4 +27,5 @@ __all__ = [
     "TrustModule",
     "TimeDecayScorer",
     "ANNIndex",
+    "GoalDrivenFeedbackLoop",
 ]

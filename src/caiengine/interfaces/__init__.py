@@ -8,6 +8,7 @@ from .network_interface import NetworkInterface
 from .inference_engine import AIInferenceEngine
 from .learning_interface import LearningInterface
 from .context_scorer import ContextScorer
+from .goal_feedback_strategy import GoalFeedbackStrategy
 
 __all__ = [
     "ContextProvider",
@@ -17,4 +18,5 @@ __all__ = [
     "AIInferenceEngine",
     "LearningInterface",
     "ContextScorer",
+    "GoalFeedbackStrategy",
 ]
