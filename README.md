@@ -86,20 +86,28 @@ Developer guides live in the `docs/` directory. Open
 1. Clone the repository:
 
    ```bash
-   https://github.com/Robo-Meister/ai-context-framework.git
+   git clone https://github.com/Robo-Meister/ai-context-framework.git
    cd ai-context-framework
    ```
-2. Create and activate virtual environment (optional but recommended)
-    ```bash
+2. *(Optional)* Create and activate a virtual environment
+
+   ```bash
    python -m venv venv
    source venv/bin/activate  # Linux/Mac
    venv\Scripts\activate     # Windows
    ```
-3. Install dependencies (to be updated)
-```bash
-pip install -r requirements.txt
-Start by implementing your own ContextProvider or test the provided Redis provider.
-```
+3. Install dependencies
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Run the unit tests to verify your setup
+
+   ```bash
+   pytest
+   ```
+
+You can now start implementing your own `ContextProvider` or test the built-in ones.
 
 ### Loading Example Contexts
 
@@ -111,6 +119,35 @@ tm.load_examples([
     {"role": 0.9, "location": 0.8, "time": 0.2, "device": 0.7, "action": 0.1},
     {"role": 0.8, "location": 0.7, "time": 0.1, "device": 0.6, "action": 0.2},
 ])
+```
+
+### Simple Provider Example
+
+```python
+from datetime import datetime, timedelta
+from caiengine.providers.simple_context_provider import SimpleContextProvider
+from caiengine.objects.context_query import ContextQuery
+
+provider = SimpleContextProvider()
+now = datetime.utcnow()
+provider.ingest_context({"foo": "bar"}, timestamp=now)
+
+query = ContextQuery(roles=[], time_range=(now - timedelta(seconds=1),
+                                           now + timedelta(seconds=1)),
+                      scope="", data_type="")
+results = provider.get_context(query)
+print(results)
+```
+
+### Fusing Context
+
+```python
+from caiengine.core.fuser import Fuser
+
+fuser = Fuser()
+categorized = {("", "", ""): results}
+summary = fuser.fuse(categorized)
+print(summary)
 ```
    
 ## Contributing
