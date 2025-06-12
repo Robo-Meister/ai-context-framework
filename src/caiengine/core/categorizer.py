@@ -26,10 +26,24 @@ class Categorizer:
 
         return best_match or "unknown"
 
+    def _flatten(self, ctx: dict, prefix: str = "") -> dict:
+        flat = {}
+        for k, v in ctx.items():
+            if isinstance(v, dict):
+                flat.update(self._flatten(v, prefix + k + "."))
+            else:
+                flat[prefix + k] = v
+        return flat
+
     def compare_layers(self, ctx1: dict, ctx2: dict) -> float:
-        matched_layers = sum(1 for k in ctx1 if ctx1.get(k) == ctx2.get(k))
-        total_layers = len(set(ctx1.keys()) | set(ctx2.keys()))
-        return matched_layers / total_layers if total_layers else 0.0
+        """Return ratio of matching context layers (supports sublayers)."""
+        f1 = self._flatten(ctx1)
+        f2 = self._flatten(ctx2)
+        keys = set(f1.keys()) | set(f2.keys())
+        if not keys:
+            return 0.0
+        matched = sum(1 for k in keys if f1.get(k) == f2.get(k))
+        return matched / len(keys)
 
 # Simple test example
 if __name__ == "__main__":
