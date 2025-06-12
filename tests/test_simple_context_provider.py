@@ -1,8 +1,8 @@
 import unittest
 from datetime import datetime, timedelta
 
-from providers.simple_context_provider import SimpleContextProvider
-import objects.context_query as ContextQuery
+from caiengine.providers.simple_context_provider import SimpleContextProvider
+import caiengine.objects.context_query as ContextQuery
 
 
 class TestSimpleContextProvider(unittest.TestCase):

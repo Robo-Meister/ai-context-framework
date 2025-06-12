@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import MagicMock
-from core.context_manager import ContextManager
-from interfaces.network_interface import NetworkInterface
-from core.distributed_context_manager import DistributedContextManager
+from caiengine.core.context_manager import ContextManager
+from caiengine.interfaces.network_interface import NetworkInterface
+from caiengine.core.distributed_context_manager import DistributedContextManager
 
 
 class TestDistributedContextManager(unittest.TestCase):

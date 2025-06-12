@@ -38,5 +38,9 @@ Homepage = "https://github.com/Robo-Meister/ai-context-framework"
 Repository = "https://github.com/Robo-Meister/ai-context-framework"
 
 [project.scripts]
-context = "ai_context.cli:main"
+context = "caiengine.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["caiengine"]
 

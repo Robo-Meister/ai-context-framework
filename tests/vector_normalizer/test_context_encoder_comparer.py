@@ -1,6 +1,6 @@
 import unittest
-from core.vector_normalizer.context_encoder import ContextEncoder
-from core.vector_normalizer.vector_comparer import VectorComparer
+from caiengine.core.vector_normalizer.context_encoder import ContextEncoder
+from caiengine.core.vector_normalizer.vector_comparer import VectorComparer
 
 class TestContextEncoderComparer(unittest.TestCase):
     def setUp(self):

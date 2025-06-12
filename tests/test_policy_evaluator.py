@@ -4,7 +4,7 @@ from pathlib import Path
 
 spec = importlib.util.spec_from_file_location(
     "policy_evaluator",
-    Path(__file__).resolve().parents[1] / "core" / "policy_evaluator.py",
+    Path(__file__).resolve().parents[1] / "src" / "caiengine" / "core" / "policy_evaluator.py",
 )
 module = importlib.util.module_from_spec(spec)
 assert spec.loader is not None

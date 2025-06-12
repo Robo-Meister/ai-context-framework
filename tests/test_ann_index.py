@@ -1,4 +1,4 @@
-from core.ann_index import ANNIndex
+from caiengine.core.ann_index import ANNIndex
 
 
 def test_ann_index_basic():

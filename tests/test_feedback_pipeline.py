@@ -4,11 +4,11 @@ import pytest
 torch = pytest.importorskip("torch")
 pytest.importorskip("torch.nn")
 
-from pipelines.feedback_pipeline import FeedbackPipeline
-from parser.log_parser import LogParser
-from core.learning.learning_manager import LearningManager
-from providers.mock_context_provider import MockContextProvider
-from interfaces.context_provider import ContextProvider
+from caiengine.pipelines.feedback_pipeline import FeedbackPipeline
+from caiengine.parser.log_parser import LogParser
+from caiengine.core.learning.learning_manager import LearningManager
+from caiengine.providers.mock_context_provider import MockContextProvider
+from caiengine.interfaces.context_provider import ContextProvider
 
 
 class Provider(MockContextProvider, ContextProvider):

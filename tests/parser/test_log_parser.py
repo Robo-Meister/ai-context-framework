@@ -1,7 +1,7 @@
 import unittest
 from datetime import datetime
 
-from parser.log_parser import LogParser
+from caiengine.parser.log_parser import LogParser
 
 
 class TestLogParser(unittest.TestCase):

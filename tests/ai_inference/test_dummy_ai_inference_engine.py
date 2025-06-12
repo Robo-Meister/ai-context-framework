@@ -7,7 +7,7 @@ import pytest
 ROOT_DIR = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT_DIR))
 
-MODULE_PATH = ROOT_DIR / "inference" / "dummy_engine.py"
+MODULE_PATH = ROOT_DIR / "src" / "caiengine" / "inference" / "dummy_engine.py"
 spec = importlib.util.spec_from_file_location("dummy_engine", MODULE_PATH)
 dummy_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(dummy_module)
