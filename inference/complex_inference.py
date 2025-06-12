@@ -14,7 +14,8 @@ class ComplexAIInferenceEngine(AIInferenceEngine):
     def infer(self, input_data: dict) -> dict:
         # Convert input dict to tensor (you decide input format)
         x = self._preprocess(input_data)
-        y_pred = self.model(x)
+        with torch.no_grad():
+            y_pred = self.model(x).real
         return {"prediction": y_pred.item(), "confidence": 1.0}
 
     def predict(self, input_data: dict) -> dict:
@@ -37,8 +38,8 @@ class ComplexAIInferenceEngine(AIInferenceEngine):
         self.model.train()
         x = self._preprocess(input_data)
         y_true = torch.tensor([target], dtype=torch.float32)
-        output = self.model(x)
-        loss = self.loss_fn(torch.abs(output), y_true)
+        output = self.model(x).real
+        loss = self.loss_fn(output, y_true)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
