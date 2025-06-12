@@ -14,7 +14,7 @@ try:  # pragma: no cover - optional dependency may be missing
 except Exception:  # pragma: no cover - optional dependency may be missing
     AIInferenceEngine = None
 from pipelines import ContextPipeline, FeedbackPipeline
-from providers import MemoryContextProvider
+from providers import MemoryContextProvider, KafkaContextProvider
 from network import NetworkManager, SimpleNetworkMock, ContextBus
 from interfaces import NetworkInterface
 try:
@@ -35,6 +35,7 @@ __all__ = [
     "ContextHookManager",
     "ContextHook",
     "MemoryContextProvider",
+    "KafkaContextProvider",
     "PolicyEvaluator",
     "NetworkManager",
     "SimpleNetworkMock",
