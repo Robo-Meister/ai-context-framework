@@ -17,6 +17,7 @@ from caiengine.pipelines import ContextPipeline, FeedbackPipeline
 from caiengine.providers import MemoryContextProvider, KafkaContextProvider
 from caiengine.network import NetworkManager, SimpleNetworkMock, ContextBus
 from caiengine.interfaces import NetworkInterface
+from caiengine.core.goal_feedback_loop import GoalDrivenFeedbackLoop
 try:
     from . import cli as cli
 except Exception:  # pragma: no cover - fallback when not imported as package
@@ -41,5 +42,6 @@ __all__ = [
     "SimpleNetworkMock",
     "ContextBus",
     "NetworkInterface",
+    "GoalDrivenFeedbackLoop",
     "cli",
 ]
