@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="ai_context",  # your package name, must be unique on PyPI
+    name="caiengine",  # your package name, must be unique on PyPI
     version="0.1.0",
     packages=find_packages(),
 
