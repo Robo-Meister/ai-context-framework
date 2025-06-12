@@ -34,7 +34,8 @@ This modular architecture is designed to evolve alongside AI needs, helping to r
 - Smart Deduplication: Basic and fuzzy matching to merge similar data
 - Flexible Categorization: Group context by roles and scopes
 - Sublayer Categorization: Nested layers (e.g. environment.camera) allow fine grained
-  weighting and future filter selection
+  weighting and future filter selection. ``Fuser`` automatically merges these
+  dot-separated categories without extra configuration
 - Context Fusion: Aggregate and weigh data for downstream AI
 - Customizable Trust Weights: Adjust context layer weights (role, environment, network, device, location, etc.) to fit your domain
 - Context Memory (with Cache Management): Efficient reuse and invalidation of context data and history data

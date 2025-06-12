@@ -4,6 +4,14 @@ from caiengine.common.types.ScopeRoleKey import ScopeRoleKey
 
 
 class Fuser:
+    """Fuse categorized events into aggregated summaries.
+
+    The keys provided by :class:`Categorizer` may include dot-separated
+    sublayer names (for example ``"environment.camera"``). ``Fuser`` treats
+    these like any other key and therefore requires no special handling to
+    merge events across nested categories.
+    """
+
     def fuse(self, categorized_data: Dict[ScopeRoleKey, List[dict]]) -> Dict[ScopeRoleKey, dict]:
         fused_results = {}
 
