@@ -122,7 +122,7 @@
 ✅ Broadcast context updates across providers
 🔧 Why: Completes subscription support in Phase 3.
 # 24. Goal-Driven Feedback Loop
-⏳ Analyze history and current actions to nudge context toward user-defined goals
+✅ Basic loop with ``SimpleGoalFeedbackStrategy`` nudges actions toward a goal state
 🔧 Why: Enables proactive course correction toward desired states.
 
 ## 📦 Release & Community Infrastructure
