@@ -27,6 +27,12 @@ This modular architecture is designed to evolve alongside AI needs, helping to r
 - AI Inference & Learning Hooks: Modular integration points for custom AI logic and model updates
 - Model Management: Replace, save, and load AI inference models at runtime
 
+## Documentation
+
+Developer guides live in the `docs/` directory. Open
+[docs/dev/index.html](docs/dev/index.html) for usage instructions and
+[docs/theory/index.html](docs/theory/index.html) for design notes.
+
 ## Project Structure
 
 ```plaintext
@@ -47,7 +53,7 @@ This modular architecture is designed to evolve alongside AI needs, helping to r
 ├── objects/
 ├── parser/
 ├── providers/
-├── documentation/
+├── docs/
 │   ├── dev/
 │   └── theory/
 ├── tests/
