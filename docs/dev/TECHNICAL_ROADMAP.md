@@ -6,14 +6,13 @@
 🔧 Why: Prepares ground for high-velocity, scalable deployments.
 🚧 Priority 5: Preparation for Extensibility & Learning
 
-# 13. Robo Connector Context Parser
-✅ Reads and converts Robo Connector format to your internal format
-✅ Optional export
-⛔️ Public release TBD
-🔧 Why: Allows seamless bridge between ecosystem tools and native context logic.
+# 13. Data Standardizer for Robo Connector Workflows
+⛔️ Original integration likely dropped
+⏳ Provide JSON-based normalization of Robo Connector logs
+🔧 Why: Maintains compatibility with legacy flows without full integration
 # 16. Packaging Improvements & PyPI Publishing
 ⏳ Finalize module layout and import paths (see **Phase 2** in [Roadmap](../../Roadmap.md))
-⏳ Provide `extras_require` for optional dependencies
+✅ Provide `extras_require` for optional dependencies
 ⏳ Build and upload distribution artifacts to PyPI
 🔧 Why: Makes installation and distribution straightforward for users.
 # 17. CI/CD Pipeline Integration
