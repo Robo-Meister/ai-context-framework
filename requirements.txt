@@ -1,6 +1,7 @@
 numpy==2.2.6
 pytest==8.3.5
 redis==6.1.0
+kafka-python==2.0.2
 setuptools==80.8.0
 sympy==1.14.0
 torch==2.7.0

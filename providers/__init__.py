@@ -9,6 +9,7 @@ from .mock_context_provider import MockContextProvider
 from .simple_context_provider import SimpleContextProvider
 from .http_context_provider import HTTPContextProvider
 from .sqlite_context_provider import SQLiteContextProvider
+from .kafka_context_provider import KafkaContextProvider
 
 __all__ = [
     "BaseContextProvider",
@@ -19,4 +20,5 @@ __all__ = [
     "SimpleContextProvider",
     "HTTPContextProvider",
     "SQLiteContextProvider",
+    "KafkaContextProvider",
 ]

@@ -12,6 +12,7 @@ setup(
     ],
     extras_require={
         "redis": ["redis>=6.1.0"],
+        "kafka": ["kafka-python>=2.0.2"],
         "dev": [
             "pytest>=8.3.5",
             "mypy",
