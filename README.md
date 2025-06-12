@@ -27,6 +27,31 @@ This modular architecture is designed to evolve alongside AI needs, helping to r
 - AI Inference & Learning Hooks: Modular integration points for custom AI logic and model updates
 - Model Management: Replace, save, and load AI inference models at runtime
 
+## Documentation
+
+Developer guides live in the `docs/` directory. Open
+[docs/dev/index.html](docs/dev/index.html) for usage instructions and
+[docs/theory/index.html](docs/theory/index.html) for design notes. See
+[docs/dev/publishing.html](docs/dev/publishing.html) to learn how to build and
+publish the package.
+
+## Installation
+
+Install the framework directly from PyPI:
+
+```bash
+pip install ai_context
+```
+
+To work on the code locally with optional developer tools, clone the repo and
+install in editable mode:
+
+```bash
+git clone https://github.com/Robo-Meister/ai-context-framework.git
+cd ai-context-framework
+pip install -e .[dev]
+```
+
 ## Project Structure
 
 ```plaintext
@@ -47,7 +72,7 @@ This modular architecture is designed to evolve alongside AI needs, helping to r
 ├── objects/
 ├── parser/
 ├── providers/
-├── documentation/
+├── docs/
 │   ├── dev/
 │   └── theory/
 ├── tests/
@@ -62,7 +87,7 @@ This modular architecture is designed to evolve alongside AI needs, helping to r
 1. Clone the repository:
 
    ```bash
-   https://github.com/Robo-Meister/ai-context-framework.git
+   git clone https://github.com/Robo-Meister/ai-context-framework.git
    cd ai-context-framework
    ```
 2. Create and activate virtual environment (optional but recommended)

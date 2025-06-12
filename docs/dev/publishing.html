@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contextual AI - Publishing</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 2rem;
+      line-height: 1.6;
+      max-width: 960px;
+      color: #2c3e50;
+    }
+    h1, h2 {
+      color: #34495e;
+      margin-top: 2rem;
+    }
+    nav a {
+      margin-right: 1rem;
+    }
+    pre, code {
+      background-color: #f4f4f4;
+      padding: 0.2rem 0.4rem;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">Overview</a>
+  <a href="getting_started.html">Getting Started</a>
+  <a href="api_reference.html">API Reference</a>
+  <a href="architecture.html">Architecture</a>
+  <a href="network.html">Network</a>
+  <a href="contributing.html">Contributing</a>
+  <a href="faq.html">FAQ</a>
+  <a href="publishing.html">Publishing</a>
+</nav>
+
+<h1>📦 Publishing to PyPI</h1>
+<p>This guide outlines the steps to build and upload the package to PyPI.</p>
+
+<h2>1. Install build tools</h2>
+<pre><code>python -m pip install --upgrade build twine</code></pre>
+
+<h2>2. Build distributions</h2>
+<pre><code>python -m build</code></pre>
+
+<h2>3. Upload</h2>
+<p>Upload the generated files in <code>dist/</code> to PyPI:</p>
+<pre><code>twine upload dist/*</code></pre>
+
+<p>Consider uploading to <code>--repository testpypi</code> first to verify the package.</p>
+
+</body>
+</html>
