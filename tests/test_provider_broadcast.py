@@ -1,9 +1,9 @@
 import unittest
 from datetime import datetime
 
-from providers.memory_context_provider import MemoryContextProvider
-from objects.context_data import ContextData
-from objects.context_query import ContextQuery
+from caiengine.providers.memory_context_provider import MemoryContextProvider
+from caiengine.objects.context_data import ContextData
+from caiengine.objects.context_query import ContextQuery
 
 
 class TestProviderBroadcast(unittest.TestCase):

@@ -1,8 +1,8 @@
 import unittest
 from datetime import datetime, timedelta
 
-from pipelines.vector_pipeline import VectorPipeline
-from interfaces.context_provider import ContextProvider
+from caiengine.pipelines.vector_pipeline import VectorPipeline
+from caiengine.interfaces.context_provider import ContextProvider
 
 
 class VectorProvider(ContextProvider):

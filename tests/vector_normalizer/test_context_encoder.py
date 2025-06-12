@@ -1,6 +1,6 @@
 import unittest
 
-from core.vector_normalizer.context_encoder import ContextEncoder
+from caiengine.core.vector_normalizer.context_encoder import ContextEncoder
 
 
 class TestContextEncoder(unittest.TestCase):

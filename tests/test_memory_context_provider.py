@@ -1,8 +1,8 @@
 import unittest
 import time
 from datetime import datetime, timedelta
-from providers.memory_context_provider import MemoryContextProvider
-from objects.context_query import ContextQuery
+from caiengine.providers.memory_context_provider import MemoryContextProvider
+from caiengine.objects.context_query import ContextQuery
 
 
 class TestMemoryContextProvider(unittest.TestCase):

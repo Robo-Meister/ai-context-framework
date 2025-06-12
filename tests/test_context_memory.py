@@ -1,6 +1,6 @@
 import unittest
 import time
-from core.context_manager import ContextManager
+from caiengine.core.context_manager import ContextManager
 
 class TestContextManagerMemory(unittest.TestCase):
     def test_cache_expiration(self):

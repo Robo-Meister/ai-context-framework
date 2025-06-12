@@ -4,8 +4,8 @@ import os
 import json
 from datetime import datetime, timedelta
 
-from providers.file_context_provider import FileContextProvider
-from objects.context_query import ContextQuery
+from caiengine.providers.file_context_provider import FileContextProvider
+from caiengine.objects.context_query import ContextQuery
 
 
 class TestFileContextProvider(unittest.TestCase):

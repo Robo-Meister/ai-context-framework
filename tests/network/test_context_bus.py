@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import MagicMock
 
-from network.context_bus import ContextBus
-from interfaces.network_interface import NetworkInterface
+from caiengine.network.context_bus import ContextBus
+from caiengine.interfaces.network_interface import NetworkInterface
 
 
 class TestContextBus(unittest.TestCase):

@@ -1,7 +1,7 @@
 import unittest
 
-from pipelines.context_pipeline import ContextPipeline
-from providers.mock_context_provider import MockContextProvider
+from caiengine.pipelines.context_pipeline import ContextPipeline
+from caiengine.providers.mock_context_provider import MockContextProvider
 
 class TestContextPipeline(unittest.TestCase):
     def test_context_pipeline(self):

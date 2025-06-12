@@ -2,8 +2,8 @@ import unittest
 import time
 from datetime import datetime, timedelta
 
-from providers.sqlite_context_provider import SQLiteContextProvider
-from objects.context_query import ContextQuery
+from caiengine.providers.sqlite_context_provider import SQLiteContextProvider
+from caiengine.objects.context_query import ContextQuery
 
 
 class TestSQLiteContextProvider(unittest.TestCase):

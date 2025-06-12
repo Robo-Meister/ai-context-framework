@@ -1,10 +1,10 @@
 import unittest
 from datetime import datetime, timedelta
 
-from objects.context_query import ContextQuery
+from caiengine.objects.context_query import ContextQuery
 
 # patch KafkaConsumer before importing provider
-from providers import kafka_context_provider
+from caiengine.providers import kafka_context_provider
 
 class DummyConsumer:
     def __init__(self, *args, **kwargs):

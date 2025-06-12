@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from core.time_decay_scorer import TimeDecayScorer
+from caiengine.core.time_decay_scorer import TimeDecayScorer
 
 
 def test_time_decay_scorer():

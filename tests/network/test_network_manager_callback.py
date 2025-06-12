@@ -1,6 +1,6 @@
 import time
-from network.network_manager import NetworkManager
-from network.simple_network import SimpleNetworkMock
+from caiengine.network.network_manager import NetworkManager
+from caiengine.network.simple_network import SimpleNetworkMock
 
 
 def test_network_manager_invokes_callback():

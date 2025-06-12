@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 import json
 from urllib import request, parse
 
-from providers.http_context_provider import HTTPContextProvider
-from objects.context_query import ContextQuery
+from caiengine.providers.http_context_provider import HTTPContextProvider
+from caiengine.objects.context_query import ContextQuery
 
 
 class TestHTTPContextProvider(unittest.TestCase):

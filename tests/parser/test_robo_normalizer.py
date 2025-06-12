@@ -1,5 +1,5 @@
 import unittest
-from parser.robo_connector_normalizer import RoboConnectorNormalizer
+from caiengine.parser.robo_connector_normalizer import RoboConnectorNormalizer
 
 EXAMPLE1 = {
     "workflow_name": "scale_digital_product",

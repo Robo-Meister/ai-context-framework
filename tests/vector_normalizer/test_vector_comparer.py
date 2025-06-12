@@ -1,6 +1,6 @@
 import unittest
 
-from core.vector_normalizer.vector_comparer import VectorComparer
+from caiengine.core.vector_normalizer.vector_comparer import VectorComparer
 
 
 class TestVectorComparer(unittest.TestCase):

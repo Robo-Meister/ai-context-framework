@@ -41,18 +41,20 @@ Developer guides live in the `docs/` directory. Open
 ├── README.md
 ├── pyproject.toml
 ├── setup.py
-├── core/
-│   ├── filters/
-│   ├── learning/
-│   └── vector_normalizer/
-├── common/
-│   └── types/
-├── inference/
-├── interfaces/
-├── network/
-├── objects/
-├── parser/
-├── providers/
+├── src/
+│   └── caiengine/
+│       ├── core/
+│       │   ├── filters/
+│       │   ├── learning/
+│       │   └── vector_normalizer/
+│       ├── common/
+│       │   └── types/
+│       ├── inference/
+│       ├── interfaces/
+│       ├── network/
+│       ├── objects/
+│       ├── parser/
+│       └── providers/
 ├── docs/
 │   ├── dev/
 │   └── theory/
@@ -86,7 +88,7 @@ Start by implementing your own ContextProvider or test the provided Redis provid
 ### Loading Example Contexts
 
 ```python
-from core.trust_module import TrustModule
+from caiengine.core.trust_module import TrustModule
 
 tm = TrustModule(weights={"role": 0.4, "location": 0.2, "device": 0.15, "action": 0.15, "time": 0.1})
 tm.load_examples([

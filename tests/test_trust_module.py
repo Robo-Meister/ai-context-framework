@@ -1,6 +1,6 @@
 import unittest
 
-from core.trust_module import TrustModule
+from caiengine.core.trust_module import TrustModule
 
 
 class TestTrustModule(unittest.TestCase):
