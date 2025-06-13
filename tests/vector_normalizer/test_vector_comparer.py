@@ -23,3 +23,15 @@ class TestVectorComparer(unittest.TestCase):
         zero_vec = [0.0] * 9
         sim = self.comparer.cosine_similarity(self.vec1, zero_vec)
         self.assertEqual(sim, 0.0)
+
+    def test_weight_length_mismatch(self):
+        """Weights and vector lengths must match."""
+        comparer = VectorComparer(weights=[1, 2])
+        with self.assertRaises(ValueError):
+            comparer.cosine_similarity(self.vec1, self.vec2)
+
+    def test_vector_length_mismatch(self):
+        """Vectors of different lengths should raise an error."""
+        vec3 = self.vec2 + [0.1]
+        with self.assertRaises(ValueError):
+            self.comparer.cosine_similarity(self.vec1, vec3)
