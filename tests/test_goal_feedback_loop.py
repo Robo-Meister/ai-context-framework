@@ -50,3 +50,21 @@ def test_goal_feedback_loop_set_goal_state():
     assert loop.suggest(history, actions)[0]["progress"] == 2
     loop.set_goal_state({"progress": 10})
     assert loop.suggest(history, actions)[0]["progress"] == 5
+
+
+def test_goal_feedback_loop_directional_prevents_backward():
+    strategy = SimpleGoalFeedbackStrategy(one_direction_layers=["time"])
+    loop = GoalDrivenFeedbackLoop(strategy, goal_state={"time": 0})
+    history = [{"time": 5}]
+    actions = [{"time": 5}]
+    suggested = loop.suggest(history, actions)
+    assert suggested[0]["time"] == 5
+
+
+def test_goal_feedback_loop_directional_forward():
+    strategy = SimpleGoalFeedbackStrategy(one_direction_layers=["time"])
+    loop = GoalDrivenFeedbackLoop(strategy, goal_state={"time": 10})
+    history = [{"time": 5}]
+    actions = [{"time": 5}]
+    suggested = loop.suggest(history, actions)
+    assert suggested[0]["time"] == 7.5
