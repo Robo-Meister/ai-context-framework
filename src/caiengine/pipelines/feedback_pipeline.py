@@ -1,9 +1,13 @@
 from typing import List, Optional, Tuple
+from collections import defaultdict
 
 from caiengine.core.categorizer import Categorizer
 from caiengine.core.Deduplicars.fuzzy_deduplicator import FuzzyDeduplicator
 from caiengine.interfaces.inference_engine import AIInferenceEngine
-from caiengine.core.learning.learning_manager import LearningManager
+try:  # optional dependency
+    from caiengine.core.learning.learning_manager import LearningManager
+except Exception:  # pragma: no cover - optional dependency may be missing
+    LearningManager = None  # type: ignore
 
 
 class FeedbackPipeline:
@@ -42,18 +46,23 @@ class FeedbackPipeline:
             used to update the ``LearningManager``.
         :return: List of prediction dictionaries for each item.
         """
-        deduped = self.deduplicator.deduplicate(data_batch)
-        results = []
-        for item in deduped:
+        categorized = defaultdict(list)
+        for item in data_batch:
             category = self.categorizer.categorize(item, candidates)
-            item_copy = dict(item)
-            item_copy["category"] = category
-            prediction = self.inference_engine.predict(item_copy)
-            results.append({
-                "category": category,
-                "prediction": prediction,
-                "item": item_copy,
-            })
+            categorized[category].append(item)
+
+        results = []
+        for category, items in categorized.items():
+            deduped = self.deduplicator.deduplicate(items)
+            for item in deduped:
+                item_copy = dict(item)
+                item_copy["category"] = category
+                prediction = self.inference_engine.predict(item_copy)
+                results.append({
+                    "category": category,
+                    "prediction": prediction,
+                    "item": item_copy,
+                })
 
         if feedback and self.learning_manager:
             for log_line, label in feedback:
