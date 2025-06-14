@@ -155,6 +155,34 @@ categorized = {("", "", ""): results}
 summary = fuser.fuse(categorized)
 print(summary)
 ```
+
+### Configurable Pipeline
+
+The `ConfigurablePipeline` ties providers, policies and optional feedback loops
+into a single object. Simply provide a configuration dictionary and run a batch
+of context items:
+
+```python
+from caiengine.pipelines.configurable_pipeline import ConfigurablePipeline
+from datetime import datetime
+
+config = {
+    "provider": {"type": "memory"},
+    "candidates": [
+        {"category": "foo", "context": {"foo": "bar"}, "base_weight": 1.0}
+    ],
+    "feedback": {"type": "goal", "goal_state": {"progress": 10}},
+}
+
+pipeline = ConfigurablePipeline.from_dict(config)
+data = [{
+    "timestamp": datetime.utcnow(),
+    "context": {"foo": "bar"},
+    "content": "example"
+}]
+result = pipeline.run(data)
+```
+
    
 ## Contributing
 

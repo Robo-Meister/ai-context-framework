@@ -13,7 +13,7 @@ try:  # pragma: no cover - optional dependency may be missing
     from caiengine.core.ai_inference import AIInferenceEngine
 except Exception:  # pragma: no cover - optional dependency may be missing
     AIInferenceEngine = None
-from caiengine.pipelines import ContextPipeline, FeedbackPipeline, QuestionPipeline
+from caiengine.pipelines import ContextPipeline, FeedbackPipeline, QuestionPipeline, ConfigurablePipeline
 from caiengine.providers import MemoryContextProvider, KafkaContextProvider
 from caiengine.network import NetworkManager, SimpleNetworkMock, ContextBus
 from caiengine.interfaces import NetworkInterface
@@ -32,6 +32,7 @@ __all__ = [
     "ContextPipeline",
     "FeedbackPipeline",
     "QuestionPipeline",
+    "ConfigurablePipeline",
     "Fuser",
     "ContextManager",
     "DistributedContextManager",

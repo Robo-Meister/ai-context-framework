@@ -31,9 +31,13 @@ class SensorPipeline:
     def run(self, data_batch: List[dict], candidates: List[dict]):
         """Deduplicate, categorize and fuse a batch of sensor events."""
 
-        deduped = self.deduplicator.deduplicate(data_batch)
         categorized = defaultdict(list)
-        for item in deduped:
+        for item in data_batch:
             key = self.categorizer.categorize(item, candidates)
             categorized[key].append(item)
-        return self.fuser.fuse(categorized)
+
+        deduped = {
+            key: self.deduplicator.deduplicate(items) for key, items in categorized.items()
+        }
+
+        return self.fuser.fuse(deduped)
