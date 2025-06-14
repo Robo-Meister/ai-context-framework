@@ -11,6 +11,9 @@ from .simple_context_provider import SimpleContextProvider
 from .http_context_provider import HTTPContextProvider
 from .sqlite_context_provider import SQLiteContextProvider
 from .kafka_context_provider import KafkaContextProvider
+from .xml_context_provider import XMLContextProvider
+from .postgres_context_provider import PostgresContextProvider
+from .mysql_context_provider import MySQLContextProvider
 
 __all__ = [
     "BaseContextProvider",
@@ -23,4 +26,7 @@ __all__ = [
     "HTTPContextProvider",
     "SQLiteContextProvider",
     "KafkaContextProvider",
+    "XMLContextProvider",
+    "PostgresContextProvider",
+    "MySQLContextProvider",
 ]
