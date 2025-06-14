@@ -112,6 +112,12 @@
 # 21. SQLiteContextProvider (Roadmap Phase 3 - Plugin & Provider Expansion)
 ✅ Lightweight SQL-backed provider for local storage
 ✅ Reuse existing filter and query logic
+# 21a. XMLContextProvider (Roadmap Phase 3 - Plugin & Provider Expansion)
+✅ Simple XML file persistence
+# 21b. PostgresContextProvider (Roadmap Phase 3 - Plugin & Provider Expansion)
+✅ PostgreSQL-backed storage option
+# 21c. MySQLContextProvider (Roadmap Phase 3 - Plugin & Provider Expansion)
+✅ MySQL-backed storage option
 
 # 22. HTTPContextProvider (REST) (Roadmap Phase 3 - Plugin & Provider Expansion)
 ✅ POST/GET endpoints for remote ingestion and retrieval
