@@ -4,18 +4,26 @@ from typing import List
 from caiengine.core.categorizer import Categorizer
 from caiengine.core.Deduplicars.vector_deduplicator import VectorDeduplicator
 from caiengine.core.filters.kalman_filter import KalmanFilter
+from caiengine.interfaces.filter_strategy import FilterStrategy
 from caiengine.core.fuser import Fuser
 
 
 class VectorPipeline:
     """Pipeline that deduplicates using vector similarity before fusion."""
 
-    def __init__(self, context_provider, vector_dim: int, time_threshold_sec: int = 5,
-                 vector_similarity_threshold: float = 0.1, merge_rule=None):
+    def __init__(
+        self,
+        context_provider,
+        vector_dim: int,
+        filter_strategy: FilterStrategy | None = None,
+        time_threshold_sec: int = 5,
+        vector_similarity_threshold: float = 0.1,
+        merge_rule=None,
+    ):
         self.categorizer = Categorizer(context_provider)
-        kf = KalmanFilter(vector_dim)
+        filter_strategy = filter_strategy or KalmanFilter(vector_dim)
         self.deduplicator = VectorDeduplicator(
-            kalman_filter=kf,
+            filter_strategy=filter_strategy,
             time_threshold_sec=time_threshold_sec,
             vector_similarity_threshold=vector_similarity_threshold,
             merge_rule=merge_rule,
@@ -29,7 +37,8 @@ class VectorPipeline:
             categorized[key].append(item)
 
         deduped = {
-            key: self.deduplicator.deduplicate(items) for key, items in categorized.items()
+            key: self.deduplicator.deduplicate(items)
+            for key, items in categorized.items()
         }
 
         return self.fuser.fuse(deduped)
