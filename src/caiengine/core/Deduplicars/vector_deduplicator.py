@@ -2,7 +2,7 @@ from typing import List
 
 import numpy as np
 
-from caiengine.core.filters.kalman_filter import KalmanFilter
+from caiengine.interfaces.filter_strategy import FilterStrategy
 from caiengine.interfaces.deduplicator_strategy import DeduplicationStrategy
 from typing import Optional, Callable
 from datetime import datetime, timedelta
@@ -11,12 +11,12 @@ from datetime import datetime, timedelta
 class VectorDeduplicator(DeduplicationStrategy):
     def __init__(
         self,
-        kalman_filter: KalmanFilter,
+        filter_strategy: FilterStrategy,
         time_threshold_sec: int = 5,
         vector_similarity_threshold: float = 0.1,
         merge_rule: Optional[Callable[[dict, dict], dict]] = None,
     ):
-        self.kalman_filter = kalman_filter
+        self.filter_strategy = filter_strategy
         self.vector_similarity_threshold = vector_similarity_threshold
         self.time_threshold = timedelta(seconds=time_threshold_sec)
         self.merge_rule = merge_rule or self.default_merge_rule
@@ -27,7 +27,11 @@ class VectorDeduplicator(DeduplicationStrategy):
         elif b.get("confidence", 0) > a.get("confidence", 0):
             return b
         else:
-            return a if a.get("timestamp", datetime.min) >= b.get("timestamp", datetime.min) else b
+            return (
+                a
+                if a.get("timestamp", datetime.min) >= b.get("timestamp", datetime.min)
+                else b
+            )
 
     def vector_similarity(self, v1, v2):
         """Return cosine distance between two vectors."""
@@ -43,27 +47,33 @@ class VectorDeduplicator(DeduplicationStrategy):
         return float(1 - cosine_sim)
 
     def deduplicate(self, items: List[dict]) -> List[dict]:
-        # Apply Kalman filter to numeric vectors in each item
+        # Apply configured filter to numeric vectors in each item
         for item in items:
-            vector = np.asarray(item.get('vector', []), dtype=float)
+            vector = np.asarray(item.get("vector", []), dtype=float)
             if vector.size > 0:
-                filtered_vector = self.kalman_filter.apply(vector)
-                item['filtered_vector'] = filtered_vector
+                filtered_vector = self.filter_strategy.apply(vector)
+                item["filtered_vector"] = filtered_vector
             else:
-                item['filtered_vector'] = None
+                item["filtered_vector"] = None
 
         unique = []
         for item in items:
             merged = False
             for i, u in enumerate(unique):
                 # check time proximity
-                time_diff = abs(item.get('timestamp', datetime.min) - u.get('timestamp', datetime.min))
+                time_diff = abs(
+                    item.get("timestamp", datetime.min)
+                    - u.get("timestamp", datetime.min)
+                )
                 if time_diff <= self.time_threshold:
                     # vector similarity check
-                    v1 = item.get('filtered_vector')
-                    v2 = u.get('filtered_vector')
+                    v1 = item.get("filtered_vector")
+                    v2 = u.get("filtered_vector")
                     if v1 is not None and v2 is not None:
-                        if self.vector_similarity(v1, v2) <= self.vector_similarity_threshold:
+                        if (
+                            self.vector_similarity(v1, v2)
+                            <= self.vector_similarity_threshold
+                        ):
                             unique[i] = self.merge_rule(item, u)
                             merged = True
                             break
