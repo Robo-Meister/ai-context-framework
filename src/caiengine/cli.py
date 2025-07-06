@@ -1,10 +1,13 @@
 import argparse
 import json
 import importlib
+import logging
 from datetime import datetime
 from caiengine.objects.context_query import ContextQuery
 
 DEFAULT_PROVIDER = "providers.memory_context_provider.MemoryContextProvider"
+
+logger = logging.getLogger(__name__)
 
 def load_provider(path: str):
     module_name, class_name = path.rsplit(".", 1)
@@ -24,7 +27,7 @@ def cmd_add(args):
         source_id=args.source_id,
         confidence=float(args.confidence),
     )
-    print(ctx_id)
+    logger.info(ctx_id)
 
 def cmd_query(args):
     provider = load_provider(args.provider)
@@ -33,9 +36,10 @@ def cmd_query(args):
     roles = args.roles.split(",") if args.roles else []
     query = ContextQuery(roles=roles, time_range=(start, end), scope=args.scope or "", data_type=args.data_type or "")
     result = provider.get_context(query)
-    print(json.dumps(result, default=str, indent=2))
+    logger.info(json.dumps(result, default=str, indent=2))
 
 def main(argv=None):
+    logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser(prog="context")
     parser.add_argument("--provider", default=DEFAULT_PROVIDER, help="Provider class path")
     sub = parser.add_subparsers(dest="command")

@@ -1,3 +1,4 @@
+import logging
 import threading
 
 try:
@@ -10,6 +11,8 @@ from typing import List
 from datetime import datetime
 from caiengine.objects.context_data import ContextData
 from caiengine.objects.context_query import ContextQuery
+
+logger = logging.getLogger(__name__)
 from .base_context_provider import BaseContextProvider
 
 # Assuming ContextQuery and ContextData are already defined as in previous message
@@ -63,7 +66,7 @@ class RedisContextProvider(BaseContextProvider):
                         metadata=metadata
                     ))
             except Exception as e:
-                print(f"Error parsing context {context_id}: {e}")
+                logger.error("Error parsing context %s: %s", context_id, e)
         return context_list
 
     def get_context(self, query: ContextQuery = None) -> List[dict]:
@@ -106,5 +109,5 @@ class RedisContextProvider(BaseContextProvider):
             )
             self.publish_context(context)
         except Exception as e:
-            print(f"Failed to push context {context_id}: {e}")
+            logger.error("Failed to push context %s: %s", context_id, e)
 

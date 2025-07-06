@@ -1,8 +1,12 @@
 """Lightweight in-memory implementation of ``NetworkInterface`` for testing."""
 
-from caiengine.interfaces.network_interface import NetworkInterface
+import logging
 import threading
 import time
+
+from caiengine.interfaces.network_interface import NetworkInterface
+
+logger = logging.getLogger(__name__)
 
 
 class SimpleNetworkMock(NetworkInterface):
@@ -16,11 +20,11 @@ class SimpleNetworkMock(NetworkInterface):
 
     def send(self, recipient_id: str, message: dict):
         self.messages.append((recipient_id, message))
-        print(f"Mock send to {recipient_id}: {message}")
+        logger.debug("Mock send to %s: %s", recipient_id, message)
 
     def broadcast(self, message: dict):
         self.messages.append(("broadcast", message))
-        print(f"Mock broadcast: {message}")
+        logger.debug("Mock broadcast: %s", message)
 
     def receive(self):
         if self.messages:

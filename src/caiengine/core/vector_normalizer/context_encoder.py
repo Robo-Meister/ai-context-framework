@@ -1,4 +1,8 @@
+import logging
+
 from caiengine.core.vector_normalizer.vector_comparer import VectorComparer
+
+logger = logging.getLogger(__name__)
 class ContextEncoder:
     def __init__(self):
         self.time_map = {
@@ -59,5 +63,5 @@ if __name__ == "__main__":
     vec1 = encoder.encode(ctx1)
     vec2 = encoder.encode(ctx2)
 
-    print("Cosine Similarity:", comparer.cosine_similarity(vec1, vec2))
-    print("Euclidean Distance:", comparer.euclidean_distance(vec1, vec2))
+    logger.info("Cosine Similarity: %s", comparer.cosine_similarity(vec1, vec2))
+    logger.info("Euclidean Distance: %s", comparer.euclidean_distance(vec1, vec2))
