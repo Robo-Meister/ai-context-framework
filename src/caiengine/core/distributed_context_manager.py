@@ -1,8 +1,12 @@
 """Tools for synchronizing ``ContextManager`` state across network nodes."""
 
+import logging
+
 from caiengine.core.context_manager import ContextManager
 from caiengine.interfaces.network_interface import NetworkInterface
 from caiengine.core.context_hooks import ContextHookManager
+
+logger = logging.getLogger(__name__)
 
 
 class DistributedContextManager:
@@ -35,7 +39,7 @@ class DistributedContextManager:
             value = data.get("value")
             self.context_manager.update_context(key, value)
             self.hooks.trigger(key, value, self.network)
-            print(f"Context updated from caiengine.network: {key} -> {value}")
+            logger.info("Context updated from caiengine.network: %s -> %s", key, value)
 
     # Optionally expose ContextManager methods here as needed
     def get_context(self, key):
@@ -56,4 +60,4 @@ class DistributedContextManager:
         value = message.get("value")
         self.context_manager.update_context(key, value)
         self.hooks.trigger(key, value, self.network)
-        print(f"Context updated from caiengine.network: {key} -> {value}")
+        logger.info("Context updated from caiengine.network: %s -> %s", key, value)

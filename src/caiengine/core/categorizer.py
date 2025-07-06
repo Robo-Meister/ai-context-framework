@@ -1,5 +1,8 @@
 from datetime import datetime
+import logging
 from caiengine.interfaces.context_provider import ContextProvider
+
+logger = logging.getLogger(__name__)
 
 class Categorizer:
     def __init__(self, context_provider: ContextProvider):
@@ -47,7 +50,6 @@ class Categorizer:
 
 # Simple test example
 if __name__ == "__main__":
-    import pprint
     categorizer = Categorizer()
 
     # Sample data batch
@@ -76,4 +78,4 @@ if __name__ == "__main__":
     ]
 
     categorized_result = categorizer.categorize(data)
-    pprint.pprint(dict(categorized_result))
+    logger.info("%s", dict(categorized_result))
