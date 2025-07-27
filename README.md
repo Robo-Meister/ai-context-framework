@@ -45,7 +45,7 @@ This modular architecture is designed to evolve alongside AI needs, helping to r
 - Distributed Context Sync & Network Communication: Synchronize context state across nodes and trigger actions over the network. Includes `NetworkManager`, `SimpleNetworkMock`, `DistributedContextManager`, `ContextBus`, and network-aware hooks. See `docs/dev/network.html` for details.
 - AI Inference & Learning Hooks: Modular integration points for custom AI logic and model updates
 - Model Management: Replace, save, and load AI inference models at runtime
-- Goal-Driven Feedback Loop: Nudge actions toward user-defined goals via strategies like ``SimpleGoalFeedbackStrategy``
+- Goal-Driven Feedback Loop: Nudge actions toward user-defined goals via strategies like ``SimpleGoalFeedbackStrategy`` or ``PersonalityGoalFeedbackStrategy`` for NPC traits
 
 ## Documentation
 
