@@ -115,6 +115,14 @@ Developer guides live in the `docs/` directory. Open
 
 You can now start implementing your own `ContextProvider` or test the built-in ones.
 
+### Environment Variables
+
+Copy `.env.example` to `.env` and adjust the values as needed. The file includes
+settings used by helpers and integration services.
+
+- `CAI_ENGINE_ENDPOINT` – Base URL for services (like `npcAiService.js`) that
+  communicate with the CAIEngine API.
+
 ### Loading Example Contexts
 
 ```python
