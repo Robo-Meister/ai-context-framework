@@ -103,3 +103,7 @@ Pipfile.lock
 
 # Redis dump files (if you run redis locally)
 dump.rdb
+
+# Node.js
+Server/node_modules/
+Server/package-lock.json
