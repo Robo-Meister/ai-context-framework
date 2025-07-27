@@ -115,6 +115,17 @@ Developer guides live in the `docs/` directory. Open
 
 You can now start implementing your own `ContextProvider` or test the built-in ones.
 
+### Starting the Service
+
+Launch a small REST server exposing the `HTTPContextProvider` and goal feedback loop:
+
+```bash
+python -m caiengine.service
+```
+
+The server binds to `0.0.0.0:8080` by default. Set `CAI_ENGINE_ENDPOINT` in your application to this URL to reuse the running service instead of spawning `cai_bridge.py` repeatedly.
+
+
 ### Loading Example Contexts
 
 ```python
