@@ -125,6 +125,13 @@ python -m caiengine.service
 
 The server binds to `0.0.0.0:8080` by default. Set `CAI_ENGINE_ENDPOINT` in your application to this URL to reuse the running service instead of spawning `cai_bridge.py` repeatedly.
 
+### Environment Variables
+
+Copy `.env.example` to `.env` and adjust the values as needed. The file includes
+settings used by helpers and integration services.
+
+- `CAI_ENGINE_ENDPOINT` – Base URL for services (like `npcAiService.js`) that
+  communicate with the CAIEngine API.
 
 ### Loading Example Contexts
 
