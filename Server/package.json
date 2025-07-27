@@ -1,0 +1,11 @@
+{
+  "name": "npc-context-service",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.6.4"
+  }
+}
