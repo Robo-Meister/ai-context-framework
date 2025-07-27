@@ -22,6 +22,7 @@ from caiengine.core.goal_strategies import (
     SimpleGoalFeedbackStrategy,
     PersonalityGoalFeedbackStrategy,
 )
+from caiengine.cai_bridge import CAIBridge
 try:
     from . import cli as cli
 except Exception:  # pragma: no cover - fallback when not imported as package
@@ -51,5 +52,6 @@ __all__ = [
     "GoalDrivenFeedbackLoop",
     "SimpleGoalFeedbackStrategy",
     "PersonalityGoalFeedbackStrategy",
+    "CAIBridge",
     "cli",
 ]
