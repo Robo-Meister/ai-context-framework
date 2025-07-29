@@ -95,7 +95,10 @@ function getPersonality(id) {
 async function sendRequest(npcId, context) {
   const personality = getPersonality(npcId);
   const payload = { npcId, context, personality };
-  // Here we'd normally forward payload to the Python service via HTTP
+  if (endpoint) {
+    return httpRequest(new URL('/context', endpoint).toString(), JSON.stringify(payload));
+  }
+  // Fallback for tests or when the service isn't running
   return payload;
 }
 
