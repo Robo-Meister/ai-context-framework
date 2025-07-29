@@ -6,6 +6,7 @@ from .simple_network import SimpleNetworkMock
 from .context_bus import ContextBus
 from .roboid import RoboId
 from .roboid_connection import RoboIdConnection
+from .node_registry import NodeRegistry
 
 __all__ = [
     "NetworkManager",
@@ -13,4 +14,5 @@ __all__ = [
     "ContextBus",
     "RoboId",
     "RoboIdConnection",
+    "NodeRegistry",
 ]

@@ -8,7 +8,7 @@ setup(
 
     install_requires=[
         "numpy>=2.2.6",
-        "torch>=2.7.0",
+        "torch==2.3.1+cpu",
         "sympy>=1.14.0",
     ],
     extras_require={

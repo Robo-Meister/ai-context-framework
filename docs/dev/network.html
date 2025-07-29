@@ -85,6 +85,13 @@ manager.update_context("task", {"status": "in_progress"})
   multi-node cooperation.
 </p>
 
+<h2>NodeRegistry</h2>
+<p>
+  <code>NodeRegistry</code> is a small utility that records active nodes in Redis.
+  Each node registers its <em>RoboID</em> and network address, making discovery
+  of peers easy.
+</p>
+
 <h2>Network-Aware Hooks</h2>
 <p>
   Hooks can be registered on <code>DistributedContextManager</code> and are

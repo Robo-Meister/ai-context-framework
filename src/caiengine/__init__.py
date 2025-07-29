@@ -15,7 +15,7 @@ except Exception:  # pragma: no cover - optional dependency may be missing
     AIInferenceEngine = None
 from caiengine.pipelines import ContextPipeline, FeedbackPipeline, QuestionPipeline, ConfigurablePipeline
 from caiengine.providers import MemoryContextProvider, KafkaContextProvider
-from caiengine.network import NetworkManager, SimpleNetworkMock, ContextBus
+from caiengine.network import NetworkManager, SimpleNetworkMock, ContextBus, NodeRegistry
 from caiengine.interfaces import NetworkInterface
 from caiengine.core.goal_feedback_loop import GoalDrivenFeedbackLoop
 from caiengine.core.goal_strategies import (
@@ -48,6 +48,7 @@ __all__ = [
     "NetworkManager",
     "SimpleNetworkMock",
     "ContextBus",
+    "NodeRegistry",
     "NetworkInterface",
     "GoalDrivenFeedbackLoop",
     "SimpleGoalFeedbackStrategy",
