@@ -27,6 +27,14 @@ class TestRoboId(unittest.TestCase):
         self.assertLess(result["similarity"], 1.0)
         self.assertIn("place", result["differences"])
 
+    def test_distance_and_visibility_virtual(self):
+        a = RoboId.parse("robot.transport@wirtualny#1")
+        b = RoboId.parse("robot.sensor@wirtualny#2")
+        self.assertTrue(a.is_visible_to(b))
+        dist = a.distance(b)
+        self.assertGreaterEqual(dist, 0.0)
+        self.assertLess(dist, 1.0)
+
 
 if __name__ == "__main__":
     unittest.main()

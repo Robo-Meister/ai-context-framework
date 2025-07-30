@@ -1,6 +1,8 @@
 """Redis-backed registry for tracking network members by RoboID."""
 
-from typing import Dict
+from typing import Dict, Union
+
+from .roboid import RoboId
 
 
 class NodeRegistry:
@@ -10,13 +12,23 @@ class NodeRegistry:
         self.redis = redis_client
         self.redis_key = redis_key
 
-    def join(self, robo_id: str, address: str) -> None:
-        """Register a node with its network address."""
-        self.redis.hset(self.redis_key, robo_id, address)
+    def join(self, robo_id: Union[str, RoboId], address: str) -> None:
+        """Register a node with its network address.
 
-    def leave(self, robo_id: str) -> None:
+        Parameters
+        ----------
+        robo_id:
+            Either a RoboId instance or RoboID string identifying the node.
+        address:
+            Network address of the node.
+        """
+        rid = str(robo_id) if isinstance(robo_id, RoboId) else robo_id
+        self.redis.hset(self.redis_key, rid, address)
+
+    def leave(self, robo_id: Union[str, RoboId]) -> None:
         """Remove a node from the registry."""
-        self.redis.hdel(self.redis_key, robo_id)
+        rid = str(robo_id) if isinstance(robo_id, RoboId) else robo_id
+        self.redis.hdel(self.redis_key, rid)
 
     def members(self) -> Dict[str, str]:
         """Return all registered nodes and their addresses."""
