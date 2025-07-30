@@ -60,3 +60,18 @@ class RoboId:
 
         similarity = score / 4.0
         return {"similarity": similarity, "differences": differences}
+
+    def distance(self, other: "RoboId") -> float:
+        """Return numeric distance between two RoboIDs.
+
+        This is defined as ``1 - similarity`` of the compared attributes.
+        """
+        return 1.0 - self.compare(other)["similarity"]
+
+    def is_visible_to(self, other: "RoboId") -> bool:
+        """Check if this RoboID should be considered visible to ``other``.
+
+        Currently nodes are visible to each other when they share the same
+        ``place`` value.
+        """
+        return self.place == other.place
