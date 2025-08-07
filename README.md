@@ -47,6 +47,15 @@ This modular architecture is designed to evolve alongside AI needs, helping to r
 - Model Management: Replace, save, and load AI inference models at runtime
 - Goal-Driven Feedback Loop: Nudge actions toward user-defined goals via strategies like ``SimpleGoalFeedbackStrategy`` or ``PersonalityGoalFeedbackStrategy`` for NPC traits
 
+## Goal-Driven Feedback Use Cases
+
+- **Learning & Skill Development** – Adaptive tutoring that delivers targeted feedback based on learner goals.
+- **Workplace Training & Coaching** – On-the-job coaching that evaluates progress on objectives and offers actionable guidance.
+- **Project Planning & Productivity** – Planning tools that track milestones and suggest adjustments when goals drift.
+- **Code Review & Software Quality** – Automated review systems that assess pull requests against project goals and supply structured feedback.
+- **Creative Work & Content Generation** – Writing assistants that help meet publishing goals through suggestions on tone and style.
+- **Research & Data Analysis** – Tools that keep researchers aligned with hypothesis-driven objectives via methodological feedback.
+
 ## Documentation
 
 Developer guides live in the `docs/` directory. Open
