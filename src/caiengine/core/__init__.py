@@ -3,6 +3,8 @@
 
 import os
 
+from . import model_manager
+
 if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
     from .cache_manager import CacheManager
     from .context_manager import ContextManager
@@ -40,6 +42,7 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         "PersonalityGoalFeedbackStrategy",
         "save_model_with_metadata",
         "load_model_with_metadata",
+        "model_manager",
     ]
 else:  # pragma: no cover - lightweight import
-    __all__ = []
+    __all__ = ["model_manager"]

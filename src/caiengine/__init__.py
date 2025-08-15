@@ -11,14 +11,15 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         ContextHook,
         Fuser,
         PolicyEvaluator,
+        model_manager,
     )
     try:  # pragma: no cover - optional dependency may be missing
         from caiengine.core.ai_inference import AIInferenceEngine
     except Exception:  # pragma: no cover - optional dependency may be missing
         AIInferenceEngine = None
     from caiengine.pipelines import ContextPipeline, FeedbackPipeline, QuestionPipeline, PromptPipeline, ConfigurablePipeline
-    from caiengine.providers import MemoryContextProvider, KafkaContextProvider
-    from caiengine.network import NetworkManager, SimpleNetworkMock, ContextBus, NodeRegistry
+    from caiengine.providers import MemoryContextProvider, KafkaContextProvider, FileModelRegistry
+    from caiengine.network import NetworkManager, SimpleNetworkMock, ContextBus, NodeRegistry, ModelRegistry
     from caiengine.interfaces import NetworkInterface
     from caiengine.core.goal_feedback_loop import GoalDrivenFeedbackLoop
     from caiengine.core.goal_strategies import (
@@ -49,15 +50,18 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         "MemoryContextProvider",
         "KafkaContextProvider",
         "PolicyEvaluator",
+        "model_manager",
         "NetworkManager",
         "SimpleNetworkMock",
         "ContextBus",
         "NodeRegistry",
+        "ModelRegistry",
         "NetworkInterface",
         "GoalDrivenFeedbackLoop",
         "SimpleGoalFeedbackStrategy",
         "PersonalityGoalFeedbackStrategy",
         "CAIBridge",
+        "FileModelRegistry",
         "cli",
     ]
 else:  # pragma: no cover - lightweight import for CLI utilities
