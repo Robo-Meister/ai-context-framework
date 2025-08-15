@@ -1,5 +1,9 @@
 from typing import Any
-import numpy as np
+
+try:  # pragma: no cover - numpy is optional for simple filter strategy
+    import numpy as np  # noqa: F401
+except Exception:  # pragma: no cover - fallback when numpy missing
+    np = None
 
 
 class FilterStrategy:
