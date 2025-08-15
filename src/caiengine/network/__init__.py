@@ -8,6 +8,7 @@ from .roboid import RoboId
 from .roboid_connection import RoboIdConnection
 from .node_registry import NodeRegistry
 from .agent_network import AgentNetwork
+from .model_registry import ModelRegistry
 
 __all__ = [
     "NetworkManager",
@@ -17,4 +18,5 @@ __all__ = [
     "RoboIdConnection",
     "NodeRegistry",
     "AgentNetwork",
+    "ModelRegistry",
 ]
