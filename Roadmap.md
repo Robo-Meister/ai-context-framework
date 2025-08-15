@@ -45,3 +45,9 @@ Optional lightweight UI for browsing context history
 Developer guide for custom integrations
 Launch landing page & documentation site (e.g., with mkdocs or docsify)
 Goal-driven feedback loop for adjusting actions toward target context states *(see Technical Roadmap #24)*
+
+# 🧠 Phase 6: Model Management & Storage
+Target: v0.6+
+- Establish a standardized model storage format with context-based metadata
+- Provide tools for loading, migrating, and transporting models between environments
+- Enable a registry for discovering and retrieving context-aware models
