@@ -20,6 +20,7 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         SimpleGoalFeedbackStrategy,
         PersonalityGoalFeedbackStrategy,
     )
+    from .model_storage import save_model_with_metadata, load_model_with_metadata
 
     __all__ = [
         "CacheManager",
@@ -37,6 +38,8 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         "GoalDrivenFeedbackLoop",
         "SimpleGoalFeedbackStrategy",
         "PersonalityGoalFeedbackStrategy",
+        "save_model_with_metadata",
+        "load_model_with_metadata",
     ]
 else:  # pragma: no cover - lightweight import
     __all__ = []
