@@ -17,6 +17,7 @@ from .goal_strategies import (
     SimpleGoalFeedbackStrategy,
     PersonalityGoalFeedbackStrategy,
 )
+from .model_storage import save_model_with_metadata, load_model_with_metadata
 
 __all__ = [
     "CacheManager",
@@ -34,4 +35,6 @@ __all__ = [
     "GoalDrivenFeedbackLoop",
     "SimpleGoalFeedbackStrategy",
     "PersonalityGoalFeedbackStrategy",
+    "save_model_with_metadata",
+    "load_model_with_metadata",
 ]
