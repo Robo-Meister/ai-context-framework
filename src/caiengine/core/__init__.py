@@ -23,6 +23,7 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         PersonalityGoalFeedbackStrategy,
     )
     from .model_storage import save_model_with_metadata, load_model_with_metadata
+    from .model_bundle import export_onnx_bundle, load_model_manifest
 
     __all__ = [
         "CacheManager",
@@ -42,6 +43,8 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         "PersonalityGoalFeedbackStrategy",
         "save_model_with_metadata",
         "load_model_with_metadata",
+        "export_onnx_bundle",
+        "load_model_manifest",
         "model_manager",
     ]
 else:  # pragma: no cover - lightweight import
