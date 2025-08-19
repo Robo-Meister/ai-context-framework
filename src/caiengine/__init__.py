@@ -11,6 +11,8 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         ContextHook,
         Fuser,
         PolicyEvaluator,
+        export_onnx_bundle,
+        load_model_manifest,
         model_manager,
     )
     try:  # pragma: no cover - optional dependency may be missing
@@ -50,6 +52,8 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         "MemoryContextProvider",
         "KafkaContextProvider",
         "PolicyEvaluator",
+        "export_onnx_bundle",
+        "load_model_manifest",
         "model_manager",
         "NetworkManager",
         "SimpleNetworkMock",
