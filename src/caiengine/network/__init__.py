@@ -9,6 +9,8 @@ from .roboid_connection import RoboIdConnection
 from .node_registry import NodeRegistry
 from .agent_network import AgentNetwork
 from .model_registry import ModelRegistry
+from .redis_pubsub_channel import RedisPubSubChannel
+from .kafka_pubsub_channel import KafkaPubSubChannel
 
 __all__ = [
     "NetworkManager",
@@ -19,4 +21,6 @@ __all__ = [
     "NodeRegistry",
     "AgentNetwork",
     "ModelRegistry",
+    "RedisPubSubChannel",
+    "KafkaPubSubChannel",
 ]

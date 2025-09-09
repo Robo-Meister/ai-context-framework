@@ -21,7 +21,15 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         AIInferenceEngine = None
     from caiengine.pipelines import ContextPipeline, FeedbackPipeline, QuestionPipeline, PromptPipeline, ConfigurablePipeline
     from caiengine.providers import MemoryContextProvider, KafkaContextProvider, FileModelRegistry
-    from caiengine.network import NetworkManager, SimpleNetworkMock, ContextBus, NodeRegistry, ModelRegistry
+    from caiengine.network import (
+        NetworkManager,
+        SimpleNetworkMock,
+        ContextBus,
+        NodeRegistry,
+        ModelRegistry,
+        RedisPubSubChannel,
+        KafkaPubSubChannel,
+    )
     from caiengine.interfaces import NetworkInterface
     from caiengine.core.goal_feedback_loop import GoalDrivenFeedbackLoop
     from caiengine.core.goal_strategies import (
@@ -60,6 +68,8 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         "ContextBus",
         "NodeRegistry",
         "ModelRegistry",
+        "RedisPubSubChannel",
+        "KafkaPubSubChannel",
         "NetworkInterface",
         "GoalDrivenFeedbackLoop",
         "SimpleGoalFeedbackStrategy",
