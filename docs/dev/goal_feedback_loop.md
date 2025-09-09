@@ -5,11 +5,20 @@ Client applications often need to steer actions toward a target without pausing 
 ## Background Worker
 Run the loop inside a background worker, service worker, or scheduled task. The worker should periodically poll for new actions or subscribe to an event stream.
 
+Use the scaffold in ``GoalFeedbackWorker`` as a starting point.
+TODO: implement real polling logic and persistence integration.
+
 ## State Tracking
 Persist the current goal state and any progress metrics in storage accessible by the worker (memory, local database, etc.). Update this state whenever goals change so the loop can compare new actions against the latest target.
 
+``GoalStateTracker`` currently stores data in memory only.
+TODO: hook this into a durable database or cache.
+
 ## Event-Driven Updates
 When a new action appears, send it to the worker through a queue or message channel. The worker computes suggestions only when history or goal state changes, limiting needless work.
+
+``FeedbackEventBus`` offers a minimal publish/subscribe interface.
+TODO: replace with an async queue or external message broker.
 
 ## Suggestion Logic
 Instantiate `GoalDrivenFeedbackLoop` with a strategy such as `SimpleGoalFeedbackStrategy` or `PersonalityGoalFeedbackStrategy`. Call `suggest_actions` with the current history and new actions to receive nudges toward the goal state.
