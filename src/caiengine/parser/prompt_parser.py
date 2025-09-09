@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
+
+from caiengine.core.vector_normalizer.context_encoder import ContextEncoder
 
 
 class PromptParser:
@@ -62,3 +64,20 @@ class PromptParser:
             "network": None,
         }
         return context
+
+    def parse_to_matrix(self, prompt: str) -> Tuple[Dict[str, Any], list]:
+        """Return context categories and their encoded matrix for ``prompt``.
+
+        The method first parses the natural language ``prompt`` into a context
+        dictionary using :meth:`transform`. The resulting dictionary is then
+        encoded into a numeric vector (context matrix) by
+        :class:`ContextEncoder`.
+
+        :param prompt: Natural language text describing a situation.
+        :return: Tuple of ``(context_dict, context_matrix)``.
+        """
+
+        context = self.transform(prompt)
+        encoder = ContextEncoder()
+        matrix = encoder.encode(context)
+        return context, matrix
