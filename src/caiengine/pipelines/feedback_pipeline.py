@@ -4,6 +4,7 @@ from collections import defaultdict
 from caiengine.core.categorizer import Categorizer
 from caiengine.core.Deduplicars.fuzzy_deduplicator import FuzzyDeduplicator
 from caiengine.interfaces.inference_engine import AIInferenceEngine
+from caiengine.common import AuditLogger
 try:  # optional dependency
     from caiengine.core.learning.learning_manager import LearningManager
 except Exception:  # pragma: no cover - optional dependency may be missing
@@ -22,6 +23,7 @@ class FeedbackPipeline:
         time_threshold_sec: int = 5,
         fuzzy_threshold: float = 0.8,
         merge_rule=None,
+        audit_logger: AuditLogger | None = None,
     ):
         self.categorizer = Categorizer(context_provider)
         self.deduplicator = FuzzyDeduplicator(
@@ -31,6 +33,7 @@ class FeedbackPipeline:
         )
         self.inference_engine = inference_engine
         self.learning_manager = learning_manager
+        self.audit_logger = audit_logger
 
     def run(
         self,
@@ -46,10 +49,16 @@ class FeedbackPipeline:
             used to update the ``LearningManager``.
         :return: List of prediction dictionaries for each item.
         """
+        if self.audit_logger:
+            self.audit_logger.log("FeedbackPipeline", "run_start", {"items": len(data_batch), "candidates": len(candidates)})
+
         categorized = defaultdict(list)
         for item in data_batch:
             category = self.categorizer.categorize(item, candidates)
             categorized[category].append(item)
+
+        if self.audit_logger:
+            self.audit_logger.log("FeedbackPipeline", "categorized", {"categories": len(categorized)})
 
         results = []
         for category, items in categorized.items():
@@ -64,8 +73,13 @@ class FeedbackPipeline:
                     "item": item_copy,
                 })
 
+        if self.audit_logger:
+            self.audit_logger.log("FeedbackPipeline", "predicted", {"results": len(results)})
+
         if feedback and self.learning_manager:
             for log_line, label in feedback:
                 self.learning_manager.learn_from_feedback(log_line, label)
+            if self.audit_logger:
+                self.audit_logger.log("FeedbackPipeline", "feedback_applied", {"count": len(feedback)})
 
         return results
