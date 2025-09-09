@@ -22,6 +22,9 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         SimpleGoalFeedbackStrategy,
         PersonalityGoalFeedbackStrategy,
     )
+    from .goal_feedback_worker import GoalFeedbackWorker
+    from .goal_state_tracker import GoalStateTracker
+    from .feedback_event_bus import FeedbackEventBus
     from .model_storage import save_model_with_metadata, load_model_with_metadata
     from .model_bundle import export_onnx_bundle, load_model_manifest
 
@@ -41,6 +44,9 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         "GoalDrivenFeedbackLoop",
         "SimpleGoalFeedbackStrategy",
         "PersonalityGoalFeedbackStrategy",
+        "GoalFeedbackWorker",
+        "GoalStateTracker",
+        "FeedbackEventBus",
         "save_model_with_metadata",
         "load_model_with_metadata",
         "export_onnx_bundle",

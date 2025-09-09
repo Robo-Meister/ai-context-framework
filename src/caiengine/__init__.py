@@ -28,6 +28,9 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         SimpleGoalFeedbackStrategy,
         PersonalityGoalFeedbackStrategy,
     )
+    from caiengine.core.goal_feedback_worker import GoalFeedbackWorker
+    from caiengine.core.goal_state_tracker import GoalStateTracker
+    from caiengine.core.feedback_event_bus import FeedbackEventBus
     from caiengine.cai_bridge import CAIBridge
     try:
         from . import cli as cli
@@ -64,6 +67,9 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         "GoalDrivenFeedbackLoop",
         "SimpleGoalFeedbackStrategy",
         "PersonalityGoalFeedbackStrategy",
+        "GoalFeedbackWorker",
+        "GoalStateTracker",
+        "FeedbackEventBus",
         "CAIBridge",
         "FileModelRegistry",
         "cli",
