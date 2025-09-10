@@ -1,0 +1,17 @@
+version: '3.9'
+services:
+  agent-a:
+    build: ./agents/agent-a
+    environment:
+      - AGENT_ID=agent-a
+    networks:
+      - mesh
+  agent-b:
+    build: ./agents/agent-b
+    environment:
+      - AGENT_ID=agent-b
+    networks:
+      - mesh
+networks:
+  mesh:
+    driver: bridge
