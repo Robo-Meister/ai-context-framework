@@ -15,6 +15,26 @@ This document outlines the first steps in implementing a goal-driven feedback lo
 - Prioritize tasks by expected impact and effort.
 - Track execution with an event logger to correlate actions with outcomes.
 
+## 3. Gather Feedback
+- Collect quantitative data such as key metrics, KPIs, and event logs.
+- Capture qualitative input from users, stakeholders, or market trends.
+- Store contextual factors (e.g., seasonality or campaigns) alongside results.
+
+## 4. Analyze and Reflect
+- Compare collected feedback against the defined objective and metrics.
+- Identify patterns, anomalies, and root causes of success or shortfalls.
+- Use historical context to distinguish action-driven effects from external trends.
+
+## 5. Adjust and Iterate
+- Refine or reprioritize tactics based on analytical insights.
+- Decide whether to continue, modify, or retire existing approaches.
+- Loop back into planning with updated knowledge and context.
+
+## 6. Document and Share
+- Record goals, actions, outcomes, and lessons learned.
+- Communicate insights to relevant teams and stakeholders.
+- Maintain an archive to inform future goal-setting and execution.
+
 ## Roadmap Overview
 1. Clarify the objective.
 2. Plan and execute actions.
@@ -22,5 +42,3 @@ This document outlines the first steps in implementing a goal-driven feedback lo
 4. Analyze and reflect.
 5. Adjust and iterate.
 6. Document and share.
-
-Additional details for steps 3–6 will be expanded in future documentation.
