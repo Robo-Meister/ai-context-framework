@@ -9,8 +9,7 @@ from .roboid_connection import RoboIdConnection
 from .node_registry import NodeRegistry
 from .agent_network import AgentNetwork
 from .model_registry import ModelRegistry
-from .redis_pubsub_channel import RedisPubSubChannel
-from .kafka_pubsub_channel import KafkaPubSubChannel
+from .pubsub_network import PubSubNetwork
 
 __all__ = [
     "NetworkManager",
@@ -21,6 +20,19 @@ __all__ = [
     "NodeRegistry",
     "AgentNetwork",
     "ModelRegistry",
-    "RedisPubSubChannel",
-    "KafkaPubSubChannel",
+    "PubSubNetwork",
 ]
+
+try:  # Optional dependencies
+    from .redis_pubsub_channel import RedisPubSubChannel
+
+    __all__.append("RedisPubSubChannel")
+except Exception:  # pragma: no cover - optional dependency not installed
+    RedisPubSubChannel = None
+
+try:
+    from .kafka_pubsub_channel import KafkaPubSubChannel
+
+    __all__.append("KafkaPubSubChannel")
+except Exception:  # pragma: no cover - optional dependency not installed
+    KafkaPubSubChannel = None
