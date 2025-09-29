@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contextual AI - RoboID Addressing</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 2rem;
+      line-height: 1.6;
+      max-width: 960px;
+      color: #2c3e50;
+    }
+    h1, h2, h3 {
+      color: #34495e;
+      margin-top: 2rem;
+    }
+    nav a {
+      margin-right: 1rem;
+      text-decoration: none;
+      color: #3498db;
+    }
+    pre, code {
+      background-color: #f4f4f4;
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-family: Consolas, monospace;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">Overview</a>
+  <a href="getting_started.html">Getting Started</a>
+  <a href="api_reference.html">API Reference</a>
+  <a href="architecture.html">Architecture</a>
+  <a href="network.html">Network</a>
+  <a href="contributing.html">Contributing</a>
+  <a href="faq.html">FAQ</a>
+</nav>
+
+<h1>🆔 RoboID Addressing</h1>
+<p>
+  RoboID provides a unified addressing scheme for the CaiEngine networking layer.
+  It captures an agent's type, role, location and optional instance so that
+  peers can reliably route messages and map existing protocols into the
+  framework's network.
+</p>
+
+<h2>Format</h2>
+<p>A RoboID is expressed as <code>type.role@place#instance</code>:</p>
+<ul>
+  <li><strong>type</strong> – broad category of node (e.g. <code>http</code>, <code>worker</code>).</li>
+  <li><strong>role</strong> – functional role within the system.</li>
+  <li><strong>place</strong> – physical or logical location.</li>
+  <li><strong>instance</strong> – optional identifier when multiple nodes share the same attributes.</li>
+</ul>
+
+<h2>Protocol Mapping</h2>
+<p>
+  Existing services can be bridged into CaiEngine by translating their native
+  addresses into RoboIDs. For example, an HTTP service at
+  <code>http://api.example</code> might register as
+  <code>http.api@cluster-a#1</code>. NodeRegistry stores these RoboIDs along
+  with the original network endpoint so other agents can discover and connect
+  using their preferred protocol.
+</p>
+
+<h2>Example</h2>
+<pre><code>from caiengine.network.roboid import RoboId
+
+rid = RoboId.parse("service.worker@eu-central#42")
+print(rid.node_type)  # service
+print(str(rid))       # service.worker@eu-central#42
+</code></pre>
+
+</body>
+</html>
