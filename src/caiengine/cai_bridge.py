@@ -75,7 +75,9 @@ class CAIBridge:
 
     def suggest(self, history: List[Dict], actions: List[Dict]) -> List[Dict]:
         if self.feedback_loop:
-            return self.feedback_loop.suggest(history, actions)
+            suggestions = self.feedback_loop.suggest(history, actions)
+            self._auto_dispatch_commands(suggestions)
+            return suggestions
         return actions
 
     # ------------------------------------------------------------------
@@ -109,23 +111,7 @@ class CAIBridge:
             self._telemetry_handler = telemetry_handler
 
         def route_command(payload: Dict[str, Any]) -> Any:
-            if self._connector_registry is None:
-                raise RuntimeError("No connector registry configured")
-            command = payload.get("command")
-            if isinstance(command, COMMAND):
-                command_value = command.value
-            else:
-                command_value = str(command)
-
-            dispatcher = getattr(self._connector_registry, "dispatch", None)
-            if dispatcher is None:
-                dispatcher = getattr(self._connector_registry, "send", None)
-            if dispatcher is None:
-                raise AttributeError(
-                    "Connector registry must implement `dispatch` or `send`"
-                )
-            body = {k: v for k, v in payload.items() if k != "command"}
-            return dispatcher(command_value, body)
+            return self._execute_command(payload)
 
         def load_persona(persona_id: str) -> Dict[str, Any]:
             if self._persona_loader is None:
@@ -161,3 +147,57 @@ class CAIBridge:
     def _emit_telemetry(self, payload: Dict[str, Any]) -> None:
         if self._telemetry_handler:
             self._telemetry_handler(payload)
+
+    # ------------------------------------------------------------------
+    # Command execution helpers
+    # ------------------------------------------------------------------
+    def _resolve_dispatcher(self) -> Callable[[str, Dict[str, Any]], Any]:
+        if self._connector_registry is None:
+            raise RuntimeError("No connector registry configured")
+        dispatcher = getattr(self._connector_registry, "dispatch", None)
+        if dispatcher is None:
+            dispatcher = getattr(self._connector_registry, "send", None)
+        if dispatcher is None:
+            raise AttributeError(
+                "Connector registry must implement `dispatch` or `send`"
+            )
+        return dispatcher
+
+    def _execute_command(self, payload: Dict[str, Any]) -> Any:
+        command = payload.get("command")
+        if isinstance(command, COMMAND):
+            command_value = command.value
+        else:
+            command_value = str(command)
+        body = {k: v for k, v in payload.items() if k != "command"}
+        dispatcher = self._resolve_dispatcher()
+        result = dispatcher(command_value, body)
+        self._emit_telemetry(
+            {
+                "type": "command_dispatch",
+                "command": command_value,
+                "payload": body,
+                "session_id": self.goal_state.get("session_id"),
+            }
+        )
+        return result
+
+    def _auto_dispatch_commands(self, suggestions: List[Dict]) -> None:
+        if not self._connector_registry:
+            return
+        auto_dispatch_enabled = self.goal_state.get("auto_dispatch", True)
+        for suggestion in suggestions:
+            for command in suggestion.get("commands", []) or []:
+                auto_execute = command.get("auto_execute")
+                if auto_execute or (auto_dispatch_enabled and auto_execute is not False):
+                    try:
+                        self._execute_command(command)
+                    except Exception as exc:  # pragma: no cover - defensive
+                        self._emit_telemetry(
+                            {
+                                "type": "command_dispatch_error",
+                                "command": str(command.get("command")),
+                                "error": str(exc),
+                                "session_id": self.goal_state.get("session_id"),
+                            }
+                        )
