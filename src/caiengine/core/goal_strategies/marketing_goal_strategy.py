@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set
 
 from caiengine.commands import COMMAND
-from caiengine.interfaces.goal_feedback_strategy import GoalF
+from caiengine.interfaces.goal_feedback_strategy import GoalFeedbackStrategy
 from caiengine.parser.conversation_parser import ConversationParser, ConversationState
 from caiengine.core.marketing_coach import AdaptiveCoach
 
