@@ -18,6 +18,9 @@ from .heartbeats import HeartbeatStore
 from .node_tasks import NodeTask, NodeTaskQueue, RedisNodeTaskQueue
 from .node_agent import NodeAgent
 from .discovery import NodeDiscoveryService, WebSocketDiscoveryClient
+from .model_registry import ModelRegistry
+from .redis_pubsub_channel import RedisPubSubChannel
+from .kafka_pubsub_channel import KafkaPubSubChannel
 
 __all__ = [
     "NetworkManager",
@@ -44,4 +47,7 @@ __all__ = [
     "NodeAgent",
     "NodeDiscoveryService",
     "WebSocketDiscoveryClient",
+    "ModelRegistry",
+    "RedisPubSubChannel",
+    "KafkaPubSubChannel",
 ]
