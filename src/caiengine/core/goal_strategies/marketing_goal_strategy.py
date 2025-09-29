@@ -6,6 +6,8 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Set
 
 from caiengine.commands import COMMAND
 from caiengine.interfaces.goal_feedback_strategy import GoalFeedbackStrategy
+from caiengine.parser.conversation_parser import ConversationParser, ConversationState
+from caiengine.core.marketing_coach import AdaptiveCoach
 
 
 @dataclass(frozen=True)
@@ -24,12 +26,14 @@ DEFAULT_GOAL_LIBRARY: Dict[str, Dict[str, Any]] = {
             {
                 "command": COMMAND.UPDATE_CRM,
                 "metadata": {"stage": "qualification"},
+                "auto_execute": True,
             },
             {
                 "command": COMMAND.SEND_EMAIL,
                 "metadata": {
                     "template": "lead_qualification",
                 },
+                "auto_execute": False,
             },
         ],
         "insights": "Probe for buying intent and readiness to purchase.",
@@ -42,10 +46,12 @@ DEFAULT_GOAL_LIBRARY: Dict[str, Dict[str, Any]] = {
                 "metadata": {
                     "template": "churn_recovery",
                 },
+                "auto_execute": False,
             },
             {
                 "command": COMMAND.UPDATE_CRM,
                 "metadata": {"risk": "churn"},
+                "auto_execute": True,
             },
         ],
         "insights": "Reassure the customer and offer retention incentives.",
@@ -63,6 +69,7 @@ DEFAULT_ESCALATION_RULES: Sequence[EscalationRule] = (
             {
                 "command": COMMAND.ESCALATE,
                 "metadata": {"reason": "churn_risk"},
+                "auto_execute": True,
             },
         ),
     ),
@@ -74,6 +81,7 @@ DEFAULT_ESCALATION_RULES: Sequence[EscalationRule] = (
             {
                 "command": COMMAND.SCHEDULE_CALL,
                 "metadata": {"priority": "high"},
+                "auto_execute": True,
             },
         ),
     ),
@@ -89,6 +97,8 @@ class MarketingGoalFeedbackStrategy(GoalFeedbackStrategy):
         config: Optional[Dict[str, Any]] = None,
         session_store: Any | None = None,
         telemetry_hook: Optional[Any] = None,
+        conversation_parser: Optional[ConversationParser] = None,
+        coach: Optional[AdaptiveCoach] = None,
     ) -> None:
         config = config or {}
         self.goal_library: Dict[str, Dict[str, Any]] = config.get(
@@ -99,6 +109,13 @@ class MarketingGoalFeedbackStrategy(GoalFeedbackStrategy):
         )
         self.session_store = session_store
         self.telemetry_hook = telemetry_hook
+        self.conversation_parser = conversation_parser or ConversationParser()
+        self.coach = coach or AdaptiveCoach(
+            friction_threshold=config.get("friction_threshold", 3)
+        )
+        self._friction_escalation_threshold = config.get(
+            "friction_threshold", 3
+        )
 
     # ------------------------------------------------------------------
     # GoalFeedbackStrategy interface
@@ -114,6 +131,12 @@ class MarketingGoalFeedbackStrategy(GoalFeedbackStrategy):
         explicit_goals = set(goal_state.get("qualitative_targets", []))
         detected_goals = self._detect_goals(customer_text, explicit_goals)
 
+        conversation_state: ConversationState | None = None
+        if self.conversation_parser:
+            conversation_state = self.conversation_parser.parse(
+                session_id, history
+            )
+
         attempt_tracker: Dict[str, int] = defaultdict(int)
         if self.session_store and session_id:
             session = self.session_store.get_session(session_id)
@@ -124,6 +147,9 @@ class MarketingGoalFeedbackStrategy(GoalFeedbackStrategy):
             "session_id": session_id,
             "detected_goals": list(detected_goals),
             "escalations": [],
+            "conversation_state": conversation_state.to_dict()
+            if conversation_state
+            else None,
         }
 
         for action in current_actions:
@@ -146,7 +172,10 @@ class MarketingGoalFeedbackStrategy(GoalFeedbackStrategy):
 
             escalations.extend(
                 self._evaluate_escalations(
-                    customer_text, detected_goals, attempt_tracker
+                    customer_text,
+                    detected_goals,
+                    attempt_tracker,
+                    conversation_state,
                 )
             )
 
@@ -158,6 +187,15 @@ class MarketingGoalFeedbackStrategy(GoalFeedbackStrategy):
                 telemetry_payload["escalations"].extend(escalations)
             if marketing_plan and "commands" not in enriched:
                 enriched["commands"] = self._collect_commands(marketing_plan)
+            if conversation_state:
+                enriched.setdefault("context", {})["conversation_state"] = (
+                    conversation_state.to_dict()
+                )
+                coaching_payload = self.coach.generate(
+                    conversation_state, marketing_plan
+                )
+                if coaching_payload:
+                    enriched["coaching"] = coaching_payload
             updated_actions.append(enriched)
 
         if self.telemetry_hook and (telemetry_payload["detected_goals"] or telemetry_payload["escalations"]):
@@ -214,6 +252,7 @@ class MarketingGoalFeedbackStrategy(GoalFeedbackStrategy):
         customer_text: str,
         detected_goals: Set[str],
         attempts: Dict[str, int],
+        conversation_state: ConversationState | None,
     ) -> List[Dict[str, Any]]:
         lowered = customer_text.lower()
         escalations: List[Dict[str, Any]] = []
@@ -231,6 +270,17 @@ class MarketingGoalFeedbackStrategy(GoalFeedbackStrategy):
             if max_attempt < rule.escalate_after:
                 continue
             escalations.extend(self._normalise_actions(rule.actions))
+        if (
+            conversation_state
+            and conversation_state.friction >= self._friction_escalation_threshold
+        ):
+            escalations.append(
+                {
+                    "command": COMMAND.ESCALATE,
+                    "metadata": {"reason": "high_friction"},
+                    "auto_execute": True,
+                }
+            )
         return escalations
 
     @staticmethod

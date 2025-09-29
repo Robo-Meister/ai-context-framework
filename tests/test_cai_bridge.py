@@ -84,3 +84,32 @@ def test_support_functions_wire_connectors_and_personas():
 
     support["emit_telemetry"]({"type": "manual"})
     assert telemetry_events[-1] == {"type": "manual"}
+
+
+def test_cai_bridge_auto_dispatches_commands_when_configured():
+    dispatched: list[tuple[str, dict]] = []
+
+    class DummyConnector:
+        def dispatch(self, command: str, payload: dict) -> None:
+            dispatched.append((command, payload))
+
+    bridge = CAIBridge(
+        goal_state={
+            "session_id": "sess-auto",
+            "qualitative_targets": ["address_churn"],
+            "auto_dispatch": True,
+        },
+        workflow="marketing",
+    )
+
+    bridge.support_functions(connector_registry=DummyConnector())
+
+    history = [
+        {"role": "customer", "content": "I am going to cancel unless this is resolved."}
+    ]
+    actions = [{}]
+
+    result = bridge.suggest(history, actions)[0]
+
+    assert any(cmd["command"] == COMMAND.ESCALATE.value for cmd in result["commands"])
+    assert any(command == COMMAND.ESCALATE.value for command, _ in dispatched)
