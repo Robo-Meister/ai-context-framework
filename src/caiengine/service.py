@@ -6,6 +6,7 @@ import threading
 from caiengine.providers.http_context_provider import HTTPContextProvider
 from caiengine.core.goal_feedback_loop import GoalDrivenFeedbackLoop
 from caiengine.core.goal_strategies import SimpleGoalFeedbackStrategy
+from caiengine.common.token_usage import TokenCounter
 
 
 class CAIService:
@@ -18,6 +19,7 @@ class CAIService:
         self.feedback_loop = GoalDrivenFeedbackLoop(SimpleGoalFeedbackStrategy())
         self._server: HTTPServer | None = None
         self._thread: threading.Thread | None = None
+        self.token_counter = TokenCounter()
 
     def _make_handler(self):
         base_handler = self.provider._make_handler()
@@ -41,12 +43,28 @@ class CAIService:
                     if goal_state is not None:
                         service.feedback_loop.set_goal_state(goal_state)
                     result = service.feedback_loop.suggest(history, current_actions)
+                    items = result if isinstance(result, list) else [result]
+                    for item in items:
+                        usage = item.get("usage") if isinstance(item, dict) else None
+                        if usage:
+                            service.token_counter.add(usage)
                     self.send_response(200)
                     self.send_header("Content-Type", "application/json")
                     self.end_headers()
                     self.wfile.write(json.dumps(result).encode())
                 else:
                     super().do_POST()
+
+            def do_GET(self):
+                if self.path == "/usage":
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(
+                        json.dumps(service.token_counter.as_dict()).encode()
+                    )
+                else:
+                    super().do_GET()
 
         return Handler
 

@@ -45,3 +45,9 @@ Optional lightweight UI for browsing context history
 Developer guide for custom integrations
 Launch landing page & documentation site (e.g., with mkdocs or docsify)
 Goal-driven feedback loop for adjusting actions toward target context states *(see Technical Roadmap #24)*
+
+# 🧠 Phase 6: Model Management & Storage
+Target: v0.6+
+- Standardize model bundles around ONNX plus a context-aware manifest (see [docs/dev/model_storage_plan.md](docs/dev/model_storage_plan.md))
+- Provide tools for loading, migrating, and transporting models between environments
+- Enable a registry for discovering and retrieving context-aware models

@@ -49,11 +49,7 @@
 <h2>NetworkManager</h2>
 <p>
   Wraps any <code>NetworkInterface</code> implementation and spawns a background
-  thread to deliver incoming messages. When provided with a
-  <code>NodeRegistry</code> it also lazily exposes mesh-aware helpers such as the
-  <code>NodeManager</code>, <code>CapabilityRegistry</code>, and
-  <code>MeshDispatcher</code>. This makes the class the central entry-point for
-  both transport-level and topology-level orchestration.
+  thread to deliver incoming messages.
 </p>
 
 <h2>SimpleNetworkMock</h2>
@@ -93,10 +89,7 @@ manager.update_context("task", {"status": "in_progress"})
 <p>
   <code>NodeRegistry</code> is a small utility that records active nodes in Redis.
   Each node registers its <em>RoboID</em> and network address, making discovery
-  of peers easy. Nodes can also be queried by RoboID fields such as role or
-  place to enable role-based addressing and filtering. See
-  <a href="roboid.html">RoboID Addressing</a> for details on the format and how
-  existing protocols are mapped into CaiEngine.
+  of peers easy.
 </p>
 
 <h2>Network-Aware Hooks</h2>
