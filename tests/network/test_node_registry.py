@@ -1,7 +1,6 @@
 import unittest
 import importlib.util
 from pathlib import Path
-import types
 import sys
 
 # Import NodeRegistry without pulling in heavy dependencies
@@ -38,6 +37,9 @@ class FakeRedis:
     def hgetall(self, key):
         return self.store.get(key, {}).copy()
 
+    def hget(self, key, field):
+        return self.store.get(key, {}).get(field)
+
 
 class TestNodeRegistry(unittest.TestCase):
     def setUp(self):
@@ -45,20 +47,74 @@ class TestNodeRegistry(unittest.TestCase):
         self.registry = NodeRegistry(self.redis)
 
     def test_join_and_members(self):
-        self.registry.join("robot.control@A#1", "10.0.0.1")
+        self.registry.join(
+            "robot.control@A#1",
+            "10.0.0.1",
+            capabilities=["camera"],
+            drivers=["driver.camera"],
+            apps=["nav"],
+        )
         self.registry.join("robot.control@B#1", "10.0.0.2")
         # Join using RoboId instance
         rid = RoboId.parse("robot.virtual@wirtualny#42")
-        self.registry.join(rid, "10.0.0.9")
+        self.registry.join(
+            rid,
+            "10.0.0.9",
+            capabilities=["virtual"],
+            meta={"zone": "lab"},
+        )
         members = self.registry.members()
-        self.assertEqual(members["robot.control@A#1"], "10.0.0.1")
-        self.assertEqual(members["robot.control@B#1"], "10.0.0.2")
-        self.assertEqual(members[str(rid)], "10.0.0.9")
+        self.assertEqual(members["robot.control@A#1"]["address"], "10.0.0.1")
+        self.assertIn("camera", members["robot.control@A#1"]["capabilities"])
+        self.assertIn("driver.camera", members["robot.control@A#1"].get("drivers", []))
+        self.assertIn("nav", members["robot.control@A#1"]["apps"])
+        self.assertEqual(members["robot.control@B#1"]["address"], "10.0.0.2")
+        self.assertEqual(members[str(rid)]["address"], "10.0.0.9")
+        self.assertEqual(members[str(rid)]["meta"].get("zone"), "lab")
 
     def test_leave(self):
         self.registry.join("robot.control@A#1", "10.0.0.1")
         self.registry.leave("robot.control@A#1")
         self.assertNotIn("robot.control@A#1", self.registry.members())
+
+    def test_find_filters(self):
+        self.registry.join("robot.control@A#1", "10.0.0.1")
+        self.registry.join("robot.control@B#1", "10.0.0.2")
+        self.registry.join(
+            "robot.worker@A#1",
+            "10.0.0.3",
+            capabilities=["arm"],
+            apps=["lift"],
+        )
+
+        by_role = self.registry.find(role="control")
+        self.assertEqual(set(by_role.keys()), {"robot.control@A#1", "robot.control@B#1"})
+
+        by_place = self.registry.find(place="A")
+        self.assertEqual(set(by_place.keys()), {"robot.control@A#1", "robot.worker@A#1"})
+
+        by_capability = self.registry.find(capability="arm")
+        self.assertEqual(list(by_capability.keys()), ["robot.worker@A#1"])
+
+        by_app = self.registry.find(app="lift")
+        self.assertEqual(list(by_app.keys()), ["robot.worker@A#1"])
+
+    def test_find_by_driver(self):
+        self.registry.join(
+            "robot.control@A#1",
+            "10.0.0.1",
+            capabilities=["camera"],
+            drivers=["driver.camera"],
+        )
+        self.registry.join(
+            "robot.worker@A#1",
+            "10.0.0.2",
+            capabilities=["arm"],
+            drivers=["driver.arm"],
+        )
+
+        matches = self.registry.find(driver="driver.camera")
+        self.assertEqual(list(matches.keys()), ["robot.control@A#1"])
 
 
 if __name__ == "__main__":
