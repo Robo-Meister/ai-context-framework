@@ -1,6 +1,5 @@
 from typing import List
-
-import numpy as np
+import math
 
 from caiengine.interfaces.filter_strategy import FilterStrategy
 from caiengine.interfaces.deduplicator_strategy import DeduplicationStrategy
@@ -35,26 +34,30 @@ class VectorDeduplicator(DeduplicationStrategy):
 
     def vector_similarity(self, v1, v2):
         """Return cosine distance between two vectors."""
-        v1 = np.asarray(v1, dtype=float)
-        v2 = np.asarray(v2, dtype=float)
-        if v1.size == 0 or v2.size == 0:
+        v1 = [float(x) for x in v1]
+        v2 = [float(x) for x in v2]
+        if len(v1) == 0 or len(v2) == 0:
             return 1.0
-        norm1 = np.linalg.norm(v1)
-        norm2 = np.linalg.norm(v2)
+        norm1 = math.sqrt(sum(x * x for x in v1))
+        norm2 = math.sqrt(sum(y * y for y in v2))
         if norm1 == 0 or norm2 == 0:
             return 1.0
-        cosine_sim = np.dot(v1, v2) / (norm1 * norm2)
+        cosine_sim = sum(a * b for a, b in zip(v1, v2)) / (norm1 * norm2)
+        cosine_sim = max(-1.0, min(1.0, cosine_sim))
         return float(1 - cosine_sim)
 
     def deduplicate(self, items: List[dict]) -> List[dict]:
         # Apply configured filter to numeric vectors in each item
         for item in items:
-            vector = np.asarray(item.get("vector", []), dtype=float)
-            if vector.size > 0:
-                filtered_vector = self.filter_strategy.apply(vector)
-                item["filtered_vector"] = filtered_vector
-            else:
-                item["filtered_vector"] = None
+            vector = item.get("vector", []) or []
+            filtered_vector = None
+            if vector:
+                filtered = self.filter_strategy.apply(vector)
+                if isinstance(filtered, (list, tuple)):
+                    filtered_vector = [float(x) for x in filtered]
+                else:
+                    filtered_vector = [float(filtered)]
+            item["filtered_vector"] = filtered_vector
 
         unique = []
         for item in items:
