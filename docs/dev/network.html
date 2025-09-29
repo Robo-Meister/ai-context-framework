@@ -93,6 +93,27 @@ manager.update_context("task", {"status": "in_progress"})
   the format and how existing protocols are mapped into CaiEngine.
 </p>
 
+<h2>Agent Mesh Topology</h2>
+<p>
+  To express relationships between agents the framework ships with
+  <code>AgentNetwork</code>, a light-weight undirected graph that keeps track of
+  neighbour links and their optional weights. It is deliberately minimal so it
+  can run entirely in-memory for orchestration experiments and the automated
+  tests.
+</p>
+
+<h3>What is still missing?</h3>
+<p>
+  The agent mesh does not by itself move messages between processes. For actual
+  inter-agent communication you need a <code>NetworkInterface</code>
+  implementation—such as <code>SimpleNetworkMock</code> for tests or
+  <code>PubSubNetwork</code> backed by a real <code>CommunicationChannel</code>
+  (Redis, Kafka, etc.). Today only the in-memory mock is bundled. To enable a
+  production mesh you must provide a concrete channel adapter that implements
+  publish/subscribe semantics and wire it into <code>NetworkManager</code> or
+  <code>DistributedContextManager</code> so that updates flow across nodes.
+</p>
+
 <h2>Network-Aware Hooks</h2>
 <p>
   Hooks can be registered on <code>DistributedContextManager</code> and are
