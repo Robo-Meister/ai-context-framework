@@ -14,11 +14,13 @@ from caiengine.providers import (
 )
 from caiengine.interfaces.context_provider import ContextProvider
 from caiengine.inference.dummy_engine import DummyAIInferenceEngine
+from caiengine.inference.token_usage_tracker import TokenUsageTracker
 from caiengine.core.trust_module import TrustModule
 from caiengine.core.goal_feedback_loop import GoalDrivenFeedbackLoop
 from caiengine.core.goal_strategies.simple_goal_strategy import SimpleGoalFeedbackStrategy
 from caiengine.policies.simple_policy import SimplePolicyEvaluator
 from caiengine.parser.log_parser import LogParser
+from caiengine.common import AuditLogger
 
 
 _PROVIDER_MAP = {
@@ -39,9 +41,10 @@ class ConfigurablePipeline:
     trust_module: Optional[TrustModule] = None
     policy: Optional[SimplePolicyEvaluator] = None
     feedback_loop: Optional[GoalDrivenFeedbackLoop] = None
+    audit_logger: AuditLogger | None = None
 
     @classmethod
-    def from_dict(cls, cfg: Dict[str, Any]) -> "ConfigurablePipeline":
+    def from_dict(cls, cfg: Dict[str, Any], audit_logger: AuditLogger | None = None) -> "ConfigurablePipeline":
         prov_cfg = cfg.get("provider", {})
         prov_type = prov_cfg.get("type", "memory")
         prov_args = prov_cfg.get("args", {})
@@ -64,7 +67,7 @@ class ConfigurablePipeline:
         feedback_cfg = cfg.get("feedback") or {}
         feedback_loop = None
         if not feedback_cfg:
-            pipeline = ContextPipeline(provider)
+            pipeline = ContextPipeline(provider, audit_logger=audit_logger)
         elif feedback_cfg.get("type") == "complex_nn":
             from caiengine.core.learning.learning_manager import LearningManager
             manager = LearningManager(
@@ -73,12 +76,14 @@ class ConfigurablePipeline:
                 output_size=feedback_cfg.get("output_size", 1),
                 parser=parser,
             )
+            engine = TokenUsageTracker(manager.inference_engine)
+            manager.inference_engine = engine
             pipeline = FeedbackPipeline(
-                provider, manager.inference_engine, learning_manager=manager
+                provider, engine, learning_manager=manager, audit_logger=audit_logger
             )
         elif feedback_cfg.get("type") == "goal":
-            engine = DummyAIInferenceEngine()
-            pipeline = FeedbackPipeline(provider, engine)
+            engine = TokenUsageTracker(DummyAIInferenceEngine())
+            pipeline = FeedbackPipeline(provider, engine, audit_logger=audit_logger)
             strategy = SimpleGoalFeedbackStrategy(
                 feedback_cfg.get("one_direction_layers", [])
             )
@@ -96,6 +101,7 @@ class ConfigurablePipeline:
             trust_module=trust_module,
             policy=policy,
             feedback_loop=feedback_loop,
+            audit_logger=audit_logger,
         )
 
     def run(self, data_batch: List[Any]) -> List[Dict]:
@@ -105,7 +111,13 @@ class ConfigurablePipeline:
                 item = self.parser.transform(item)
             processed.append(item)
 
+        if self.audit_logger:
+            self.audit_logger.log("ConfigurablePipeline", "preprocessed", {"items": len(processed)})
+
         results = self.pipeline.run(processed, self.candidates or [])
+
+        if self.audit_logger:
+            self.audit_logger.log("ConfigurablePipeline", "pipeline_run", {"results": len(results) if isinstance(results, list) else len(results.keys())})
 
         if isinstance(results, dict):
             results = [dict(v, category=k) for k, v in results.items()]
@@ -124,17 +136,23 @@ class ConfigurablePipeline:
                         res["prediction"] = pred
                     filtered.append(res)
             results = filtered
+            if self.audit_logger:
+                self.audit_logger.log("ConfigurablePipeline", "policy_applied", {"results": len(results)})
 
         if self.trust_module:
             for res in results:
                 ctx = res.get("item", res)
                 presence = {k: bool(ctx.get(k)) for k in self.trust_module.weights}
                 res["trust"] = self.trust_module.calculate_trust(presence)
+            if self.audit_logger:
+                self.audit_logger.log("ConfigurablePipeline", "trust_calculated", {})
 
         if self.feedback_loop:
             actions = [r.get("prediction", {}) for r in results]
             suggestions = self.feedback_loop.suggest([], actions)
             for res, sugg in zip(results, suggestions):
                 res["goal_suggestion"] = sugg
+            if self.audit_logger:
+                self.audit_logger.log("ConfigurablePipeline", "feedback_suggested", {})
 
         return results
