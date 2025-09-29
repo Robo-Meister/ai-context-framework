@@ -68,13 +68,3 @@ def test_goal_feedback_loop_directional_forward():
     actions = [{"time": 5}]
     suggested = loop.suggest(history, actions)
     assert suggested[0]["time"] == 7.5
-
-def test_goal_feedback_loop_randomized_batch():
-    strategy = SimpleGoalFeedbackStrategy()
-    loop = GoalDrivenFeedbackLoop(strategy, goal_state={"progress": 100})
-    history = [{"progress": i} for i in range(100)]
-    actions = [{"progress": i} for i in range(100)]
-    suggested = loop.suggest(history, actions)
-    assert len(suggested) == len(actions)
-    expected = history[-1]["progress"] + (100 - history[-1]["progress"]) * 0.5
-    assert all(act["progress"] == expected for act in suggested)

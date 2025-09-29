@@ -1,5 +1,5 @@
 from typing import Dict, List, Optional, Any
-import numpy as np
+import math
 
 class TrustModule:
     def __init__(self, weights: Dict[str, float], distance_method: str = "cosine", parser=None):
@@ -34,20 +34,24 @@ class TrustModule:
         """
         # Convert to vectors aligned by keys
         keys = sorted(set(ctx1.keys()) | set(ctx2.keys()))
-        v1 = np.array([ctx1.get(k, 0.0) for k in keys], dtype=float)
-        v2 = np.array([ctx2.get(k, 0.0) for k in keys], dtype=float)
+        if not keys:
+            return 0.0
+        v1 = [float(ctx1.get(k, 0.0)) for k in keys]
+        v2 = [float(ctx2.get(k, 0.0)) for k in keys]
 
         if self.distance_method == "cosine":
-            dot_val = float(np.dot(v1, v2))
-            norm1 = np.linalg.norm(v1)
-            norm2 = np.linalg.norm(v2)
+            dot_val = sum(a * b for a, b in zip(v1, v2))
+            norm1 = math.sqrt(sum(a * a for a in v1))
+            norm2 = math.sqrt(sum(b * b for b in v2))
             if norm1 == 0 or norm2 == 0:
                 return 0.0
             return dot_val / (norm1 * norm2)
 
         elif self.distance_method == "euclidean":
-            dist = np.linalg.norm(v1 - v2)
-            max_dist = np.sqrt(len(keys))
+            dist = math.sqrt(sum((a - b) ** 2 for a, b in zip(v1, v2)))
+            max_dist = math.sqrt(len(keys))
+            if max_dist == 0:
+                return 1.0
             return max(0.0, 1 - dist / max_dist)
 
         else:

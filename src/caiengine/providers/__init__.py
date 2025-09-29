@@ -15,7 +15,6 @@ from .kafka_context_provider import KafkaContextProvider
 from .xml_context_provider import XMLContextProvider
 from .postgres_context_provider import PostgresContextProvider
 from .mysql_context_provider import MySQLContextProvider
-from .file_model_registry import FileModelRegistry
 
 __all__ = [
     "BaseContextProvider",
@@ -32,5 +31,4 @@ __all__ = [
     "XMLContextProvider",
     "PostgresContextProvider",
     "MySQLContextProvider",
-    "FileModelRegistry",
 ]

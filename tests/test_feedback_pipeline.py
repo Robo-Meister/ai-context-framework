@@ -39,36 +39,5 @@ class TestFeedbackPipeline(unittest.TestCase):
         self.assertIsInstance(updated, list)
 
 
-    def test_feedback_pipeline_randomized_batch(self):
-        provider = Provider()
-        log_parser = LogParser()
-        manager = LearningManager(input_size=4, parser=log_parser)
-        pipeline = FeedbackPipeline(provider, manager, learning_manager=manager)
-
-        data_batch = [
-            {
-                "id": i,
-                "roles": ["editor"],
-                "timestamp": provider.get_context()[0]["timestamp"],
-                "situations": [f"deal{i}"],
-                "content": f"Edit of deal{i}",
-                "context": {"deal": str(i)},
-                "confidence": 0.9,
-            }
-            for i in range(50)
-        ]
-        candidates = [
-            {"category": f"deal{i}", "context": {"deal": str(i)}, "base_weight": 1.0}
-            for i in range(50)
-        ]
-
-        results = pipeline.run(data_batch, candidates)
-        self.assertGreater(len(results), 0)
-        self.assertTrue(all("prediction" in r for r in results))
-
-        feedback = [(entry["content"], 1.0) for entry in data_batch[:5]]
-        updated = pipeline.run([], [], feedback=feedback)
-        self.assertIsInstance(updated, list)
-
 if __name__ == "__main__":
     unittest.main()

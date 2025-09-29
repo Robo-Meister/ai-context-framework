@@ -14,7 +14,6 @@ from caiengine.providers import (
 )
 from caiengine.interfaces.context_provider import ContextProvider
 from caiengine.inference.dummy_engine import DummyAIInferenceEngine
-from caiengine.inference.token_usage_tracker import TokenUsageTracker
 from caiengine.core.trust_module import TrustModule
 from caiengine.core.goal_feedback_loop import GoalDrivenFeedbackLoop
 from caiengine.core.goal_strategies.simple_goal_strategy import SimpleGoalFeedbackStrategy
@@ -74,13 +73,11 @@ class ConfigurablePipeline:
                 output_size=feedback_cfg.get("output_size", 1),
                 parser=parser,
             )
-            engine = TokenUsageTracker(manager.inference_engine)
-            manager.inference_engine = engine
             pipeline = FeedbackPipeline(
-                provider, engine, learning_manager=manager
+                provider, manager.inference_engine, learning_manager=manager
             )
         elif feedback_cfg.get("type") == "goal":
-            engine = TokenUsageTracker(DummyAIInferenceEngine())
+            engine = DummyAIInferenceEngine()
             pipeline = FeedbackPipeline(provider, engine)
             strategy = SimpleGoalFeedbackStrategy(
                 feedback_cfg.get("one_direction_layers", [])

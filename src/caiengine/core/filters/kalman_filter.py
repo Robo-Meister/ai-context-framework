@@ -1,29 +1,36 @@
-import numpy as np
-
 from caiengine.interfaces.filter_strategy import FilterStrategy
+from typing import List
 
 
 class KalmanFilter(FilterStrategy):
-    """Simple Kalman filter implementation using NumPy arrays."""
+    """Simple vector Kalman filter implementation without external deps."""
 
     def __init__(
         self, dim: int, process_var: float = 1e-2, measurement_var: float = 1e-1
     ):
-        self.x = np.zeros(dim)
-        self.P = np.eye(dim)
-        self.Q = np.eye(dim) * process_var
-        self.R = np.eye(dim) * measurement_var
+        self.x = [0.0 for _ in range(dim)]
+        self.P = [1.0 for _ in range(dim)]
+        self.Q = [process_var for _ in range(dim)]
+        self.R = [measurement_var for _ in range(dim)]
         self.initialized = False
 
     def apply(self, z):
-        z = np.asarray(z, dtype=float)
+        values = [float(v) for v in (z if isinstance(z, (list, tuple)) else [z])]
         if not self.initialized:
-            self.x = z
+            self.x = values
             self.initialized = True
-            return self.x.copy()
+            return list(self.x) if isinstance(z, (list, tuple)) else self.x[0]
 
-        self.P = self.P + self.Q
-        K = self.P @ np.linalg.inv(self.P + self.R)
-        self.x = self.x + K @ (z - self.x)
-        self.P = (np.eye(len(self.x)) - K) @ self.P
-        return self.x.copy()
+        updated: List[float] = []
+        for i, measurement in enumerate(values):
+            prev_x = self.x[i]
+            prev_P = self.P[i] + self.Q[i]
+            denom = prev_P + self.R[i]
+            K = prev_P / denom if denom else 0.0
+            estimate = prev_x + K * (measurement - prev_x)
+            covariance = (1 - K) * prev_P
+            updated.append(estimate)
+            self.x[i] = estimate
+            self.P[i] = covariance
+
+        return updated if isinstance(z, (list, tuple)) else updated[0]
