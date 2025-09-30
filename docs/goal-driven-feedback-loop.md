@@ -14,6 +14,8 @@ This document outlines the first steps in implementing a goal-driven feedback lo
 - Break the goal into concrete actions or experiments.
 - Prioritize tasks by expected impact and effort.
 - Track execution with an event logger to correlate actions with outcomes.
+- Persist the evolving history inside the feedback loop so repeated calls can
+  use the latest context without resending the full timeline.
 
 ## 3. Gather Feedback
 - Collect quantitative data such as key metrics, KPIs, and event logs.
@@ -24,6 +26,9 @@ This document outlines the first steps in implementing a goal-driven feedback lo
 - Compare collected feedback against the defined objective and metrics.
 - Identify patterns, anomalies, and root causes of success or shortfalls.
 - Use historical context to distinguish action-driven effects from external trends.
+- Surface lightweight analytics (gap, baseline, momentum) alongside suggested
+  actions so downstream systems can quickly understand why a recommendation was
+  made.
 
 ## 5. Adjust and Iterate
 - Refine or reprioritize tactics based on analytical insights.
