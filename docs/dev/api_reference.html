@@ -60,6 +60,7 @@
     <li><strong>Fuser</strong>: Combines similar messages based on context distance and merge logic.</li>
     <li><strong>FuzzyDeduplicator</strong>: Removes duplicates based on hash or semantics.</li>
     <li><strong>Categorizer</strong>: Categorizes messages using rule-based or AI models.</li>
+    <li><strong>TextEmbeddingComparer</strong>: Provides keyword categorisation, deterministic hashing-based embeddings, and cosine similarity scoring without requiring optional ML dependencies.</li>
   </ul>
 
   <h3>CacheManager</h3>
@@ -92,6 +93,22 @@ fuser = Fuser()
 context_data = provider.get_context('example_key')
 fused = fuser.fuse([context_data])
 print(fused)
+</code></pre>
+
+  <h2>Text Embedding Helpers</h2>
+  <p>The <code>caiengine.core.text_embeddings</code> module exposes lightweight utilities for categorising and comparing text. They are safe to use when optional dependencies such as PyTorch are unavailable.</p>
+  <pre><code>from caiengine.core.text_embeddings import TextEmbeddingComparer
+
+comparer = TextEmbeddingComparer()
+result = comparer.compare(
+    "Investigate the billing outage report",
+    "Follow up on the finance incident ticket",
+    context_a=["priority: urgent"],
+    context_b={"tags": ["finance", "outage"]},
+)
+
+print(result["similarity"])
+print(result["category_a"]["category"], result["category_b"]["category"])
 </code></pre>
 
 </body>
