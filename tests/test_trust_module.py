@@ -1,6 +1,9 @@
+import os
 import unittest
 
-from caiengine.core.trust_module import TrustModule
+os.environ.setdefault("CAIENGINE_LIGHT_IMPORT", "1")
+
+from caiengine.core.trust_module import TrustModule, TrustMemoryEntry
 
 
 class TestTrustModule(unittest.TestCase):
@@ -21,6 +24,8 @@ class TestTrustModule(unittest.TestCase):
         ]
         self.tm.load_examples(examples)
         self.assertEqual(len(self.tm.memory), 2)
+        self.assertTrue(all(isinstance(entry, TrustMemoryEntry) for entry in self.tm.memory))
+        self.assertIn("timestamp", self.tm.memory[0].provenance)
 
     def test_base_trust_score(self):
         ctx = {
@@ -71,6 +76,16 @@ class TestTrustModule(unittest.TestCase):
         trust = self.tm.compute_trust_with_memory(ctx_presence, ctx_scores)
         base = self.tm.calculate_trust(ctx_presence)
         self.assertAlmostEqual(trust, base * self.tm.get_max_similarity(ctx_scores), places=5)
+
+    def test_memory_provenance_is_retained(self):
+        context = {"role": 0.4, "location": 0.3}
+        provenance = {"source": "unit-test"}
+        entry = self.tm.add_to_memory(context, provenance=provenance)
+
+        self.assertIsInstance(entry, TrustMemoryEntry)
+        self.assertEqual(entry.context, context)
+        self.assertEqual(entry.provenance["source"], "unit-test")
+        self.assertIn("timestamp", entry.provenance)
 
 if __name__ == "__main__":
     unittest.main()
