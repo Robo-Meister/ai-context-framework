@@ -78,3 +78,28 @@ def test_goal_feedback_loop_randomized_batch():
     assert len(suggested) == len(actions)
     expected = history[-1]["progress"] + (100 - history[-1]["progress"]) * 0.5
     assert all(act["progress"] == expected for act in suggested)
+
+
+def test_goal_feedback_loop_persists_history():
+    strategy = SimpleGoalFeedbackStrategy()
+    loop = GoalDrivenFeedbackLoop(strategy, goal_state={"progress": 10})
+    loop.suggest([{"progress": 4}], [{"progress": 4}])
+    # When history is omitted the loop should reuse the tracked history.
+    suggestions = loop.suggest([], [{"progress": 4}])
+    assert suggestions[0]["progress"] == 7
+
+
+def test_goal_feedback_loop_generates_analysis_metadata():
+    strategy = SimpleGoalFeedbackStrategy()
+    loop = GoalDrivenFeedbackLoop(strategy, goal_state={"progress": 10})
+    history = [{"progress": 2}, {"progress": 4}]
+    suggestions = loop.suggest(history, [{"progress": 4}])
+    analysis = loop.last_analysis
+    assert "progress" in analysis
+    progress_metric = analysis["progress"]
+    assert progress_metric["goal"] == 10
+    assert progress_metric["current"] == 4
+    assert progress_metric["gap"] == 6
+    assert progress_metric["trend"] == "toward_goal"
+    assert 0.0 <= progress_metric["progress_ratio"] <= 1.0
+    assert suggestions[0]["goal_feedback"]["analysis"]["progress"]["gap"] == 6
