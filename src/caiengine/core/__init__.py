@@ -12,7 +12,7 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
     from .context_hooks import ContextHookManager, ContextHook
     from .fuser import Fuser
     from .policy_evaluator import PolicyEvaluator
-    from .categorizer import Categorizer
+    from .categorizer import Categorizer, NeuralKeywordCategorizer
     from .context_filer import ContextFilter
     from .trust_module import TrustModule
     from .time_decay_scorer import TimeDecayScorer
@@ -37,6 +37,7 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         "Fuser",
         "PolicyEvaluator",
         "Categorizer",
+        "NeuralKeywordCategorizer",
         "ContextFilter",
         "TrustModule",
         "TimeDecayScorer",

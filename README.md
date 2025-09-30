@@ -182,6 +182,26 @@ categorized = {("", "", ""): results}
 summary = fuser.fuse(categorized)
 print(summary)
 ```
+### Neural Keyword Categorization
+
+Use ``NeuralKeywordCategorizer`` for lightweight categorization that combines a
+neural model with deterministic keyword bootstrapping. Override the default
+mapping by providing your own categories.
+
+```python
+from caiengine.core.categorizer import NeuralKeywordCategorizer
+
+categorizer = NeuralKeywordCategorizer(
+    {
+        "sales": ("deal", "prospect"),
+        "support": ("ticket", "bug"),
+    }
+)
+
+item = {"content": "Investigating a ticket for a high-value prospect"}
+result = categorizer.categorize(item)
+print(result["category"], result["confidence"])
+```
 
 ### Configurable Pipeline
 
