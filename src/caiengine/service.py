@@ -12,10 +12,10 @@ from caiengine.common.token_usage import TokenCounter
 class CAIService:
     """Combined HTTP service exposing context and feedback endpoints."""
 
-    def __init__(self, host: str = "0.0.0.0", port: int = 8080):
+    def __init__(self, host: str = "0.0.0.0", port: int = 8080, backend: object | None = None):
         self.host = host
         self.port = port
-        self.provider = HTTPContextProvider(host=host, port=port)
+        self.provider = HTTPContextProvider(host=host, port=port, backend=backend)
         self.feedback_loop = GoalDrivenFeedbackLoop(SimpleGoalFeedbackStrategy())
         self._server: HTTPServer | None = None
         self._thread: threading.Thread | None = None
@@ -90,9 +90,20 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="Start CAIEngine service")
     parser.add_argument("--host", default="0.0.0.0", help="Bind host")
     parser.add_argument("--port", type=int, default=8080, help="Bind port")
+    parser.add_argument("--backend", default=None, help="Backend provider class path")
+    parser.add_argument(
+        "--backend-options",
+        default=None,
+        help="JSON encoded keyword arguments for the backend provider",
+    )
     args = parser.parse_args(argv)
 
-    service = CAIService(host=args.host, port=args.port)
+    backend_spec = None
+    if args.backend:
+        options = json.loads(args.backend_options) if args.backend_options else {}
+        backend_spec = {"path": args.backend, "options": options}
+
+    service = CAIService(host=args.host, port=args.port, backend=backend_spec)
     service.start()
     try:
         if service._thread:
