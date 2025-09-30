@@ -163,6 +163,14 @@ python -m caiengine.service
 
 The server binds to `0.0.0.0:8080` by default. Set `CAI_ENGINE_ENDPOINT` in your application to this URL to reuse the running service instead of spawning `cai_bridge.py` repeatedly.
 
+You can choose an alternative backend provider by supplying the class path and optional keyword arguments:
+
+```bash
+python -m caiengine.service \
+  --backend caiengine.providers.sqlite_context_provider.SQLiteContextProvider \
+  --backend-options '{"db_path": "./context.db"}'
+```
+
 ### Environment Variables
 
 Copy `.env.example` to `.env` and adjust the values as needed. The file includes

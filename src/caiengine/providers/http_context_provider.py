@@ -1,7 +1,8 @@
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from datetime import datetime
-from typing import Optional
+from importlib import import_module
+from typing import Any, Dict, Optional
 import threading
 from urllib.parse import urlparse, parse_qs
 
@@ -13,12 +14,45 @@ from caiengine.providers.memory_context_provider import MemoryContextProvider
 class HTTPContextProvider:
     """Expose a simple REST API for context ingestion and retrieval."""
 
-    def __init__(self, host: str = "0.0.0.0", port: int = 8080, backend: Optional[MemoryContextProvider] = None):
+    def __init__(
+        self,
+        host: str = "0.0.0.0",
+        port: int = 8080,
+        backend: Optional[object] = None,
+    ):
         self.host = host
         self.port = port
-        self.backend = backend or MemoryContextProvider()
+        self.backend = self._prepare_backend(backend)
         self._server: Optional[HTTPServer] = None
         self._thread: Optional[threading.Thread] = None
+
+    def _prepare_backend(self, backend: Optional[object]) -> object:
+        if backend is None:
+            return MemoryContextProvider()
+
+        if isinstance(backend, str):
+            return self._load_backend_from_path(backend, {})
+
+        if isinstance(backend, dict):
+            path = backend.get("path")
+            if not path:
+                raise ValueError("Backend configuration must include 'path'")
+            options = backend.get("options", {})
+            if not isinstance(options, dict):
+                raise TypeError("Backend 'options' must be a mapping of keyword arguments")
+            return self._load_backend_from_path(path, options)
+
+        if hasattr(backend, "ingest_context") and hasattr(backend, "get_context"):
+            return backend
+
+        raise TypeError("Unsupported backend specification for HTTPContextProvider")
+
+    @staticmethod
+    def _load_backend_from_path(path: str, options: Dict[str, Any]) -> object:
+        module_name, class_name = path.rsplit(".", 1)
+        module = import_module(module_name)
+        backend_cls = getattr(module, class_name)
+        return backend_cls(**options)
 
     # ---- HTTP Handlers -------------------------------------------------
     def _make_handler(self):

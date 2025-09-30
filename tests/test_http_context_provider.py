@@ -5,9 +5,25 @@ from urllib import request, parse
 
 from caiengine.providers.http_context_provider import HTTPContextProvider
 from caiengine.objects.context_query import ContextQuery
+from caiengine.providers.memory_context_provider import MemoryContextProvider
 
 
 class TestHTTPContextProvider(unittest.TestCase):
+    def test_prepare_backend_from_path(self):
+        provider = HTTPContextProvider(
+            backend="caiengine.providers.simple_context_provider.SimpleContextProvider"
+        )
+        self.assertTrue(hasattr(provider.backend, "ingest_context"))
+        self.assertTrue(hasattr(provider.backend, "get_context"))
+
+    def test_prepare_backend_from_config(self):
+        backend_config = {
+            "path": "caiengine.providers.memory_context_provider.MemoryContextProvider",
+            "options": {},
+        }
+        provider = HTTPContextProvider(backend=backend_config)
+        self.assertIsInstance(provider.backend, MemoryContextProvider)
+
     def test_post_and_get(self):
         provider = HTTPContextProvider(host="127.0.0.1", port=8099)
         provider.start()
