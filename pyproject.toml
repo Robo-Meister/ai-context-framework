@@ -29,6 +29,12 @@ dependencies = [
 [project.optional-dependencies]
 redis = ["redis>=6.1.0"]
 kafka = ["kafka-python>=2.0.2"]
+mysql = ["mysql-connector-python>=9.1.0"]
+postgresql = ["psycopg2-binary>=2.9.10"]
+storage = [
+    "mysql-connector-python>=9.1.0",
+    "psycopg2-binary>=2.9.10",
+]
 dev = [
     "pytest>=8.3.5",
     "pytest-cov>=4.1.0",
