@@ -13,6 +13,11 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
     from .fuser import Fuser
     from .policy_evaluator import PolicyEvaluator
     from .categorizer import Categorizer, NeuralKeywordCategorizer
+    from .text_embeddings import (
+        SimpleTextCategorizer,
+        HashingTextEmbedder,
+        TextEmbeddingComparer,
+    )
     from .context_filer import ContextFilter
     from .trust_module import TrustModule
     from .time_decay_scorer import TimeDecayScorer
@@ -38,6 +43,9 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         "PolicyEvaluator",
         "Categorizer",
         "NeuralKeywordCategorizer",
+        "SimpleTextCategorizer",
+        "HashingTextEmbedder",
+        "TextEmbeddingComparer",
         "ContextFilter",
         "TrustModule",
         "TimeDecayScorer",

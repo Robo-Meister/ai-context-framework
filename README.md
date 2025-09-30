@@ -46,6 +46,35 @@ This modular architecture is designed to evolve alongside AI needs, helping to r
 - AI Inference & Learning Hooks: Modular integration points for custom AI logic and model updates
 - Model Management: Replace, save, and load AI inference models at runtime
 - Goal-Driven Feedback Loop: Nudge actions toward user-defined goals via strategies like ``SimpleGoalFeedbackStrategy`` or ``PersonalityGoalFeedbackStrategy`` for NPC traits
+- Lightweight Text Embedding Utilities: Deterministic hashing-based embeddings, keyword categorisation, and similarity comparison without heavy ML dependencies
+
+### Text Embedding Utilities
+
+Use the helpers in `caiengine.core.text_embeddings` when you need deterministic,
+dependency-light text processing. They expose a hashing-based embedder, a simple
+keyword categoriser, and a high level comparer that mirrors the optional
+PyTorch-powered components.
+
+```python
+from caiengine.core.text_embeddings import TextEmbeddingComparer
+
+comparer = TextEmbeddingComparer()
+comparison = comparer.compare(
+    "Follow up with the new prospect",
+    "Schedule a call with the sales lead",
+    context_a={"notes": ["priority: high", "region: emea"]},
+    context_b=["lead source: inbound"],
+)
+
+print(f"Similarity: {comparison['similarity']:.2f}")
+print("Category A:", comparison["category_a"]["category"])
+print("Category B:", comparison["category_b"]["category"])
+```
+
+`TextEmbeddingComparer` exposes lower-level helpers via `embed()` and
+`categorize()` when you want manual control over embedding vectors or keyword
+scoring. It gracefully degrades when optional dependencies such as PyTorch are
+not installed, making it safe to use in lightweight deployments.
 
 ## Goal-Driven Feedback Use Cases
 
