@@ -1,5 +1,20 @@
-from typing import Dict, List, Optional, Any
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Dict, List, Optional, Any, Iterable
 import numpy as np
+
+
+@dataclass
+class TrustMemoryEntry:
+    """Container for a trusted context and its provenance metadata."""
+
+    context: Dict[str, float]
+    provenance: Dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        self.provenance.setdefault("timestamp", datetime.utcnow().isoformat())
 
 class TrustModule:
     def __init__(self, weights: Dict[str, float], distance_method: str = "cosine", parser=None):
@@ -9,7 +24,7 @@ class TrustModule:
         """
         self.weights = weights
         self.distance_method = distance_method
-        self.memory = []  # list of trusted contexts (dicts)
+        self.memory: List[TrustMemoryEntry] = []  # trusted contexts with provenance
         self.parser = parser  # <-- store parser instance here
 
     def calculate_trust(self, context: Dict[str, bool], required_layers: Optional[List[str]] = None) -> float:
@@ -53,15 +68,33 @@ class TrustModule:
         else:
             raise ValueError(f"Unsupported distance method: {self.distance_method}")
 
-    def add_to_memory(self, context: Dict[str, float]):
+    def _normalize_examples(self, examples: Iterable[Any]) -> List[TrustMemoryEntry]:
+        normalized: List[TrustMemoryEntry] = []
+        for example in examples:
+            if isinstance(example, TrustMemoryEntry):
+                normalized.append(example)
+            elif isinstance(example, dict) and "context" in example:
+                normalized.append(
+                    TrustMemoryEntry(
+                        context=dict(example["context"]),
+                        provenance=dict(example.get("provenance", {})),
+                    )
+                )
+            else:
+                normalized.append(TrustMemoryEntry(context=dict(example)))
+        return normalized
+
+    def add_to_memory(self, context: Dict[str, float], provenance: Optional[Dict[str, Any]] = None) -> TrustMemoryEntry:
         """
         Store a trusted context into memory for future comparison
         """
-        self.memory.append(context)
+        entry = TrustMemoryEntry(context=dict(context), provenance=dict(provenance or {}))
+        self.memory.append(entry)
+        return entry
 
-    def load_examples(self, examples: List[Dict[str, float]]):
+    def load_examples(self, examples: List[Any]):
         """Load multiple trusted contexts at once."""
-        self.memory.extend(examples)
+        self.memory.extend(self._normalize_examples(examples))
 
     def get_max_similarity(self, context: Dict[str, float]) -> float:
         """
@@ -69,7 +102,7 @@ class TrustModule:
         """
         if not self.memory:
             return 0.0
-        scores = [self.compare_contexts(context, mem_ctx) for mem_ctx in self.memory]
+        scores = [self.compare_contexts(context, entry.context) for entry in self.memory]
         return max(scores)
 
     def compute_trust_with_memory(self, context_presence: Dict[str, bool], context_scores: Dict[str, float],
