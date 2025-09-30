@@ -151,6 +151,22 @@ Developer guides live in the `docs/` directory. Open
    pytest
    ```
 
+### Optional storage drivers
+
+The built-in providers cover in-memory storage and SQLite without any extra
+dependencies. To persist context to external databases, install the optional
+extras when setting up the package:
+
+- **MySQL** – `pip install .[mysql]` installs
+  `mysql-connector-python` for `MySQLContextProvider`.
+- **PostgreSQL** – `pip install .[postgresql]` installs
+  `psycopg2-binary` for `PostgresContextProvider`.
+- **All SQL backends** – `pip install .[storage]` pulls in the full set of
+  SQL connectors so you can switch providers without reinstalling.
+
+Once the desired driver is installed you can point the service or pipeline to
+the corresponding provider class (e.g. `caiengine.providers.mysql_context_provider.MySQLContextProvider`).
+
 You can now start implementing your own `ContextProvider` or test the built-in ones.
 
 ### Starting the Service

@@ -10,6 +10,7 @@ from caiengine.providers import (
     XMLContextProvider,
     SQLiteContextProvider,
     MySQLContextProvider,
+    PostgresContextProvider,
     MemoryContextProvider,
 )
 from caiengine.interfaces.context_provider import ContextProvider
@@ -28,6 +29,8 @@ _PROVIDER_MAP = {
     "xml": XMLContextProvider,
     "sqlite": SQLiteContextProvider,
     "mysql": MySQLContextProvider,
+    "postgres": PostgresContextProvider,
+    "postgresql": PostgresContextProvider,
     "memory": lambda **kwargs: ContextProvider(**kwargs),
 }
 
