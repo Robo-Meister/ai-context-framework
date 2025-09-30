@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Sequence, Set
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
 
 _CUSTOMER_ROLES = {"customer", "user", "prospect", "lead"}
@@ -36,6 +36,70 @@ _INTENT_KEYWORDS: Sequence[tuple[str, Set[str]]] = (
     ("complaint", {"issue", "problem", "broken", "bug"}),
 )
 
+_ENTITY_PATTERNS: Sequence[tuple[str, re.Pattern[str]]] = (
+    ("email", re.compile(r"\b[\w\.-]+@[\w\.-]+\.[A-Za-z]{2,}\b")),
+    ("phone", re.compile(r"\b(?:\+?\d[\d\s\-()]{7,}\d)\b")),
+    (
+        "money",
+        re.compile(r"(?:[$£€]\s?\d+(?:,\d{3})*(?:\.\d+)?|\d+(?:\.\d+)?\s?(?:usd|dollars|bucks|eur|euro|pounds))", re.I),
+    ),
+    (
+        "date",
+        re.compile(
+            r"\b(?:\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?|"
+            r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\s+\d{1,2}(?:,\s*\d{4})?)\b",
+            re.I,
+        ),
+    ),
+    ("time", re.compile(r"\b\d{1,2}:\d{2}\s?(?:am|pm)?\b|\b\d{1,2}\s?(?:am|pm)\b", re.I)),
+    ("url", re.compile(r"\bhttps?://\S+")),
+    ("ticket", re.compile(r"\b(?:ticket|case|incident)\s*#?\s*([A-Za-z0-9-]+)\b", re.I)),
+    ("account", re.compile(r"\baccount(?: number| id)?\s*(?:is|:)?\s*([A-Za-z0-9-]+)\b", re.I)),
+)
+
+_PERSON_PATTERNS: Sequence[re.Pattern[str]] = (
+    re.compile(r"\b(?:i'm|i am|this is|my name is)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)", re.I),
+    re.compile(r"\b(?:call me)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)", re.I),
+)
+
+_COMPANY_PATTERNS: Sequence[re.Pattern[str]] = (
+    re.compile(r"\bfrom\s+([A-Z][\w&]*(?:\s+[A-Z][\w&]*)*)", re.I),
+    re.compile(r"\b(?:company|organisation|organization|team)\s*(?:is|:)?\s*([A-Z][\w&]*(?:\s+[A-Z][\w&]*)*)", re.I),
+)
+
+_TOPIC_KEYWORDS: Sequence[str] = (
+    "dashboard",
+    "integration",
+    "portal",
+    "workflow",
+    "report",
+    "analytics",
+    "login",
+    "mobile app",
+    "api",
+    "billing",
+    "invoice",
+    "contract",
+)
+
+_ISSUE_KEYWORDS: Set[str] = {
+    "issue",
+    "problem",
+    "bug",
+    "outage",
+    "error",
+    "crash",
+    "crashes",
+    "broken",
+    "fail",
+    "failing",
+    "failure",
+    "down",
+    "slow",
+}
+
+_PRONOUN_PATTERN = re.compile(r"\b(it|this|that|they|them|those)\b", re.I)
+
 
 @dataclass
 class ConversationTurn:
@@ -44,6 +108,10 @@ class ConversationTurn:
     sentiment: str
     intents: List[str] = field(default_factory=list)
     questions: List[str] = field(default_factory=list)
+    entities: Dict[str, Set[str]] = field(default_factory=dict)
+    entity_mentions: List[Tuple[str, int]] = field(default_factory=list)
+    slots: Dict[str, Set[str]] = field(default_factory=dict)
+    references: Dict[str, str] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -52,6 +120,9 @@ class ConversationTurn:
             "sentiment": self.sentiment,
             "intents": list(self.intents),
             "questions": list(self.questions),
+            "entities": {key: sorted(values) for key, values in self.entities.items()},
+            "slots": {key: sorted(values) for key, values in self.slots.items()},
+            "references": dict(self.references),
         }
 
 
@@ -67,6 +138,9 @@ class ConversationState:
     tags: Set[str] = field(default_factory=set)
     last_customer_message: Optional[str] = None
     last_agent_message: Optional[str] = None
+    entities: Dict[str, Set[str]] = field(default_factory=dict)
+    slots: Dict[str, Set[str]] = field(default_factory=dict)
+    discourse: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not self.metrics:
@@ -76,6 +150,11 @@ class ConversationState:
                 "agent_messages": 0,
                 "question_count": 0,
                 "negative_markers": 0,
+            }
+        if not self.discourse:
+            self.discourse = {
+                "recent_entities": [],
+                "pronoun_links": [],
             }
 
     def to_dict(self) -> Dict[str, Any]:
@@ -89,6 +168,12 @@ class ConversationState:
             "tags": sorted(self.tags),
             "last_customer_message": self.last_customer_message,
             "last_agent_message": self.last_agent_message,
+            "entities": {key: sorted(values) for key, values in self.entities.items()},
+            "slots": {key: sorted(values) for key, values in self.slots.items()},
+            "discourse": {
+                "recent_entities": list(self.discourse.get("recent_entities", [])),
+                "pronoun_links": list(self.discourse.get("pronoun_links", [])),
+            },
             "turns": [turn.to_dict() for turn in self.turns[-10:]],
         }
 
@@ -114,6 +199,9 @@ class ConversationParser:
             self._update_stage(state, turn)
             self._update_sentiment(state, turn)
             self._update_questions(state, turn)
+            self._update_discourse(state, turn)
+            self._update_entities(state, turn)
+            self._update_slots(state, turn)
             self._update_tags(state, turn)
         self._states[session_id] = state
         return state
@@ -128,7 +216,16 @@ class ConversationParser:
         sentiment = ConversationParser._analyse_sentiment(content)
         intents = ConversationParser._detect_intents(content)
         questions = ConversationParser._extract_questions(content)
-        return ConversationTurn(role=role, content=content, sentiment=sentiment, intents=intents, questions=questions)
+        entities, entity_mentions = ConversationParser._extract_entities(content)
+        return ConversationTurn(
+            role=role,
+            content=content,
+            sentiment=sentiment,
+            intents=intents,
+            questions=questions,
+            entities=entities,
+            entity_mentions=entity_mentions,
+        )
 
     @staticmethod
     def _analyse_sentiment(text: str) -> str:
@@ -161,6 +258,46 @@ class ConversationParser:
             if question:
                 results.append(question)
         return results
+
+    @staticmethod
+    def _extract_entities(text: str) -> Tuple[Dict[str, Set[str]], List[Tuple[str, int]]]:
+        entities: Dict[str, Set[str]] = {}
+        ordered: List[Tuple[int, str]] = []
+        for name, pattern in _ENTITY_PATTERNS:
+            for match in pattern.finditer(text):
+                group_index = 1 if (match.lastindex and match.lastindex >= 1) else 0
+                value = match.group(group_index).strip()
+                if not value:
+                    continue
+                entities.setdefault(name, set()).add(value)
+                ordered.append((match.start(group_index), value))
+        for pattern in _PERSON_PATTERNS:
+            for match in pattern.finditer(text):
+                value = match.group(1).strip()
+                if value:
+                    entities.setdefault("person", set()).add(value)
+                    ordered.append((match.start(1), value))
+        for pattern in _COMPANY_PATTERNS:
+            for match in pattern.finditer(text):
+                value = match.group(1).strip()
+                if value:
+                    entities.setdefault("company", set()).add(value)
+                    ordered.append((match.start(1), value))
+        lowered = text.lower()
+        for keyword in _TOPIC_KEYWORDS:
+            if keyword in lowered:
+                pattern = re.compile(
+                    rf"((?:the|a|an|this|that|those|these)\s+)?((?:[A-Za-z0-9']+\s+){{0,3}}{re.escape(keyword)})",
+                    re.I,
+                )
+                for match in pattern.finditer(text):
+                    phrase = match.group(2).strip()
+                    if phrase:
+                        entities.setdefault("topic", set()).add(phrase)
+                        ordered.append((match.start(2), phrase))
+        ordered.sort(key=lambda item: item[0])
+        ordered_mentions = [(value, position) for position, value in ordered]
+        return entities, ordered_mentions
 
     @staticmethod
     def _keywords(text: str) -> Set[str]:
@@ -213,6 +350,104 @@ class ConversationParser:
                     continue
                 unresolved.append(question)
             state.open_questions = unresolved
+
+    @staticmethod
+    def _update_discourse(state: ConversationState, turn: ConversationTurn) -> None:
+        pronouns = list(_PRONOUN_PATTERN.finditer(turn.content))
+        if not pronouns:
+            return
+        recent: List[str] = state.discourse.get("recent_entities", [])
+        if not (recent or turn.entity_mentions):
+            return
+        references: Dict[str, str] = {}
+        for match in pronouns:
+            pronoun = match.group(1).lower()
+            pronoun_position = match.start()
+            resolved = None
+            best_start = -1
+            best_length = -1
+            for value, start in turn.entity_mentions:
+                if start >= pronoun_position:
+                    continue
+                value_length = len(value)
+                if start > best_start or (start == best_start and value_length > best_length):
+                    resolved = value
+                    best_start = start
+                    best_length = value_length
+            if resolved is None and recent:
+                resolved = recent[-1]
+            if resolved:
+                references[pronoun] = resolved
+                state.discourse.setdefault("pronoun_links", []).append(
+                    {
+                        "turn_index": len(state.turns) - 1,
+                        "pronoun": pronoun,
+                        "entity": resolved,
+                    }
+                )
+        if references:
+            turn.references = references
+
+    @staticmethod
+    def _update_entities(state: ConversationState, turn: ConversationTurn) -> None:
+        if not turn.entities:
+            return
+        recent: List[str] = state.discourse.setdefault("recent_entities", [])
+        for name, values in turn.entities.items():
+            store = state.entities.setdefault(name, set())
+            store.update(values)
+        for value, _ in turn.entity_mentions:
+            if value in recent:
+                recent.remove(value)
+            recent.append(value)
+        if len(recent) > 20:
+            del recent[:-20]
+
+    def _update_slots(self, state: ConversationState, turn: ConversationTurn) -> None:
+        detected: Dict[str, Set[str]] = {}
+        lowered = turn.content.lower()
+        money_values = turn.entities.get("money", set())
+        if money_values and any(keyword in lowered for keyword in {"price", "cost", "rate", "budget", "quote"}):
+            detected["price"] = set(money_values)
+        date_values = turn.entities.get("date", set())
+        time_values = turn.entities.get("time", set())
+        if (date_values or time_values) and any(
+            keyword in lowered for keyword in {"timeline", "launch", "start", "deadline", "by", "schedule", "when"}
+        ):
+            detected.setdefault("timeline", set()).update(date_values)
+            detected.setdefault("timeline", set()).update(time_values)
+        contact_values: Set[str] = set()
+        contact_values.update(turn.entities.get("email", set()))
+        contact_values.update(turn.entities.get("phone", set()))
+        if contact_values:
+            detected["contact"] = contact_values
+        account_values = turn.entities.get("account", set())
+        if account_values:
+            detected["account"] = set(account_values)
+        ticket_values = turn.entities.get("ticket", set())
+        if ticket_values:
+            detected["ticket"] = set(ticket_values)
+        issue_sentences: Set[str] = set()
+        for sentence in re.split(r"[.!?]", turn.content):
+            sentence = sentence.strip()
+            if not sentence:
+                continue
+            lowered_sentence = sentence.lower()
+            if any(keyword in lowered_sentence for keyword in _ISSUE_KEYWORDS):
+                issue_sentences.add(sentence)
+        if issue_sentences:
+            detected["issue"] = issue_sentences
+        topic_values = turn.entities.get("topic", set())
+        if topic_values:
+            detected.setdefault("topic", set()).update(topic_values)
+        if turn.intents:
+            detected.setdefault("intent", set()).update(turn.intents)
+        if not detected:
+            return
+        turn.slots = detected
+        for name, values in detected.items():
+            store = state.slots.setdefault(name, set())
+            store.update(values)
 
     @staticmethod
     def _update_tags(state: ConversationState, turn: ConversationTurn) -> None:
