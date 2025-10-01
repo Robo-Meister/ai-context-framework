@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <radialGradient id="glow-gradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(255, 214, 125, 0.95)" />
+      <stop offset="70%" stop-color="rgba(255, 170, 64, 0.6)" />
+      <stop offset="100%" stop-color="rgba(255, 170, 64, 0)" />
+    </radialGradient>
+  </defs>
+  <g id="effects/sun-core">
+    <circle cx="100" cy="100" r="40" fill="rgba(255, 196, 82, 0.9)" />
+  </g>
+  <g id="effects/sun-glow" opacity="0.8">
+    <circle cx="100" cy="100" r="90" fill="url(#glow-gradient)" />
+  </g>
+</svg>

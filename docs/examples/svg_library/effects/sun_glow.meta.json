@@ -1,0 +1,23 @@
+{
+  "summary": "Radial glow effect for sunlight or energy auras.",
+  "groups": [
+    {
+      "id": "effects/sun-core",
+      "role": "bright inner core",
+      "bounding_box": { "x": 60, "y": 60, "width": 80, "height": 80 }
+    },
+    {
+      "id": "effects/sun-glow",
+      "role": "soft exterior glow",
+      "bounding_box": { "x": 10, "y": 10, "width": 180, "height": 180 }
+    }
+  ],
+  "palette_tokens": ["glow-gradient"],
+  "blend_modes": {
+    "default": "screen"
+  },
+  "recommended_usage": [
+    "Overlay for heroic emphasis",
+    "Backdrop highlight behind characters"
+  ]
+}
