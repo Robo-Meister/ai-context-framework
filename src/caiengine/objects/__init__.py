@@ -6,6 +6,7 @@ from .context_query import ContextQuery
 from .fused_context import FusedContext
 from .model_metadata import ModelMetadata
 from .model_manifest import ModelManifest
+from .ocr_metadata import OCRMetadata, OCRSpan
 
 __all__ = [
     "ContextData",
@@ -14,4 +15,6 @@ __all__ = [
     "FusedContext",
     "ModelMetadata",
     "ModelManifest",
+    "OCRMetadata",
+    "OCRSpan",
 ]

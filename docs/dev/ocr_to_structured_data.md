@@ -44,6 +44,20 @@ module) that reads OCR output (files, API responses, or database rows) and yield
 By keeping these signals inside the context, CAIEngine modules can incorporate
 confidence and structural hints rather than relying on regexes.
 
+### 2.1 Use the Built-in `OCRContextProvider`
+
+The repository now ships with an `OCRContextProvider` that implements the
+pattern above. It accepts raw OCR text, optional `display_text`, confidence
+scores, and either `OCRSpan` objects or dictionaries describing bounding boxes.
+Each ingested document is stored in a `ContextData` record with the
+`ocr_metadata` field populated so downstream modules can access both the
+structured payload and the spatial metadata.
+
+If you already have OCR spans represented as dictionaries, pass them directly to
+`ingest_ocr_document`; they will be normalised into strongly-typed `OCRSpan`
+instances. This simplifies integrating new OCR sources without rewriting your
+data mapping logic.
+
 ## 3. Smarter Categorization than Regex
 
 Instead of regular expressions, leverage the `TextEmbeddingComparer` plus your
