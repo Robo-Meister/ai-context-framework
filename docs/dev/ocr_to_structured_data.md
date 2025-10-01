@@ -85,6 +85,37 @@ By enriching the categorizer with OCR-specific metadata and feedback, you can
 support documents that would otherwise be misrouted by pure text similarity or
 regex heuristics.
 
+### 3.2 Returning Structured OCR Fields with Spatial Context
+
+Meeting downstream OCR consumers—such as invoice ingestion systems that expect
+values plus their on-page position—typically requires augmenting the categorizer
+with a richer payload than just raw text. A practical recipe is:
+
+1. **Preserve whitespace-aligned text.** Instead of normalising all whitespace,
+   keep the OCR provider's spacing so you can reconstruct columnar layouts
+   (tables, totals blocks). Store both the raw text and a "display" version that
+   pads each line with spaces to mirror the original grid. Your
+   `ContextItem.payload` might expose `{"text": raw_text, "display_text": formatted_text}`.
+2. **Attach geometric spans per candidate field.** Include bounding boxes or
+   character-offset ranges for key OCR detections (invoice number, line items,
+   totals). For example, add `{"field": "invoice_number", "bbox": [x1, y1, x2, y2]}`
+   entries. When the categorizer selects a document type, downstream inference
+   can recover both the value and its location.
+3. **Score against layout-aware prototypes.** Seed each category with exemplar
+   snippets that include structured hints (e.g., a JSON blob of expected fields
+   and their spatial relationships). Implement a custom `SimilarityScorer` that
+   rewards OCR items whose detected fields align with the exemplar schema—helping
+   distinguish invoices with line-item tables from quotes or purchase orders.
+4. **Emit structured context for inference.** After categorization, package the
+   enriched OCR payload into the fused context so your `AIInferenceEngine` can
+   format the final record. For invoices, the inference step can iterate over the
+   `line_items` span list, reconstruct each row's text via the preserved spacing,
+   and output an ordered table alongside header fields such as invoice number and
+   totals.
+
+These additions let the categorizer maintain spatial fidelity while still
+benefiting from embedding similarity and metadata signals.
+
 ## 4. Structured Extraction via Inference Engines
 
 Inside your `AIInferenceEngine` implementation:
