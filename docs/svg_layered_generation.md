@@ -92,3 +92,14 @@ backgrounds, and effects SVGs grouped semantically, paired with JSON or YAML
 metadata that encodes summaries, palette tokens, and bounding boxes. The
 accompanying README shows how to translate the metadata into a context packet
 and a model-generated layer plan.
+
+## Reference Pipeline
+
+The repository ships with a `SvgLayerPipeline` that automates the steps above.
+It gathers SVG metadata from any context provider, packages it into the
+`visual_assets` channel, asks an inference engine for a JSON plan, and
+post-processes the response so only resolvable layers remain. Bounding boxes
+defined in the metadata are merged into the final plan so downstream tooling can
+position fragments deterministically. See
+`src/caiengine/pipelines/svg_layer_pipeline.py` for the implementation and
+`tests/test_svg_layer_pipeline.py` for usage examples.
