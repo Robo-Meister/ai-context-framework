@@ -12,7 +12,7 @@ class RoboIdConnection(NetworkInterface):
 
     def __init__(self, sock: socket.socket):
         self.socket = sock
-        self.socket.setblocking(True)
+        self.socket.settimeout(0.1)
         self._buffer = b""
         self._lock = threading.Lock()
         self.listening = False
@@ -30,7 +30,10 @@ class RoboIdConnection(NetworkInterface):
 
     def receive(self):
         while True:
-            chunk = self.socket.recv(4096)
+            try:
+                chunk = self.socket.recv(4096)
+            except socket.timeout:
+                return None
             if not chunk:
                 return None
             self._buffer += chunk

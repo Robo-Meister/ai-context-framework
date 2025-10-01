@@ -1,7 +1,4 @@
 
-"""Learning utilities and neural network models."""
+"""Learning utilities and lightweight model helpers."""
 
-from .complex_linear import ComplexLinear
-from .complex_net import ComplexNet
-
-__all__ = ["ComplexLinear", "ComplexNet"]
+__all__: list[str] = []

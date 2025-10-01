@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Iterable
-import numpy as np
+from math import sqrt
 
 
 @dataclass
@@ -49,20 +49,22 @@ class TrustModule:
         """
         # Convert to vectors aligned by keys
         keys = sorted(set(ctx1.keys()) | set(ctx2.keys()))
-        v1 = np.array([ctx1.get(k, 0.0) for k in keys], dtype=float)
-        v2 = np.array([ctx2.get(k, 0.0) for k in keys], dtype=float)
+        v1 = [float(ctx1.get(k, 0.0)) for k in keys]
+        v2 = [float(ctx2.get(k, 0.0)) for k in keys]
 
         if self.distance_method == "cosine":
-            dot_val = float(np.dot(v1, v2))
-            norm1 = np.linalg.norm(v1)
-            norm2 = np.linalg.norm(v2)
+            dot_val = sum(a * b for a, b in zip(v1, v2))
+            norm1 = sqrt(sum(a * a for a in v1))
+            norm2 = sqrt(sum(b * b for b in v2))
             if norm1 == 0 or norm2 == 0:
                 return 0.0
             return dot_val / (norm1 * norm2)
 
         elif self.distance_method == "euclidean":
-            dist = np.linalg.norm(v1 - v2)
-            max_dist = np.sqrt(len(keys))
+            if not keys:
+                return 0.0
+            dist = sqrt(sum((a - b) ** 2 for a, b in zip(v1, v2)))
+            max_dist = sqrt(float(len(keys)))
             return max(0.0, 1 - dist / max_dist)
 
         else:
