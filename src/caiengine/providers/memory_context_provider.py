@@ -1,9 +1,10 @@
 import uuid
 from datetime import datetime
-from typing import List, Union
+from typing import List, Union, Optional
 
 from caiengine.core.cache_manager import CacheManager
 from caiengine.objects.context_data import ContextData
+from caiengine.objects.ocr_metadata import OCRMetadata
 from caiengine.objects.context_query import ContextQuery
 from .base_context_provider import BaseContextProvider
 
@@ -23,6 +24,7 @@ class MemoryContextProvider(BaseContextProvider):
             source_id: str = "memory",
             confidence: float = 1.0,
             ttl: Union[int, None] = None,
+            ocr_metadata: Optional[OCRMetadata] = None,
     ) -> str:
         """Store a new context entry and notify subscribers."""
         context_id = str(uuid.uuid4())
@@ -35,6 +37,7 @@ class MemoryContextProvider(BaseContextProvider):
             roles=(metadata or {}).get("roles", []),
             situations=(metadata or {}).get("situations", []),
             content=(metadata or {}).get("content", ""),
+            ocr_metadata=ocr_metadata,
         )
         self.cache.set(context_id, cd, ttl)
         super().publish_context(cd)
@@ -63,4 +66,5 @@ class MemoryContextProvider(BaseContextProvider):
             "content": cd.content,
             "context": cd.payload,
             "confidence": cd.confidence,
+            "ocr_metadata": cd.ocr_metadata.to_dict() if cd.ocr_metadata else None,
         }

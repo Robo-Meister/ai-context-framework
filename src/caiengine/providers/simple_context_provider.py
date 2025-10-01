@@ -1,9 +1,10 @@
 import uuid
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 import caiengine.objects.context_data as ContextData
 import caiengine.objects.context_query as ContextQuery
+from caiengine.objects.ocr_metadata import OCRMetadata
 from .base_context_provider import BaseContextProvider
 
 
@@ -21,6 +22,7 @@ class SimpleContextProvider(BaseContextProvider):
         metadata: dict | None = None,
         source_id: str = "simple",
         confidence: float = 1.0,
+        ocr_metadata: Optional[OCRMetadata] = None,
     ) -> str:
         context_id = str(uuid.uuid4())
         cd = ContextData.ContextData(
@@ -32,6 +34,7 @@ class SimpleContextProvider(BaseContextProvider):
             roles=(metadata or {}).get("roles", []),
             situations=(metadata or {}).get("situations", []),
             content=(metadata or {}).get("content", ""),
+            ocr_metadata=ocr_metadata,
         )
         self._data.append(cd)
         super().publish_context(cd)
@@ -57,4 +60,5 @@ class SimpleContextProvider(BaseContextProvider):
             "content": cd.content,
             "context": cd.payload,
             "confidence": cd.confidence,
+            "ocr_metadata": cd.ocr_metadata.to_dict() if cd.ocr_metadata else None,
         }
