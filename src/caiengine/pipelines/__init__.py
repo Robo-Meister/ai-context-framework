@@ -5,6 +5,7 @@ from .question_pipeline import QuestionPipeline
 from .prompt_pipeline import PromptPipeline
 from .intent_pipeline import IntentPipeline
 from .configurable_pipeline import ConfigurablePipeline
+from .svg_layer_pipeline import SvgLayerPipeline
 
 try:
     from .feedback_pipeline import FeedbackPipeline
@@ -19,6 +20,7 @@ __all__ = [
     "PromptPipeline",
     "IntentPipeline",
     "ConfigurablePipeline",
+    "SvgLayerPipeline",
 ]
 if FeedbackPipeline is not None:
     __all__.insert(1, "FeedbackPipeline")

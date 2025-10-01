@@ -83,3 +83,14 @@ these instructions with a deterministic SVG manipulation library (such as
 
 With these pieces in place, the framework can extend the same context-driven
 workflow it uses for text to orchestrate layered, editable SVG artwork.
+
+## Reference Pipeline
+
+The repository ships with a `SvgLayerPipeline` that automates the steps above.
+It gathers SVG metadata from any context provider, packages it into the
+`visual_assets` channel, asks an inference engine for a JSON plan, and
+post-processes the response so only resolvable layers remain. Bounding boxes
+defined in the metadata are merged into the final plan so downstream tooling can
+position fragments deterministically. See
+`src/caiengine/pipelines/svg_layer_pipeline.py` for the implementation and
+`tests/test_svg_layer_pipeline.py` for usage examples.
