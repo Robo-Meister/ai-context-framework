@@ -1,5 +1,6 @@
 import json
-from typing import Dict
+from datetime import datetime
+from typing import Dict, Mapping
 
 from caiengine.interfaces.inference_engine import AIInferenceEngine
 from caiengine.common.token_usage import TokenCounter, TokenUsage
@@ -19,13 +20,22 @@ class TokenUsageTracker(AIInferenceEngine):
         """Naive whitespace tokeniser used for usage accounting."""
         return len(text.split()) if text else 0
 
+    def _normalise_for_json(self, value):
+        if isinstance(value, datetime):
+            return value.isoformat()
+        if isinstance(value, Mapping):
+            return {k: self._normalise_for_json(v) for k, v in value.items()}
+        if isinstance(value, (list, tuple, set)):
+            return [self._normalise_for_json(v) for v in value]
+        return value
+
     # ------------------------------------------------------------------
     # AIInferenceEngine interface
     # ------------------------------------------------------------------
     def infer(self, input_data: Dict) -> Dict:
         result = self.engine.infer(input_data)
-        prompt_tokens = self._count_tokens(json.dumps(input_data))
-        completion_tokens = self._count_tokens(json.dumps(result))
+        prompt_tokens = self._count_tokens(json.dumps(self._normalise_for_json(input_data)))
+        completion_tokens = self._count_tokens(json.dumps(self._normalise_for_json(result)))
         usage = TokenUsage(prompt_tokens, completion_tokens)
         self.counter.add(usage)
         enriched = dict(result)
@@ -37,8 +47,8 @@ class TokenUsageTracker(AIInferenceEngine):
         if "usage" in result:
             self.counter.add(result["usage"])
             return result
-        prompt_tokens = self._count_tokens(json.dumps(input_data))
-        completion_tokens = self._count_tokens(json.dumps(result))
+        prompt_tokens = self._count_tokens(json.dumps(self._normalise_for_json(input_data)))
+        completion_tokens = self._count_tokens(json.dumps(self._normalise_for_json(result)))
         usage = TokenUsage(prompt_tokens, completion_tokens)
         self.counter.add(usage)
         enriched = dict(result)

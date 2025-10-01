@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
+from math import sqrt
 from typing import Dict, List, Optional, Any, Iterable
-import numpy as np
 
 
 @dataclass
@@ -49,21 +49,27 @@ class TrustModule:
         """
         # Convert to vectors aligned by keys
         keys = sorted(set(ctx1.keys()) | set(ctx2.keys()))
-        v1 = np.array([ctx1.get(k, 0.0) for k in keys], dtype=float)
-        v2 = np.array([ctx2.get(k, 0.0) for k in keys], dtype=float)
+        v1 = [float(ctx1.get(k, 0.0)) for k in keys]
+        v2 = [float(ctx2.get(k, 0.0)) for k in keys]
+
+        def _dot(a: List[float], b: List[float]) -> float:
+            return sum(x * y for x, y in zip(a, b))
+
+        def _norm(vec: List[float]) -> float:
+            return sqrt(sum(x * x for x in vec))
 
         if self.distance_method == "cosine":
-            dot_val = float(np.dot(v1, v2))
-            norm1 = np.linalg.norm(v1)
-            norm2 = np.linalg.norm(v2)
+            dot_val = _dot(v1, v2)
+            norm1 = _norm(v1)
+            norm2 = _norm(v2)
             if norm1 == 0 or norm2 == 0:
                 return 0.0
             return dot_val / (norm1 * norm2)
 
         elif self.distance_method == "euclidean":
-            dist = np.linalg.norm(v1 - v2)
-            max_dist = np.sqrt(len(keys))
-            return max(0.0, 1 - dist / max_dist)
+            dist = _norm([x - y for x, y in zip(v1, v2)])
+            max_dist = sqrt(len(keys))
+            return max(0.0, 1 - dist / max_dist) if max_dist else 0.0
 
         else:
             raise ValueError(f"Unsupported distance method: {self.distance_method}")

@@ -4,7 +4,20 @@ import json
 import threading
 from typing import Callable, Dict, Any
 
-from kafka import KafkaProducer, KafkaConsumer
+try:  # pragma: no cover - optional dependency
+    from kafka import KafkaProducer, KafkaConsumer  # type: ignore
+except Exception:  # pragma: no cover - provide lightweight fallback
+    class KafkaProducer:  # type: ignore[misc]
+        def __init__(self, *args, **kwargs):
+            raise RuntimeError(
+                "The 'kafka-python' package is required to use KafkaPubSubChannel"
+            )
+
+    class KafkaConsumer:  # type: ignore[misc]
+        def __init__(self, *args, **kwargs):
+            raise RuntimeError(
+                "The 'kafka-python' package is required to use KafkaPubSubChannel"
+            )
 
 from caiengine.interfaces.communication_channel import CommunicationChannel
 

@@ -1,22 +1,15 @@
 from __future__ import annotations
 
 import logging
+import math
 import re
 from collections import Counter
 from datetime import datetime
 from typing import Iterable, Mapping, Sequence
 
-try:  # pragma: no cover - optional dependency
-    import torch
-    from torch import nn
-    from torch.nn import functional as F
-except ImportError:  # pragma: no cover - optional dependency
-    torch = None
-    nn = None
-    F = None
-
 from caiengine.interfaces.context_provider import ContextProvider
 from caiengine.core.text_embeddings import HashingTextEmbedder
+from caiengine.core.vector_normalizer.vector_comparer import VectorComparer
 
 logger = logging.getLogger(__name__)
 
@@ -98,60 +91,21 @@ class NeuralKeywordCategorizer:
         categories_keywords: Mapping[str, Sequence[str]] | None = None,
         *,
         unknown_category: str = "unknown",
-        device: str | torch.device | None = None,
+        device: object | None = None,
         category_bias: Mapping[str, float] | None = None,
     ) -> None:
-        if torch is None:  # pragma: no cover - defensive guard
-            raise ImportError("PyTorch is required for NeuralKeywordCategorizer")
-
-        self.device = torch.device(device or "cpu")
-        self.unknown_category = unknown_category
+        del device  # retained for API compatibility
 
         raw_map = categories_keywords or self.DEFAULT_CATEGORY_KEYWORDS
         if not raw_map:
             raise ValueError("categories_keywords must define at least one category")
 
+        self.unknown_category = unknown_category
         self.category_to_keywords = {
             category: tuple(sorted({kw.lower() for kw in keywords}))
             for category, keywords in raw_map.items()
         }
-        self.categories = tuple(self.category_to_keywords.keys())
-        self.keyword_to_index = self._build_vocabulary(self.category_to_keywords)
-
-        self.model = nn.Linear(len(self.keyword_to_index), len(self.categories))
-        self.model.to(self.device)
-        self.model.eval()
-
-        self._initialise_weights(category_bias)
-
-    @staticmethod
-    def _build_vocabulary(
-        category_map: Mapping[str, Sequence[str]]
-    ) -> Mapping[str, int]:
-        vocab = {}
-        for keywords in category_map.values():
-            for keyword in keywords:
-                if keyword not in vocab:
-                    vocab[keyword] = len(vocab)
-        if not vocab:
-            raise ValueError("No keywords provided for neural categorizer")
-        return vocab
-
-    def _initialise_weights(
-        self, category_bias: Mapping[str, float] | None
-    ) -> None:
-        with torch.no_grad():
-            self.model.weight.zero_()
-            self.model.bias.zero_()
-
-            for category, keywords in self.category_to_keywords.items():
-                category_idx = self.categories.index(category)
-                for keyword in keywords:
-                    keyword_idx = self.keyword_to_index[keyword]
-                    self.model.weight[category_idx, keyword_idx] = 1.0
-
-                if category_bias and category in category_bias:
-                    self.model.bias[category_idx] = category_bias[category]
+        self.category_bias = {k: float(v) for k, v in (category_bias or {}).items()}
 
     @staticmethod
     def _iter_text_fragments(item: Mapping) -> Iterable[str]:
@@ -177,13 +131,6 @@ class NeuralKeywordCategorizer:
     def _tokenise(text: str) -> Iterable[str]:
         return re.findall(r"[\w']+", text.lower())
 
-    def _encode(self, tokens: Iterable[str]) -> torch.Tensor:
-        counts = Counter(token for token in tokens if token in self.keyword_to_index)
-        vector = torch.zeros(len(self.keyword_to_index), dtype=torch.float32)
-        for token, count in counts.items():
-            vector[self.keyword_to_index[token]] = float(count)
-        return vector.to(self.device)
-
     def score_item(self, item: Mapping) -> dict[str, float]:
         """Return per-category probabilities for the provided ``item``."""
 
@@ -195,16 +142,19 @@ class NeuralKeywordCategorizer:
         if not tokens:
             return {}
 
-        features = self._encode(tokens)
+        counts = Counter(tokens)
+        raw_scores: dict[str, float] = {}
+        for category, keywords in self.category_to_keywords.items():
+            score = sum(counts.get(keyword, 0) for keyword in keywords)
+            score += self.category_bias.get(category, 0.0)
+            if score > 0:
+                raw_scores[category] = float(score)
 
-        with torch.no_grad():
-            logits = self.model(features)
-            probabilities = torch.softmax(logits, dim=0)
+        if not raw_scores:
+            return {}
 
-        return {
-            category: probabilities[idx].item()
-            for idx, category in enumerate(self.categories)
-        }
+        total = sum(raw_scores.values())
+        return {category: score / total for category, score in raw_scores.items()}
 
     def categorize(self, item: Mapping) -> dict[str, object]:
         """Categorise ``item`` and return the best match with confidences."""
@@ -242,12 +192,11 @@ class NeuralEmbeddingCategorizer:
         *,
         embedder: HashingTextEmbedder | None = None,
         unknown_category: str = "unknown",
-        device: str | torch.device | None = None,
+        device: object | None = None,
         temperature: float = 1.0,
         normalise_prototypes: bool = True,
     ) -> None:
-        if torch is None or nn is None or F is None:  # pragma: no cover - guard
-            raise ImportError("PyTorch is required for NeuralEmbeddingCategorizer")
+        del device  # retained for API compatibility
 
         if not category_examples:
             raise ValueError("category_examples must define at least one category")
@@ -255,14 +204,13 @@ class NeuralEmbeddingCategorizer:
         if temperature <= 0:
             raise ValueError("temperature must be a positive value")
 
-        self.device = torch.device(device or "cpu")
         self.embedder = embedder or HashingTextEmbedder()
         self.unknown_category = unknown_category
         self.temperature = float(temperature)
+        self.normalise_prototypes = normalise_prototypes
+        self.comparer = VectorComparer()
 
-        categories: list[str] = []
-        prototype_vectors: list[torch.Tensor] = []
-
+        self.prototypes: dict[str, list[float]] = {}
         for category, examples in category_examples.items():
             example_list = list(examples)
             if not example_list:
@@ -270,32 +218,13 @@ class NeuralEmbeddingCategorizer:
                     f"Category '{category}' must include at least one training example"
                 )
 
-            embedded_examples: list[torch.Tensor] = []
-            for example in example_list:
-                vector = torch.tensor(
-                    self.embedder.embed(str(example)), dtype=torch.float32
-                )
-                embedded_examples.append(vector)
-
-            stacked = torch.stack(embedded_examples)
-            prototype = stacked.mean(dim=0)
-            if normalise_prototypes:
-                norm = torch.linalg.vector_norm(prototype)
-                if norm > 0:
-                    prototype = prototype / norm
-
-            categories.append(category)
-            prototype_vectors.append(prototype)
-
-        weight = torch.stack(prototype_vectors)
-
-        self.categories = tuple(categories)
-        self.model = nn.Linear(weight.shape[1], len(self.categories), bias=False)
-        self.model.to(self.device)
-        self.model.eval()
-
-        with torch.no_grad():
-            self.model.weight.copy_(weight.to(self.device))
+            embedded_examples = [
+                self.embedder.embed(str(example)) for example in example_list
+            ]
+            prototype = self._average_vectors(embedded_examples)
+            if self.normalise_prototypes:
+                prototype = self._normalise_vector(prototype)
+            self.prototypes[category] = prototype
 
     @staticmethod
     def _gather_fragments(item: Mapping) -> list[str]:
@@ -305,7 +234,7 @@ class NeuralEmbeddingCategorizer:
                 fragments.append(fragment)
         return fragments
 
-    def _encode(self, item: Mapping) -> torch.Tensor | None:
+    def _encode(self, item: Mapping) -> list[float] | None:
         fragments = self._gather_fragments(item)
         if not fragments:
             return None
@@ -313,8 +242,28 @@ class NeuralEmbeddingCategorizer:
         text = " ".join(fragments)
         context = item.get("context")
         features = self.embedder.embed(text, context=context)
-        tensor = torch.tensor(features, dtype=torch.float32, device=self.device)
-        return tensor
+        if self.normalise_prototypes:
+            return self._normalise_vector(features)
+        return features
+
+    @staticmethod
+    def _average_vectors(vectors: Sequence[Sequence[float]]) -> list[float]:
+        length = len(vectors[0])
+        sums = [0.0] * length
+        for vector in vectors:
+            if len(vector) != length:
+                raise ValueError("All embeddings must share the same dimensionality")
+            for idx, value in enumerate(vector):
+                sums[idx] += float(value)
+        count = float(len(vectors))
+        return [value / count for value in sums]
+
+    @staticmethod
+    def _normalise_vector(vector: Sequence[float]) -> list[float]:
+        norm = math.sqrt(sum(float(v) * float(v) for v in vector))
+        if norm == 0:
+            return [0.0 for _ in vector]
+        return [float(v) / norm for v in vector]
 
     def score_item(self, item: Mapping) -> dict[str, float]:
         """Return per-category probabilities for ``item``."""
@@ -323,14 +272,18 @@ class NeuralEmbeddingCategorizer:
         if features is None:
             return {}
 
-        with torch.no_grad():
-            logits = self.model(features)
-            probabilities = F.softmax(logits / self.temperature, dim=0)
+        raw_scores: dict[str, float] = {}
+        for category, prototype in self.prototypes.items():
+            similarity = self.comparer.cosine_similarity(features, prototype)
+            adjusted = max(0.0, similarity) ** (1.0 / self.temperature)
+            if adjusted > 0:
+                raw_scores[category] = adjusted
 
-        return {
-            category: probabilities[idx].item()
-            for idx, category in enumerate(self.categories)
-        }
+        if not raw_scores:
+            return {}
+
+        total = sum(raw_scores.values())
+        return {category: score / total for category, score in raw_scores.items()}
 
     def categorize(self, item: Mapping) -> dict[str, object]:
         """Categorise ``item`` using the embedding network."""
