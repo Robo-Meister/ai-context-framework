@@ -3,7 +3,16 @@
 import json
 from typing import Callable, Dict, Any
 
-from redis import Redis
+try:  # pragma: no cover - optional dependency
+    from redis import Redis  # type: ignore
+except Exception:  # pragma: no cover - provide lightweight fallback
+    class Redis:  # type: ignore[misc]
+        """Fallback Redis stub used when the real package is unavailable."""
+
+        def __init__(self, *args, **kwargs):  # noqa: D401 - short message
+            raise RuntimeError(
+                "The 'redis' package is required to use RedisPubSubChannel"
+            )
 
 from caiengine.interfaces.communication_channel import CommunicationChannel
 
