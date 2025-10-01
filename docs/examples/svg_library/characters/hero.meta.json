@@ -1,0 +1,25 @@
+{
+  "summary": "Hero character facing forward with cape fluttering.",
+  "groups": [
+    {
+      "id": "hero_character/body",
+      "role": "primary figure",
+      "bounding_box": { "x": 70, "y": 60, "width": 60, "height": 100 }
+    },
+    {
+      "id": "hero_character/cape",
+      "role": "dynamic cape",
+      "bounding_box": { "x": 60, "y": 120, "width": 80, "height": 100 }
+    },
+    {
+      "id": "hero_character/emblem",
+      "role": "chest emblem",
+      "bounding_box": { "x": 90, "y": 130, "width": 20, "height": 20 }
+    }
+  ],
+  "palette_tokens": ["--skin", "--cape", "--suit", "--accent"],
+  "recommended_usage": [
+    "Foreground hero in promotional art",
+    "Character callout layer"
+  ]
+}

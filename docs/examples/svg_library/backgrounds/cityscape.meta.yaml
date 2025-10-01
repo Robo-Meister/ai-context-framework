@@ -1,0 +1,19 @@
+summary: Atmospheric city skyline gradient background.
+groups:
+  - id: cityscape/background
+    role: sky gradient backdrop
+    bounding_box: { x: 0, y: 0, width: 320, height: 200 }
+  - id: cityscape/buildings-back
+    role: mid-distance silhouettes
+    bounding_box: { x: 20, y: 70, width: 240, height: 130 }
+  - id: cityscape/buildings-front
+    role: foreground buildings
+    bounding_box: { x: 70, y: 100, width: 220, height: 100 }
+palette_tokens:
+  - --building-dark
+  - --building-mid
+  - --building-light
+  - sky-gradient
+recommended_usage:
+  - Wide background plate for hero scenes
+  - Layer to pair with character foregrounds

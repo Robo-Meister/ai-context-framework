@@ -84,6 +84,15 @@ these instructions with a deterministic SVG manipulation library (such as
 With these pieces in place, the framework can extend the same context-driven
 workflow it uses for text to orchestrate layered, editable SVG artwork.
 
+## Example Asset Library
+
+For a concrete illustration of these conventions, see the sample library under
+[`docs/examples/svg_library`](./examples/svg_library/). It contains characters,
+backgrounds, and effects SVGs grouped semantically, paired with JSON or YAML
+metadata that encodes summaries, palette tokens, and bounding boxes. The
+accompanying README shows how to translate the metadata into a context packet
+and a model-generated layer plan.
+
 ## Reference Pipeline
 
 The repository ships with a `SvgLayerPipeline` that automates the steps above.
