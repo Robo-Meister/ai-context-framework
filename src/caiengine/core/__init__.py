@@ -12,7 +12,11 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
     from .context_hooks import ContextHookManager, ContextHook
     from .fuser import Fuser
     from .policy_evaluator import PolicyEvaluator
-    from .categorizer import Categorizer, NeuralKeywordCategorizer
+    from .categorizer import (
+        Categorizer,
+        NeuralKeywordCategorizer,
+        NeuralEmbeddingCategorizer,
+    )
     from .text_embeddings import (
         SimpleTextCategorizer,
         HashingTextEmbedder,
@@ -43,6 +47,7 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         "PolicyEvaluator",
         "Categorizer",
         "NeuralKeywordCategorizer",
+        "NeuralEmbeddingCategorizer",
         "SimpleTextCategorizer",
         "HashingTextEmbedder",
         "TextEmbeddingComparer",

@@ -256,6 +256,28 @@ result = categorizer.categorize(item)
 print(result["category"], result["confidence"])
 ```
 
+### Neural Embedding Categorization
+
+For richer semantic matching initialise ``NeuralEmbeddingCategorizer`` with a
+handful of example phrases per category.  The categorizer builds prototype
+embeddings and returns softmax-normalised confidences without any additional
+training.
+
+```python
+from caiengine.core.categorizer import NeuralEmbeddingCategorizer
+
+categorizer = NeuralEmbeddingCategorizer(
+    {
+        "sales": ("Closing a deal", "Following up with a prospect"),
+        "support": ("Investigating a ticket", "Escalating a customer bug"),
+    }
+)
+
+item = {"content": "Working on an urgent ticket for a key customer"}
+result = categorizer.categorize(item)
+print(result["category"], result["confidence"])
+```
+
 ### Configurable Pipeline
 
 The `ConfigurablePipeline` ties providers, policies and optional feedback loops

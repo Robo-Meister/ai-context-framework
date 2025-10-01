@@ -9,11 +9,14 @@ from typing import Iterable, Mapping, Sequence
 try:  # pragma: no cover - optional dependency
     import torch
     from torch import nn
+    from torch.nn import functional as F
 except ImportError:  # pragma: no cover - optional dependency
     torch = None
     nn = None
+    F = None
 
 from caiengine.interfaces.context_provider import ContextProvider
+from caiengine.core.text_embeddings import HashingTextEmbedder
 
 logger = logging.getLogger(__name__)
 
@@ -205,6 +208,132 @@ class NeuralKeywordCategorizer:
 
     def categorize(self, item: Mapping) -> dict[str, object]:
         """Categorise ``item`` and return the best match with confidences."""
+
+        scores = self.score_item(item)
+        if not scores:
+            return {
+                "category": self.unknown_category,
+                "confidence": 0.0,
+                "scores": {},
+            }
+
+        best_category = max(scores, key=scores.get)
+        return {
+            "category": best_category,
+            "confidence": scores[best_category],
+            "scores": scores,
+        }
+
+
+class NeuralEmbeddingCategorizer:
+    """Embedding driven categoriser backed by a shallow neural network.
+
+    The categoriser converts text fragments into deterministic embeddings using
+    :class:`~caiengine.core.text_embeddings.HashingTextEmbedder` and projects the
+    result through a single linear layer.  The layer weights are initialised
+    from example texts provided for each category which makes the behaviour
+    immediately useful without additional training while keeping the
+    implementation extensible for fine-tuning.
+    """
+
+    def __init__(
+        self,
+        category_examples: Mapping[str, Sequence[str]],
+        *,
+        embedder: HashingTextEmbedder | None = None,
+        unknown_category: str = "unknown",
+        device: str | torch.device | None = None,
+        temperature: float = 1.0,
+        normalise_prototypes: bool = True,
+    ) -> None:
+        if torch is None or nn is None or F is None:  # pragma: no cover - guard
+            raise ImportError("PyTorch is required for NeuralEmbeddingCategorizer")
+
+        if not category_examples:
+            raise ValueError("category_examples must define at least one category")
+
+        if temperature <= 0:
+            raise ValueError("temperature must be a positive value")
+
+        self.device = torch.device(device or "cpu")
+        self.embedder = embedder or HashingTextEmbedder()
+        self.unknown_category = unknown_category
+        self.temperature = float(temperature)
+
+        categories: list[str] = []
+        prototype_vectors: list[torch.Tensor] = []
+
+        for category, examples in category_examples.items():
+            example_list = list(examples)
+            if not example_list:
+                raise ValueError(
+                    f"Category '{category}' must include at least one training example"
+                )
+
+            embedded_examples: list[torch.Tensor] = []
+            for example in example_list:
+                vector = torch.tensor(
+                    self.embedder.embed(str(example)), dtype=torch.float32
+                )
+                embedded_examples.append(vector)
+
+            stacked = torch.stack(embedded_examples)
+            prototype = stacked.mean(dim=0)
+            if normalise_prototypes:
+                norm = torch.linalg.vector_norm(prototype)
+                if norm > 0:
+                    prototype = prototype / norm
+
+            categories.append(category)
+            prototype_vectors.append(prototype)
+
+        weight = torch.stack(prototype_vectors)
+
+        self.categories = tuple(categories)
+        self.model = nn.Linear(weight.shape[1], len(self.categories), bias=False)
+        self.model.to(self.device)
+        self.model.eval()
+
+        with torch.no_grad():
+            self.model.weight.copy_(weight.to(self.device))
+
+    @staticmethod
+    def _gather_fragments(item: Mapping) -> list[str]:
+        fragments = []
+        for fragment in NeuralKeywordCategorizer._iter_text_fragments(item):
+            if fragment:
+                fragments.append(fragment)
+        return fragments
+
+    def _encode(self, item: Mapping) -> torch.Tensor | None:
+        fragments = self._gather_fragments(item)
+        if not fragments:
+            return None
+
+        text = " ".join(fragments)
+        context = item.get("context")
+        features = self.embedder.embed(text, context=context)
+        tensor = torch.tensor(features, dtype=torch.float32, device=self.device)
+        return tensor
+
+    def score_item(self, item: Mapping) -> dict[str, float]:
+        """Return per-category probabilities for ``item``."""
+
+        features = self._encode(item)
+        if features is None:
+            return {}
+
+        with torch.no_grad():
+            logits = self.model(features)
+            probabilities = F.softmax(logits / self.temperature, dim=0)
+
+        return {
+            category: probabilities[idx].item()
+            for idx, category in enumerate(self.categories)
+        }
+
+    def categorize(self, item: Mapping) -> dict[str, object]:
+        """Categorise ``item`` using the embedding network."""
 
         scores = self.score_item(item)
         if not scores:
