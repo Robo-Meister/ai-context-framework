@@ -59,6 +59,32 @@ OCR metadata:
 This hybrid approach reduces false positives and allows the categorizer to adapt
 as you feed more training data.
 
+### 3.1 Extending the Categorizer for OCR Signals
+
+For tricky OCR documents—such as those with mixed languages, tables embedded as
+images, or heavily rotated scans—augment the categorizer with richer signals so
+it can disambiguate near-duplicate content:
+
+1. **Create OCR-aware features.** In your `ContextItem` payload, add fields that
+   capture layout hints (page numbers, column indexes), language detection
+   results, and OCR confidence scores. These features give the categorizer more
+   than just text similarity when deciding among competing categories.
+2. **Add metadata-based scorers.** Implement a custom `SimilarityScorer` that
+   rewards matches where the OCR metadata aligns with category expectations
+   (e.g., invoices usually contain currency symbols; resumes reference job
+   titles). Register this scorer alongside the default embedding comparer.
+3. **Handle weak OCR predictions.** When the OCR engine emits low-confidence
+   labels, fall back to embedding similarity plus rule-based overrides. This
+   prevents a noisy OCR guess from locking the item into the wrong category.
+4. **Log ambiguous assignments.** Track cases where the categorizer returns
+   multiple candidates with close scores. Review these examples, tune your OCR
+   pipeline (deskewing, contrast boosting), and add new exemplars to narrow the
+   margin over time.
+
+By enriching the categorizer with OCR-specific metadata and feedback, you can
+support documents that would otherwise be misrouted by pure text similarity or
+regex heuristics.
+
 ## 4. Structured Extraction via Inference Engines
 
 Inside your `AIInferenceEngine` implementation:
