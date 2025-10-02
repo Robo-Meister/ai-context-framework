@@ -113,3 +113,43 @@ def test_cai_bridge_auto_dispatches_commands_when_configured():
 
     assert any(cmd["command"] == COMMAND.ESCALATE.value for cmd in result["commands"])
     assert any(command == COMMAND.ESCALATE.value for command, _ in dispatched)
+
+
+def test_cai_bridge_accepts_custom_session_store():
+    class CustomSessionStore:
+        def __init__(self):
+            self.sessions = {}
+
+        def get_session(self, session_id):
+            return self.sessions.setdefault(
+                session_id, {"metadata": {}, "attempts": {}}
+            )
+
+        def update_metadata(self, session_id, updates):
+            session = self.get_session(session_id)
+            session["metadata"].update(updates)
+            return session
+
+        def increment_attempt(self, session_id, goal):
+            session = self.get_session(session_id)
+            attempts = session.setdefault("attempts", {})
+            attempts[goal] = attempts.get(goal, 0) + 1
+            return attempts[goal]
+
+    store = CustomSessionStore()
+    bridge = CAIBridge(
+        goal_state={
+            "session_id": "custom",
+            "qualitative_targets": ["address_churn"],
+        },
+        workflow="marketing",
+        session_store=store,
+    )
+
+    bridge.support_functions()["session_context"]("custom", {"stage": "trial"})
+    assert store.sessions["custom"]["metadata"]["stage"] == "trial"
+
+    history = [{"role": "customer", "content": "I will cancel"}]
+    bridge.suggest(history, [{}])
+
+    assert store.sessions["custom"]["attempts"]["address_churn"] == 1
