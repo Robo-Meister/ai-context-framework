@@ -1,0 +1,23 @@
+summary: Warm desert canyon with layered mesas and sunlit dunes.
+groups:
+  - id: desert_canyon/sky
+    role: dawn sky gradient with soft sun
+    bounding_box: { x: 0, y: 0, width: 320, height: 120 }
+  - id: desert_canyon/mesas-back
+    role: distant mesas for parallax depth
+    bounding_box: { x: 0, y: 90, width: 320, height: 110 }
+  - id: desert_canyon/mesas-front
+    role: midground rock formations
+    bounding_box: { x: 0, y: 110, width: 320, height: 100 }
+  - id: desert_canyon/sand
+    role: foreground dune sweep
+    bounding_box: { x: 0, y: 150, width: 320, height: 50 }
+palette_tokens:
+  - --sky-dawn
+  - --sky-horizon
+  - --rock-sunlit
+  - --rock-shadow
+  - --sand-light
+recommended_usage:
+  - Adventure or sci-fi desert backdrop
+  - Combine with hover vehicles or explorers for cinematic depth

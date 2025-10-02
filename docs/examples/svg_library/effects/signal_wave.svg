@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <defs>
+    <radialGradient id="signal-core" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="var(--core-bright, #7af6ff)" />
+      <stop offset="70%" stop-color="var(--core-mid, #2fb7d6)" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="var(--core-dark, #0c3f5a)" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <g id="signal_wave/core">
+    <circle cx="120" cy="120" r="36" fill="url(#signal-core)" />
+    <circle cx="120" cy="120" r="18" fill="var(--core-highlight, #caffff)" opacity="0.4" />
+  </g>
+  <g id="signal_wave/rings">
+    <circle cx="120" cy="120" r="58" fill="none" stroke="var(--ring-primary, #4fe3ff)" stroke-width="6" opacity="0.7" />
+    <circle cx="120" cy="120" r="86" fill="none" stroke="var(--ring-secondary, #36b6e2)" stroke-width="5" opacity="0.45" stroke-dasharray="12 10" />
+    <circle cx="120" cy="120" r="112" fill="none" stroke="var(--ring-tertiary, #1c7aa0)" stroke-width="4" opacity="0.3" stroke-dasharray="6 16" />
+  </g>
+  <g id="signal_wave/flares">
+    <path d="M120 34 l8 24 h-16z" fill="var(--flare, #b8f4ff)" opacity="0.5" />
+    <path d="M206 120 l-24 8 v-16z" fill="var(--flare, #b8f4ff)" opacity="0.5" />
+    <path d="M120 206 l-8 -24 h16z" fill="var(--flare, #b8f4ff)" opacity="0.45" />
+    <path d="M34 120 l24 -8 v16z" fill="var(--flare, #b8f4ff)" opacity="0.45" />
+  </g>
+</svg>

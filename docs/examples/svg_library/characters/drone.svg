@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <style>
+      :root {
+        --shell: #4f5d75;
+        --shell-light: #7b88a8;
+        --energy: #4be1ff;
+        --accent: #ffb347;
+      }
+    </style>
+  </defs>
+  <g id="scout_drone/body">
+    <ellipse cx="100" cy="100" rx="48" ry="38" fill="var(--shell)" />
+    <ellipse cx="100" cy="100" rx="40" ry="30" fill="var(--shell-light)" />
+  </g>
+  <g id="scout_drone/eyes">
+    <circle cx="80" cy="100" r="10" fill="#0c1b2a" />
+    <circle cx="120" cy="100" r="10" fill="#0c1b2a" />
+    <circle cx="80" cy="100" r="6" fill="var(--energy)" />
+    <circle cx="120" cy="100" r="6" fill="var(--energy)" />
+  </g>
+  <g id="scout_drone/emitter" opacity="0.85">
+    <ellipse cx="100" cy="130" rx="18" ry="8" fill="var(--energy)" />
+  </g>
+  <g id="scout_drone/wings" opacity="0.6">
+    <path d="M52 96c-18-10-28-6-28-6 0 0 18 30 46 30l-18-24z" fill="var(--accent)" />
+    <path d="M148 96c18-10 28-6 28-6 0 0-18 30-46 30l18-24z" fill="var(--accent)" />
+  </g>
+</svg>

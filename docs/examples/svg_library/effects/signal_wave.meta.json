@@ -1,0 +1,31 @@
+{
+  "summary": "Radiating signal wave effect with concentric rings and flares.",
+  "groups": [
+    {
+      "id": "signal_wave/core",
+      "role": "central emission source",
+      "bounding_box": { "x": 84, "y": 84, "width": 72, "height": 72 }
+    },
+    {
+      "id": "signal_wave/rings",
+      "role": "expanding energy rings",
+      "bounding_box": { "x": 24, "y": 24, "width": 192, "height": 192 }
+    },
+    {
+      "id": "signal_wave/flares",
+      "role": "directional burst accents",
+      "bounding_box": { "x": 24, "y": 24, "width": 192, "height": 192 }
+    }
+  ],
+  "palette_tokens": [
+    "--core-bright",
+    "--ring-primary",
+    "--ring-secondary",
+    "--ring-tertiary",
+    "--flare"
+  ],
+  "recommended_usage": [
+    "Layer behind characters to suggest communications or sonar",
+    "Blend with sci-fi interfaces as a looping signal motif"
+  ]
+}
