@@ -45,9 +45,10 @@ class CAIBridge:
         one_direction_layers: Optional[List[str]] | None = None,
         workflow: str | None = None,
         marketing_config: Optional[Dict[str, Any]] = None,
+        session_store: Optional[Any] = None,
     ) -> None:
         self.goal_state = goal_state or {}
-        self._session_store = _SessionContextStore()
+        self._session_store = session_store or _SessionContextStore()
         self._connector_registry: Any | None = None
         self._persona_loader: Optional[Callable[[str], Dict[str, Any]]] = None
         self._active_persona: Optional[Dict[str, Any]] = None
