@@ -1,6 +1,8 @@
 import json
 from datetime import datetime, timedelta
 
+import pytest
+
 from caiengine.objects.context_query import ContextQuery
 from caiengine.pipelines.svg_layer_pipeline import SvgLayerPipeline
 from caiengine.providers.memory_context_provider import MemoryContextProvider
@@ -24,6 +26,25 @@ def _query_window():
         time_range=(now - timedelta(seconds=1), now + timedelta(seconds=1)),
         scope="visual_assets",
         data_type="svg",
+    )
+
+
+def _ingest_basic_asset(provider):
+    now = datetime.utcnow()
+    provider.ingest_context(
+        {
+            "name": "characters/hero",
+            "path": "characters/hero.svg",
+            "summary": "Hero base asset",
+            "layers": [
+                {
+                    "id": "pose-1",
+                    "purpose": "Hero base pose",
+                    "aliases": ["default_pose"],
+                }
+            ],
+        },
+        timestamp=now,
     )
 
 
@@ -115,3 +136,54 @@ def test_svg_layer_pipeline_parses_string_payload():
     result = pipeline.generate("Add morning glow", window)
 
     assert result["plan"]["layers"][0]["asset_name"] == "effects/sun_glow"
+
+
+def test_svg_layer_pipeline_passes_canvas_and_constraints():
+    provider = MemoryContextProvider()
+    window = _query_window()
+    _ingest_basic_asset(provider)
+
+    plan = {"layers": []}
+    engine = RecordingEngine(plan)
+    pipeline = SvgLayerPipeline(provider, engine)
+
+    canvas = {"width": 1024, "height": 768}
+    constraints = {"max_layers": 5}
+
+    pipeline.generate(
+        "Compose hero portrait",
+        window,
+        canvas=canvas,
+        constraints=constraints,
+    )
+
+    assert engine.last_input["canvas"] == canvas
+    assert engine.last_input["constraints"] == constraints
+
+
+def test_svg_layer_pipeline_rejects_empty_plan_string():
+    provider = MemoryContextProvider()
+    window = _query_window()
+    _ingest_basic_asset(provider)
+
+    engine = RecordingEngine("   ")
+    pipeline = SvgLayerPipeline(provider, engine)
+
+    with pytest.raises(ValueError) as exc:
+        pipeline.generate("Invalid plan", window)
+
+    assert "empty plan string" in str(exc.value)
+
+
+def test_svg_layer_pipeline_rejects_invalid_json_plan():
+    provider = MemoryContextProvider()
+    window = _query_window()
+    _ingest_basic_asset(provider)
+
+    engine = RecordingEngine({"result": "{not json}"})
+    pipeline = SvgLayerPipeline(provider, engine)
+
+    with pytest.raises(ValueError) as exc:
+        pipeline.generate("Invalid json", window)
+
+    assert "invalid JSON plan" in str(exc.value)
