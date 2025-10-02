@@ -1,0 +1,30 @@
+{
+  "summary": "Compact scout drone with expressive lenses and energy emitter.",
+  "groups": [
+    {
+      "id": "scout_drone/body",
+      "role": "primary chassis",
+      "bounding_box": { "x": 52, "y": 62, "width": 96, "height": 76 }
+    },
+    {
+      "id": "scout_drone/eyes",
+      "role": "dual optical sensors",
+      "bounding_box": { "x": 70, "y": 90, "width": 60, "height": 20 }
+    },
+    {
+      "id": "scout_drone/emitter",
+      "role": "downward light emitter",
+      "bounding_box": { "x": 82, "y": 122, "width": 36, "height": 16 }
+    },
+    {
+      "id": "scout_drone/wings",
+      "role": "hovering fins",
+      "bounding_box": { "x": 20, "y": 80, "width": 160, "height": 50 }
+    }
+  ],
+  "palette_tokens": ["--shell", "--shell-light", "--energy", "--accent"],
+  "recommended_usage": [
+    "Secondary character companion",
+    "Foreground hover element for tech scenes"
+  ]
+}

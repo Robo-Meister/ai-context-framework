@@ -13,12 +13,24 @@ svg_library/
   characters/
     hero.svg
     hero.meta.json
+    drone.svg
+    drone.meta.json
+    field_medic.svg
+    field_medic.meta.json
   backgrounds/
     cityscape.svg
     cityscape.meta.yaml
+    forest_glade.svg
+    forest_glade.meta.yaml
+    desert_canyon.svg
+    desert_canyon.meta.yaml
   effects/
     sun_glow.svg
     sun_glow.meta.json
+    energy_ring.svg
+    energy_ring.meta.json
+    signal_wave.svg
+    signal_wave.meta.json
 ```
 
 Each SVG is organised into semantic `<g>` groups whose `id` attributes encode
@@ -28,7 +40,10 @@ prompts can reference reusable colour schemes without editing raw hex values.
 The metadata sidecars summarise the visual intent of each group, record bounding
 box hints, and list any palettes or blend modes that downstream tools should
 apply. These files can be ingested into a context map under a `visual_assets`
-channel so the language model can plan compositions.
+channel so the language model can plan compositions. The expanded library now
+covers nature and desert backdrops, multiple support characters, and layered
+energy effects so the prompting examples can show how to mix and match multiple
+styles.
 
 ## Sample Context Packet Entry
 

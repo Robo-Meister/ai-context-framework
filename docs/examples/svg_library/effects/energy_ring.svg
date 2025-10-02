@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <radialGradient id="ring-core" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(75, 225, 255, 0.9)" />
+      <stop offset="60%" stop-color="rgba(75, 225, 255, 0.2)" />
+      <stop offset="100%" stop-color="rgba(75, 225, 255, 0)" />
+    </radialGradient>
+    <style>
+      :root {
+        --ring-highlight: rgba(255, 255, 255, 0.8);
+        --ring-accent: rgba(0, 198, 255, 0.9);
+      }
+    </style>
+  </defs>
+  <g id="energy_ring/base-glow" opacity="0.75">
+    <circle cx="100" cy="100" r="82" fill="url(#ring-core)" />
+  </g>
+  <g id="energy_ring/inner-ring">
+    <circle cx="100" cy="100" r="58" fill="none" stroke="var(--ring-accent)" stroke-width="6" stroke-dasharray="18 12" />
+  </g>
+  <g id="energy_ring/outer-ring" opacity="0.6">
+    <circle cx="100" cy="100" r="92" fill="none" stroke="var(--ring-highlight)" stroke-width="4" stroke-dasharray="8 10" />
+  </g>
+  <g id="energy_ring/sparks">
+    <circle cx="60" cy="60" r="4" fill="var(--ring-highlight)" />
+    <circle cx="142" cy="46" r="3" fill="var(--ring-highlight)" />
+    <circle cx="158" cy="132" r="4" fill="var(--ring-highlight)" />
+    <circle cx="44" cy="128" r="3" fill="var(--ring-highlight)" />
+  </g>
+</svg>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <defs>
+    <linearGradient id="glade-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#87d4ff" />
+      <stop offset="100%" stop-color="#f3fff5" />
+    </linearGradient>
+    <style>
+      :root {
+        --tree-deep: #1f4b2c;
+        --tree-mid: #2f6b3a;
+        --tree-light: #4d8f55;
+        --meadow: #c9e6a0;
+      }
+    </style>
+  </defs>
+  <g id="forest_glade/sky">
+    <rect x="0" y="0" width="320" height="200" fill="url(#glade-sky)" />
+  </g>
+  <g id="forest_glade/tree-line-back" opacity="0.8">
+    <path d="M0 140c20-30 40-30 60 0s40 30 60 0 40-30 60 0 40 30 60 0 40-30 80 0v60H0z" fill="var(--tree-mid)" />
+  </g>
+  <g id="forest_glade/tree-line-front">
+    <path d="M0 150c25-35 45-35 70 0s45 35 70 0 45-35 70 0 45 35 70 0 45-35 70 0v50H0z" fill="var(--tree-deep)" />
+  </g>
+  <g id="forest_glade/meadow">
+    <rect x="0" y="170" width="320" height="30" fill="var(--meadow)" />
+    <circle cx="40" cy="185" r="8" fill="var(--tree-light)" />
+    <circle cx="110" cy="180" r="6" fill="var(--tree-light)" />
+    <circle cx="200" cy="186" r="7" fill="var(--tree-light)" />
+  </g>
+</svg>

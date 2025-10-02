@@ -1,0 +1,33 @@
+{
+  "summary": "Cyan energy ring with layered glow and sparks for motion accents.",
+  "groups": [
+    {
+      "id": "energy_ring/base-glow",
+      "role": "diffuse energy field",
+      "bounding_box": { "x": 18, "y": 18, "width": 164, "height": 164 }
+    },
+    {
+      "id": "energy_ring/inner-ring",
+      "role": "intense focal ring",
+      "bounding_box": { "x": 42, "y": 42, "width": 116, "height": 116 }
+    },
+    {
+      "id": "energy_ring/outer-ring",
+      "role": "soft highlight rim",
+      "bounding_box": { "x": 12, "y": 12, "width": 176, "height": 176 }
+    },
+    {
+      "id": "energy_ring/sparks",
+      "role": "floating energy sparks",
+      "bounding_box": { "x": 40, "y": 40, "width": 140, "height": 120 }
+    }
+  ],
+  "palette_tokens": ["--ring-highlight", "--ring-accent", "ring-core"],
+  "blend_modes": {
+    "default": "screen"
+  },
+  "recommended_usage": [
+    "Add motion to tech interfaces",
+    "Overlay around characters or artifacts"
+  ]
+}

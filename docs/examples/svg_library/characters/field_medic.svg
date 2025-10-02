@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <defs>
+    <linearGradient id="medic-suit" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="var(--suit-top, #e8f4ff)" />
+      <stop offset="100%" stop-color="var(--suit-base, #a9c8dd)" />
+    </linearGradient>
+    <linearGradient id="medic-pack" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--pack-light, #74b5d6)" />
+      <stop offset="100%" stop-color="var(--pack-dark, #346b8a)" />
+    </linearGradient>
+  </defs>
+  <g id="field_medic/body">
+    <path d="M60 32 q20 -18 40 0 l8 18 v44 q0 18 -12 32 l-16 18 h-12 l-16 -18 q-12 -14 -12 -32 V50z" fill="url(#medic-suit)" stroke="var(--suit-outline, #5c7c92)" stroke-width="2" stroke-linejoin="round" />
+    <rect x="66" y="96" width="28" height="32" rx="12" fill="var(--suit-core, #7ea2b8)" opacity="0.6" />
+  </g>
+  <g id="field_medic/visor">
+    <path d="M58 48 q22 -20 44 0 q-6 16 -22 16 q-16 0 -22 -16z" fill="var(--visor-glow, #3ed0ff)" opacity="0.85" />
+    <path d="M62 48 q16 -12 32 0" fill="none" stroke="var(--visor-highlight, #b7f3ff)" stroke-width="3" stroke-linecap="round" />
+  </g>
+  <g id="field_medic/pack">
+    <rect x="42" y="58" width="18" height="44" rx="8" fill="url(#medic-pack)" />
+    <rect x="100" y="58" width="18" height="44" rx="8" fill="url(#medic-pack)" />
+    <rect x="54" y="44" width="52" height="16" rx="8" fill="var(--pack-link, #4f88a7)" />
+    <path d="M58 66 h12 v12 h-12z" fill="var(--pack-badge, #ff6f6f)" />
+    <path d="M94 66 h12 v12 h-12z" fill="var(--pack-badge, #ff6f6f)" />
+  </g>
+  <g id="field_medic/accents">
+    <path d="M74 120 l6 12 l6 -12" fill="none" stroke="var(--accent-line, #ff9f6f)" stroke-width="3" stroke-linecap="round" />
+    <circle cx="60" cy="104" r="4" fill="var(--indicator, #ffe7a0)" />
+    <circle cx="100" cy="104" r="4" fill="var(--indicator, #ffe7a0)" />
+  </g>
+</svg>
