@@ -6,6 +6,7 @@ from .prompt_pipeline import PromptPipeline
 from .intent_pipeline import IntentPipeline
 from .configurable_pipeline import ConfigurablePipeline
 from .svg_layer_pipeline import SvgLayerPipeline
+from .svg_layer_actions import SvgActionPlanner, build_svg_action_plan
 
 try:
     from .feedback_pipeline import FeedbackPipeline
@@ -21,6 +22,8 @@ __all__ = [
     "IntentPipeline",
     "ConfigurablePipeline",
     "SvgLayerPipeline",
+    "SvgActionPlanner",
+    "build_svg_action_plan",
 ]
 if FeedbackPipeline is not None:
     __all__.insert(1, "FeedbackPipeline")
