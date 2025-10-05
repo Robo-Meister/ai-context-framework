@@ -103,7 +103,7 @@ class FileContextProvider:
         source_id: str = "file",
         confidence: float = 1.0,
     ):
-        self.ingest_context(payload, timestamp, metadata, source_id, confidence)
+        return self.ingest_context(payload, timestamp, metadata, source_id, confidence)
 
     def _to_dict(self, cd: ContextData) -> dict:
         return {
