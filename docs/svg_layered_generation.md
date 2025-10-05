@@ -103,3 +103,12 @@ defined in the metadata are merged into the final plan so downstream tooling can
 position fragments deterministically. See
 `src/caiengine/pipelines/svg_layer_pipeline.py` for the implementation and
 `tests/test_svg_layer_pipeline.py` for usage examples.
+
+### Converting plans into layer actions
+
+Once a plan has been validated you can feed it into `SvgActionPlanner` to obtain
+an ordered list of explicit actions. Each entry is tagged as an `add`,
+`transform`, `remove`, or `update` command and includes the resolved asset
+fragment, bounding boxes, inline SVG payloads, and any requested transforms.
+This keeps the orchestration service focused on high-level intent while your
+SVG manipulation layer performs precise DOM edits or compositing work.【F:src/caiengine/pipelines/svg_layer_actions.py†L1-L247】【F:tests/test_svg_layer_actions.py†L1-L123】
