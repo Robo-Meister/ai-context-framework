@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import pytest
 
 from caiengine.objects.context_query import ContextQuery
+from caiengine.pipelines.svg_layer_actions import SvgActionPlanner
 from caiengine.pipelines.svg_layer_pipeline import SvgLayerPipeline
 from caiengine.providers.memory_context_provider import MemoryContextProvider
 from caiengine.interfaces.inference_engine import AIInferenceEngine
@@ -187,3 +188,91 @@ def test_svg_layer_pipeline_rejects_invalid_json_plan():
         pipeline.generate("Invalid json", window)
 
     assert "invalid JSON plan" in str(exc.value)
+
+
+def test_svg_layer_pipeline_end_to_end_layer_actions(tmp_path):
+    provider = MemoryContextProvider()
+    window = _query_window()
+
+    asset_dir = tmp_path / "characters"
+    asset_dir.mkdir()
+    svg_path = asset_dir / "hero.svg"
+    svg_path.write_text(
+        """
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+            <g id="pose">
+                <rect x="10" y="10" width="30" height="80" fill="#ff0000" />
+            </g>
+            <g id="shadow">
+                <ellipse cx="40" cy="90" rx="30" ry="8" fill="#00000055" />
+            </g>
+        </svg>
+        """.strip(),
+        encoding="utf-8",
+    )
+
+    now = datetime.utcnow()
+    provider.ingest_context(
+        {
+            "name": "characters/hero",
+            "path": "characters/hero.svg",
+            "summary": "Hero figure with shadow",
+            "layers": [
+                {"id": "pose", "purpose": "Primary silhouette"},
+                {"id": "shadow", "purpose": "Cast shadow"},
+            ],
+            "bounding_boxes": {
+                "pose": [10, 10, 40, 90],
+                "shadow": [10, 82, 70, 98],
+            },
+        },
+        timestamp=now,
+        metadata={"roles": ["visual_assets"]},
+    )
+
+    plan_payload = {
+        "plan": {
+            "layers": [
+                {
+                    "layer_id": "pose-layer",
+                    "source": "characters/hero.svg#pose",
+                    "translate": [5, -2],
+                    "opacity": 0.95,
+                },
+                {
+                    "layer_id": "shadow-layer",
+                    "source": "characters/hero.svg#shadow",
+                    "scale": [1.1, 1.0],
+                    "opacity": 0.6,
+                },
+            ]
+        }
+    }
+
+    engine = RecordingEngine(plan_payload)
+    pipeline = SvgLayerPipeline(provider, engine)
+    result = pipeline.generate("Compose hero with shadow", window)
+
+    validated_layers = result["plan"]["layers"]
+    assert len(validated_layers) == 2
+    assert {layer["fragment_id"] for layer in validated_layers} == {"pose", "shadow"}
+
+    fetch_map = {"characters/hero.svg": svg_path}
+
+    def fetch_asset(path: str) -> str:
+        return fetch_map[path].read_text(encoding="utf-8")
+
+    planner = SvgActionPlanner(asset_fetcher=fetch_asset)
+    actions = planner.build_actions(result["plan"], result["assets"])
+
+    assert len(actions) == 2
+    assert all(action["action"] == "add" for action in actions)
+    assert all("svg_content" in action["asset"] for action in actions)
+
+    composed_svg = "<svg>" + "".join(
+        f"<g id='{action['layer_id']}' data-fragment='{action['asset']['fragment_id']}'></g>"
+        for action in actions
+    ) + "</svg>"
+
+    assert "pose-layer" in composed_svg
+    assert "shadow-layer" in composed_svg
