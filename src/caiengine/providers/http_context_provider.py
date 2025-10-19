@@ -1,4 +1,5 @@
 import json
+import logging
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from datetime import datetime
 from importlib import import_module
@@ -22,13 +23,21 @@ class HTTPContextProvider:
     ):
         self.host = host
         self.port = port
+        self.logger = logging.getLogger(
+            f"{self.__class__.__module__}.{self.__class__.__name__}"
+        )
         self.backend = self._prepare_backend(backend)
         self._server: Optional[HTTPServer] = None
         self._thread: Optional[threading.Thread] = None
 
     def _prepare_backend(self, backend: Optional[object]) -> object:
         if backend is None:
-            return MemoryContextProvider()
+            provider = MemoryContextProvider()
+            self.logger.warning(
+                "HTTPContextProvider defaulting to MemoryContextProvider backend",
+                extra={"backend": "memory"},
+            )
+            return provider
 
         if isinstance(backend, str):
             return self._load_backend_from_path(backend, {})
@@ -70,6 +79,10 @@ class HTTPContextProvider:
                 self.wfile.write(json.dumps(data, default=convert).encode())
 
             def do_POST(self):
+                provider.logger.debug(
+                    "Received context ingestion request",
+                    extra={"path": self.path},
+                )
                 if self.path != "/context":
                     self._respond(404, {"error": "not found"})
                     return
@@ -78,21 +91,41 @@ class HTTPContextProvider:
                 try:
                     payload = json.loads(body)
                 except json.JSONDecodeError:
+                    provider.logger.warning(
+                        "Invalid JSON payload received",
+                        extra={"path": self.path},
+                    )
                     self._respond(400, {"error": "invalid json"})
                     return
 
                 ts_val = payload.get("timestamp")
                 timestamp = datetime.fromisoformat(ts_val) if ts_val else None
-                context_id = provider.backend.ingest_context(
-                    payload.get("payload", {}),
-                    timestamp=timestamp,
-                    metadata=payload.get("metadata"),
-                    source_id=payload.get("source_id", "http"),
-                    confidence=float(payload.get("confidence", 1.0)),
+                try:
+                    context_id = provider.backend.ingest_context(
+                        payload.get("payload", {}),
+                        timestamp=timestamp,
+                        metadata=payload.get("metadata"),
+                        source_id=payload.get("source_id", "http"),
+                        confidence=float(payload.get("confidence", 1.0)),
+                    )
+                except Exception:
+                    provider.logger.exception(
+                        "Backend ingestion failed",
+                        extra={"path": self.path},
+                    )
+                    self._respond(500, {"error": "ingestion failed"})
+                    return
+                provider.logger.info(
+                    "Context ingested via HTTP",
+                    extra={"context_id": context_id},
                 )
                 self._respond(200, {"id": context_id})
 
             def do_GET(self):
+                provider.logger.debug(
+                    "Received context query request",
+                    extra={"path": self.path},
+                )
                 if not self.path.startswith("/context"):
                     self._respond(404, {"error": "not found"})
                     return
@@ -102,7 +135,19 @@ class HTTPContextProvider:
                 start = datetime.fromisoformat(start_s) if start_s else datetime.min
                 end = datetime.fromisoformat(end_s) if end_s else datetime.utcnow()
                 query = ContextQuery(roles=[], time_range=(start, end), scope="", data_type="")
-                data = provider.backend.get_context(query)
+                try:
+                    data = provider.backend.get_context(query)
+                except Exception:
+                    provider.logger.exception(
+                        "Backend query failed",
+                        extra={"path": self.path},
+                    )
+                    self._respond(500, {"error": "query failed"})
+                    return
+                provider.logger.info(
+                    "Context retrieved via HTTP",
+                    extra={"result_count": len(data)},
+                )
                 self._respond(200, data)
 
             def log_message(self, format, *args):  # silence default logging
@@ -117,6 +162,10 @@ class HTTPContextProvider:
         handler = self._make_handler()
         self._server = HTTPServer((self.host, self.port), handler)
         self._thread = threading.Thread(target=self._server.serve_forever, daemon=True)
+        self.logger.info(
+            "Starting HTTP context provider",
+            extra={"host": self.host, "port": self.port},
+        )
         self._thread.start()
 
     def stop(self):
@@ -127,6 +176,10 @@ class HTTPContextProvider:
             self._server.server_close()
             self._server = None
             self._thread = None
+            self.logger.info(
+                "Stopped HTTP context provider",
+                extra={"host": self.host, "port": self.port},
+            )
 
     # ---- Direct API wrappers ------------------------------------------
     def ingest_context(self, *args, **kwargs):

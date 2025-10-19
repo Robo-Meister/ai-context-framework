@@ -1,4 +1,5 @@
 import json
+import logging
 import threading
 import uuid
 from datetime import datetime
@@ -58,12 +59,26 @@ class KafkaContextProvider(BaseContextProvider):
         self._thread: Optional[threading.Thread] = None
         if auto_start:
             self.start()
+        self.logger.info(
+            "Initialized Kafka context provider",
+            extra={
+                "topic": topic,
+                "bootstrap_servers": bootstrap_servers,
+                "publish_topic": publish_topic,
+                "feedback_topic": feedback_topic,
+            },
+        )
 
     # ------------------------------------------------------------------
     def start(self):
         if self._thread:
+            self.logger.debug("Kafka consumer thread already running")
             return
         self._thread = threading.Thread(target=self._consume_loop, daemon=True)
+        self.logger.info(
+            "Starting Kafka consumer thread",
+            extra={"topic": self.topic},
+        )
         self._thread.start()
 
     def stop(self):
@@ -71,6 +86,10 @@ class KafkaContextProvider(BaseContextProvider):
             self.consumer.close()
             self._thread.join()
             self._thread = None
+            self.logger.info(
+                "Stopped Kafka consumer thread",
+                extra={"topic": self.topic},
+            )
 
     def _consume_loop(self):  # pragma: no cover - requires Kafka
         for msg in self.consumer:
@@ -86,6 +105,10 @@ class KafkaContextProvider(BaseContextProvider):
             )
             data = json.loads(value)
         except Exception:
+            self.logger.exception(
+                "Failed to decode Kafka record",
+                extra={"topic": self.topic},
+            )
             return
         timestamp = (
             datetime.fromtimestamp(record.timestamp / 1000.0)
@@ -124,7 +147,10 @@ class KafkaContextProvider(BaseContextProvider):
                 msg = json.dumps({"payload": payload, "metadata": metadata or {}}).encode()
                 self.producer.send(self.publish_topic, msg)
             except Exception:
-                pass
+                self.logger.exception(
+                    "Failed to publish context to Kafka topic",
+                    extra={"publish_topic": self.publish_topic},
+                )
         return context_id
 
     def fetch_context(self, query_params: ContextQuery) -> List[ContextData]:
@@ -159,4 +185,7 @@ class KafkaContextProvider(BaseContextProvider):
         try:
             self.producer.send(self.feedback_topic, json.dumps(message).encode())
         except Exception:
-            pass
+            self.logger.exception(
+                "Failed to send feedback to Kafka",
+                extra={"feedback_topic": self.feedback_topic},
+            )

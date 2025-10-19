@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import uuid
 from typing import Callable, List, Union
@@ -14,21 +15,36 @@ class FileContextProvider:
     def __init__(self, file_path: str):
         self.file_path = file_path
         self.subscribers: dict[SubscriptionHandle, Callable[[ContextData], None]] = {}
+        self.logger = logging.getLogger(
+            f"{self.__class__.__module__}.{self.__class__.__name__}"
+        )
         # Ensure the storage file exists
         if not os.path.exists(self.file_path):
             with open(self.file_path, "w", encoding="utf-8") as f:
                 json.dump([], f)
+            self.logger.warning(
+                "Created missing context storage file",
+                extra={"file_path": self.file_path},
+            )
 
     def _load_entries(self) -> List[dict]:
         try:
             with open(self.file_path, "r", encoding="utf-8") as f:
                 return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
+            self.logger.exception(
+                "Failed to load context entries from file",
+                extra={"file_path": self.file_path},
+            )
             return []
 
     def _save_entries(self, entries: List[dict]):
         with open(self.file_path, "w", encoding="utf-8") as f:
             json.dump(entries, f, indent=2)
+        self.logger.debug(
+            "Persisted context entries to file",
+            extra={"file_path": self.file_path, "entry_count": len(entries)},
+        )
 
     def ingest_context(
         self,
@@ -61,8 +77,18 @@ class FileContextProvider:
             }
         )
         self._save_entries(entries)
-        for cb in self.subscribers.values():
-            cb(cd)
+        for handle, cb in list(self.subscribers.items()):
+            try:
+                cb(cd)
+            except Exception:
+                self.logger.exception(
+                    "Subscriber callback failed during file ingest",
+                    extra={"subscriber_id": str(handle), "file_path": self.file_path},
+                )
+        self.logger.info(
+            "Context stored in file backend",
+            extra={"context_id": context_id, "file_path": self.file_path},
+        )
         return context_id
 
     def fetch_context(self, query_params: ContextQuery) -> List[ContextData]:

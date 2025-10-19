@@ -41,6 +41,10 @@ class MemoryContextProvider(BaseContextProvider):
         )
         self.cache.set(context_id, cd, ttl)
         super().publish_context(cd)
+        self.logger.info(
+            "Stored context in memory",
+            extra={"context_id": context_id, "source_id": source_id},
+        )
         return context_id
 
     def fetch_context(self, query_params: ContextQuery) -> List[ContextData]:
@@ -51,6 +55,10 @@ class MemoryContextProvider(BaseContextProvider):
                 continue
             if query_params.time_range[0] <= cd.timestamp <= query_params.time_range[1]:
                 results.append(cd)
+        self.logger.debug(
+            "Fetched context records from memory",
+            extra={"result_count": len(results)},
+        )
         return results
 
     def get_context(self, query: ContextQuery) -> List[dict]:
