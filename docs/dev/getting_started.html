@@ -60,7 +60,15 @@ cd ai-context-framework</code></pre>
 source venv/bin/activate  # On Windows: venv\Scripts\activate</code></pre>
 
   <h2>Step 3: Install dependencies</h2>
-  <pre><code>pip install -r requirements.txt</code></pre>
+  <p>Select the installation profile that matches your environment:</p>
+  <ul>
+    <li><strong>Minimal core runtime</strong>: <code>pip install caiengine</code></li>
+    <li><strong>Full AI toolchain</strong>: <code>pip install caiengine[ai]</code></li>
+  </ul>
+  <p>For local development, install the project in editable mode with tooling:</p>
+  <pre><code>pip install -e .[dev]</code></pre>
+  <p>The helper script <code>./install_test_requirements.sh &lt;core|ai&gt;</code> mirrors the CI setup and
+    installs either the minimal or full dependency set (defaulting to <code>ai</code>).</p>
 
   <h2>Step 4: Run a basic example</h2>
   <p>Try running the example script to see the pipeline in action:</p>

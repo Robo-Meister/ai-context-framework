@@ -8,14 +8,19 @@ setup(
 
     install_requires=[
         "numpy>=2.2.6",
-        "torch==2.3.1+cpu",
         "sympy>=1.14.0",
     ],
     extras_require={
+        "ai": [
+            "torch>=2.3.1",
+            "onnx>=1.17.0",
+            "PyYAML>=6.0.2",
+        ],
         "redis": ["redis>=6.1.0"],
         "kafka": ["kafka-python>=2.0.2"],
         "dev": [
             "pytest>=8.3.5",
+            "pytest-cov>=4.1.0",
             "mypy",
             "black"
         ],  # optional dev deps

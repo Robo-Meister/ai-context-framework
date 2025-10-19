@@ -5,21 +5,26 @@ on:
   pull_request:
 
 jobs:
-  build:
+  tests:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [core, ai]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       - name: Install dependencies
-        run: |
-          ./install_test_requirements.sh
+        run: ./install_test_requirements.sh ${{ matrix.profile }}
 #      - name: Run black
 #        run: |
 #          black --check .
       - name: Run tests
-        run: |
-          pytest -vv --cov=caiengine --cov-report=xml
+        env:
+          CAIENGINE_TEST_PROFILE: ${{ matrix.profile }}
+        run: pytest -vv --cov=caiengine --cov-report=xml
       - name: Upload coverage to Codecov
+        if: matrix.profile == 'ai'
         uses: codecov/codecov-action@v4

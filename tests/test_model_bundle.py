@@ -3,8 +3,16 @@ import pathlib
 import sys
 import types
 
-import torch
-import torch.nn as nn
+import pytest
+
+torch = pytest.importorskip("torch")
+if not hasattr(torch, "device"):
+    pytest.skip(
+        "PyTorch optional dependencies are not available.",
+        allow_module_level=True,
+    )
+nn = pytest.importorskip("torch.nn")
+pytest.importorskip("onnx")
 
 
 SRC_ROOT = pathlib.Path(__file__).resolve().parents[1] / "src" / "caiengine"
