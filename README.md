@@ -153,13 +153,32 @@ navigation.
    source venv/bin/activate  # Linux/Mac
    venv\Scripts\activate     # Windows
    ```
-3. Install dependencies and the package in editable mode. The helper script
-   below installs everything needed for the full test suite (including the
-   optional PyTorch components used by some tests).
+3. Install the package using the profile that matches your deployment needs:
 
-   ```bash
-   ./install_test_requirements.sh
-   ```
+   - **Core runtime (minimal dependencies)**
+
+     ```bash
+     pip install -e .
+     ```
+
+   - **Full AI toolchain (PyTorch + ONNX)**
+
+     ```bash
+     pip install -e .[ai]
+     ```
+
+   - **Developer tooling and tests**
+
+     ```bash
+     pip install -e .[dev]
+     ```
+
+   When installing from PyPI the same profiles are available via
+   `pip install caiengine` or `pip install caiengine[ai]`.
+
+   The helper script `./install_test_requirements.sh` mirrors the CI
+   configuration and accepts either `core` or `ai` to install the appropriate
+   extras (defaulting to `ai`).
 4. Run the unit tests to verify your setup
 
    ```bash

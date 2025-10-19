@@ -57,7 +57,9 @@ _EXPORT_ORDER = [
 
 _EXPORT_SPECS: Dict[str, _ExportSpec] = {
     "CacheManager": _ExportSpec("caiengine.core.cache_manager", "CacheManager"),
-    "AIInferenceEngine": _ExportSpec("caiengine.core.ai_inference", "AIInferenceEngine"),
+    "AIInferenceEngine": _ExportSpec(
+        "caiengine.core.ai_inference", "AIInferenceEngine", "ai"
+    ),
     "ContextPipeline": _ExportSpec("caiengine.pipelines.context_pipeline", "ContextPipeline"),
     "FeedbackPipeline": _ExportSpec("caiengine.pipelines.feedback_pipeline", "FeedbackPipeline"),
     "QuestionPipeline": _ExportSpec("caiengine.pipelines.question_pipeline", "QuestionPipeline"),
@@ -75,8 +77,12 @@ _EXPORT_SPECS: Dict[str, _ExportSpec] = {
         "kafka",
     ),
     "PolicyEvaluator": _ExportSpec("caiengine.core.policy_evaluator", "PolicyEvaluator"),
-    "export_onnx_bundle": _ExportSpec("caiengine.core.model_bundle", "export_onnx_bundle"),
-    "load_model_manifest": _ExportSpec("caiengine.core.model_bundle", "load_model_manifest"),
+    "export_onnx_bundle": _ExportSpec(
+        "caiengine.core.model_bundle", "export_onnx_bundle", "ai"
+    ),
+    "load_model_manifest": _ExportSpec(
+        "caiengine.core.model_bundle", "load_model_manifest", "ai"
+    ),
     "model_manager": _ExportSpec("caiengine.core.model_manager"),
     "NetworkManager": _ExportSpec("caiengine.network.network_manager", "NetworkManager"),
     "SimpleNetworkMock": _ExportSpec("caiengine.network.simple_network", "SimpleNetworkMock"),

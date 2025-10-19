@@ -6,9 +6,15 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
-import torch
-import torch.nn as nn
-import yaml
+try:
+    import torch
+    import torch.nn as nn
+    import yaml
+except ModuleNotFoundError as exc:  # pragma: no cover - optional dependency gate
+    raise ImportError(
+        "Model bundle utilities require the optional dependency set 'ai'. "
+        "Install it with `pip install caiengine[ai]`."
+    ) from exc
 
 from caiengine.objects.model_manifest import ModelManifest
 

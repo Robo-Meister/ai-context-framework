@@ -7,8 +7,14 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Tuple, Type
 
-import torch
-import torch.nn as nn
+try:
+    import torch
+    import torch.nn as nn
+except ModuleNotFoundError as exc:  # pragma: no cover - optional dependency gate
+    raise ImportError(
+        "Model storage helpers require the optional dependency set 'ai'. "
+        "Install it with `pip install caiengine[ai]`."
+    ) from exc
 
 from caiengine.objects.model_metadata import ModelMetadata
 

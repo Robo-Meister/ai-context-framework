@@ -1,6 +1,12 @@
-import torch
-import torch.nn as nn
-import torch.optim as optim
+try:
+    import torch
+    import torch.nn as nn
+    import torch.optim as optim
+except ModuleNotFoundError as exc:  # pragma: no cover - optional dependency gate
+    raise ImportError(
+        "AIInferenceEngine requires the optional dependency set 'ai'. "
+        "Install it with `pip install caiengine[ai]`."
+    ) from exc
 
 
 class AIInferenceEngine:
