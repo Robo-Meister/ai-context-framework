@@ -1,4 +1,4 @@
-from caiengine.core.marketing_coach import AdaptiveCoach
+from caiengine.experimental.marketing_coach import AdaptiveCoach
 from caiengine.parser.conversation_parser import ConversationState
 
 

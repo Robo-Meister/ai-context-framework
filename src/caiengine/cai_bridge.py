@@ -6,8 +6,8 @@ from caiengine.core.goal_feedback_loop import GoalDrivenFeedbackLoop
 from caiengine.core.goal_strategies import (
     SimpleGoalFeedbackStrategy,
     PersonalityGoalFeedbackStrategy,
-    MarketingGoalFeedbackStrategy,
 )
+from caiengine.experimental.goal_strategies import MarketingGoalFeedbackStrategy
 from caiengine.commands import COMMAND
 
 
