@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "caiengine"
-version = "0.1.0"
+version = "0.2.0"
 description = "A Context-Aware AI Engine for decision automation, workflow reasoning, and dynamic task orchestration"
 readme = "README.md"
 requires-python = ">=3.6"
@@ -51,5 +51,8 @@ context = "caiengine.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
-packages = ["caiengine"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["caiengine*"]
 

@@ -1,6 +1,6 @@
 import os
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
     from caiengine.core import (
