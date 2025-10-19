@@ -1,0 +1,26 @@
+site_name: CAIEngine Docs
+site_description: Documentation for the Context-Aware Intelligence Engine
+site_url: https://robo-meister.github.io/ai-context-framework/
+docs_dir: docs
+use_directory_urls: false
+theme:
+  name: readthedocs
+nav:
+  - Home: dev/index.html
+  - Getting Started:
+      - Quickstart: getting_started/quickstart.md
+  - Developer Guides:
+      - Extending CAIEngine: dev/extending.md
+      - API Reference: dev/api_reference.md
+      - Architecture: dev/architecture.html
+      - Network Guide: dev/network.html
+  - Theory: theory/index.html
+  - Examples:
+      - Goal-driven Feedback Loop: goal-driven-feedback-loop.md
+      - Event Context Standard: event-context-standard.md
+      - SVG Layered Generation: svg_layered_generation.md
+markdown_extensions:
+  - toc:
+      permalink: true
+  - admonition
+  - def_list

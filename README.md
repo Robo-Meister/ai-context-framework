@@ -87,9 +87,24 @@ not installed, making it safe to use in lightweight deployments.
 
 ## Documentation
 
-Developer guides live in the `docs/` directory. Open
-[docs/dev/index.html](docs/dev/index.html) for usage instructions and
-[docs/theory/index.html](docs/theory/index.html) for design notes.
+- [Quickstart guide](docs/getting_started/quickstart.md) – install from PyPI,
+  enable optional extras, and run a reference pipeline.
+- [Developer hub](docs/dev/index.html) – HTML index that links to the existing
+  architecture, API, and network deep dives.
+- [Extending CAIEngine](docs/dev/extending.md) – checklist for authoring new
+  context providers and goal strategies.
+- [Theory and architecture notes](docs/theory/index.html) – deeper background
+  on the design principles.
+
+Install the optional `docs` extra to preview the site locally:
+
+```bash
+pip install caiengine[docs]
+mkdocs serve
+```
+
+This serves the documentation at http://127.0.0.1:8000/ using the `mkdocs.yml`
+navigation.
 
 ## Project Structure
 
@@ -151,23 +166,25 @@ Developer guides live in the `docs/` directory. Open
    pytest
    ```
 
-### Optional storage drivers
+## Optional extras
 
-The built-in providers cover in-memory storage and SQLite without any extra
-dependencies. To persist context to external databases, install the optional
-extras when setting up the package:
+Install extras during `pip install caiengine[...]` to bring in infrastructure
+dependencies on demand:
 
-- **MySQL** – `pip install .[mysql]` installs
-  `mysql-connector-python` for `MySQLContextProvider`.
-- **PostgreSQL** – `pip install .[postgresql]` installs
-  `psycopg2-binary` for `PostgresContextProvider`.
-- **All SQL backends** – `pip install .[storage]` pulls in the full set of
-  SQL connectors so you can switch providers without reinstalling.
+- **Redis (`[redis]`)** – installs the `redis` client so you can use
+  `RedisContextProvider` for pub/sub distribution. Supply
+  `redis://host:port/db` URLs via the provider constructor or environment
+  variables.
+- **Kafka (`[kafka]`)** – installs `kafka-python` for the streaming
+  `KafkaContextProvider`. Configure topics and bootstrap servers when instantiating
+  the provider to mirror context events or feedback into your clusters.
+- **Storage (`[storage]`)** – installs both `mysql-connector-python` and
+  `psycopg2-binary`, enabling the MySQL and PostgreSQL providers. Point the
+  constructors at your DSNs (e.g. `postgresql://user:pass@host/db`).
 
-Once the desired driver is installed you can point the service or pipeline to
-the corresponding provider class (e.g. `caiengine.providers.mysql_context_provider.MySQLContextProvider`).
-
-You can now start implementing your own `ContextProvider` or test the built-in ones.
+Extras can be combined, for example `pip install caiengine[redis,kafka]`. Once
+installed, refer to the [Quickstart guide](docs/getting_started/quickstart.md)
+for concrete configuration snippets.
 
 ### Starting the Service
 

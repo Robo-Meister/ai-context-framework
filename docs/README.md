@@ -1,13 +1,24 @@
 # Documentation
 
-This project ships developer guides and design notes as static HTML files.
+This project ships developer guides and design notes as static HTML and Markdown
+files. You can browse them directly from the repository or render them through
+MkDocs.
 
 - Open `dev/index.html` for developer-focused documentation.
 - Open `theory/index.html` for theoretical background and architecture notes.
 - See `event-context-standard.md` for the event/context data model.
+- Follow `getting_started/quickstart.md` for PyPI installation and pipeline
+  examples.
 
-In the future these pages may move to a dedicated docs site (see
-[docs/dev/TECHNICAL_ROADMAP.md](dev/TECHNICAL_ROADMAP.md)).
+To serve the documentation locally, install the docs extra and run MkDocs:
+
+```bash
+pip install caiengine[docs]
+mkdocs serve
+```
+
+The site will be available at http://127.0.0.1:8000/ using the navigation from
+`mkdocs.yml`.
 
 
 ## Mass Testing
