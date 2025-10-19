@@ -1,11 +1,15 @@
+import logging
 from datetime import datetime, timedelta
 from typing import List
 
 
 class MockContextProvider:
+    def __init__(self) -> None:
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+
     def get_context(self) -> List[dict]:
         base = datetime(2025, 5, 21, 9, 0)
-        return [
+        contexts = [
             {
                 "id": 1,
                 "roles": ["editor"],
@@ -34,3 +38,5 @@ class MockContextProvider:
                 "confidence": 0.95
             }
         ]
+        self.logger.debug("Returning mock context entries", extra={"count": len(contexts)})
+        return contexts

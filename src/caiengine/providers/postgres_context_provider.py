@@ -1,4 +1,5 @@
 import json
+import logging
 import uuid
 from datetime import datetime, timedelta
 from typing import Callable, List, Optional, Union
@@ -37,6 +38,8 @@ class PostgresContextProvider:
                 """
             )
         self.subscribers: dict[SubscriptionHandle, Callable[[ContextData], None]] = {}
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+        self.logger.debug("Postgres context provider initialised", extra={"dsn": dsn})
 
     def ingest_context(
         self,
@@ -73,6 +76,10 @@ class PostgresContextProvider:
                     expiry_ts,
                 ),
             )
+        self.logger.info(
+            "Persisted context entry to Postgres",
+            extra={"entry_id": context_id, "ttl": ttl, "source_id": source_id},
+        )
         for cb in self.subscribers.values():
             cb(cd)
         return context_id
@@ -108,6 +115,10 @@ class PostgresContextProvider:
                 content=metadata.get("content", ""),
             )
             result.append(cd)
+        self.logger.debug(
+            "Fetched Postgres context entries",
+            extra={"count": len(result), "start": start, "end": end},
+        )
         return result
 
     def get_context(self, query: ContextQuery) -> List[dict]:
@@ -117,6 +128,9 @@ class PostgresContextProvider:
     def subscribe_context(self, callback: Callable[[ContextData], None]) -> SubscriptionHandle:
         handle = uuid.uuid4()
         self.subscribers[handle] = callback
+        self.logger.debug(
+            "Subscriber registered", extra={"subscriber_count": len(self.subscribers)}
+        )
         return handle
 
     def publish_context(

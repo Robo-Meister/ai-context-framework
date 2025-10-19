@@ -1,4 +1,5 @@
 import json
+import logging
 import uuid
 from datetime import datetime, timedelta
 from typing import Callable, List, Optional, Union
@@ -40,6 +41,10 @@ class MySQLContextProvider:
         )
         cur.close()
         self.subscribers: dict[SubscriptionHandle, Callable[[ContextData], None]] = {}
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+        self.logger.debug(
+            "MySQL context provider initialised", extra={"database": connect_kwargs.get("database")}
+        )
 
     def ingest_context(
         self,
@@ -77,6 +82,10 @@ class MySQLContextProvider:
             ),
         )
         cur.close()
+        self.logger.info(
+            "Persisted context entry to MySQL",
+            extra={"entry_id": context_id, "ttl": ttl, "source_id": source_id},
+        )
         for cb in self.subscribers.values():
             cb(cd)
         return context_id
@@ -113,6 +122,10 @@ class MySQLContextProvider:
                 content=metadata.get("content", ""),
             )
             result.append(cd)
+        self.logger.debug(
+            "Fetched MySQL context entries",
+            extra={"count": len(result), "start": start, "end": end},
+        )
         return result
 
     def get_context(self, query: ContextQuery) -> List[dict]:
@@ -122,6 +135,9 @@ class MySQLContextProvider:
     def subscribe_context(self, callback: Callable[[ContextData], None]) -> SubscriptionHandle:
         handle = uuid.uuid4()
         self.subscribers[handle] = callback
+        self.logger.debug(
+            "Subscriber registered", extra={"subscriber_count": len(self.subscribers)}
+        )
         return handle
 
     def publish_context(

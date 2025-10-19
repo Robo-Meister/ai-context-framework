@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import uuid
 from typing import Callable, List, Union
@@ -6,29 +7,52 @@ from datetime import datetime
 
 from caiengine.objects.context_data import ContextData, SubscriptionHandle
 from caiengine.objects.context_query import ContextQuery
+from .base_context_provider import BaseContextProvider
 
 
-class FileContextProvider:
+class FileContextProvider(BaseContextProvider):
     """Persist context entries to a local JSON file."""
 
     def __init__(self, file_path: str):
+        super().__init__()
         self.file_path = file_path
-        self.subscribers: dict[SubscriptionHandle, Callable[[ContextData], None]] = {}
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         # Ensure the storage file exists
         if not os.path.exists(self.file_path):
             with open(self.file_path, "w", encoding="utf-8") as f:
                 json.dump([], f)
+            self.logger.info("Created new context store", extra={"path": self.file_path})
 
     def _load_entries(self) -> List[dict]:
         try:
             with open(self.file_path, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
+        except FileNotFoundError:
+            self.logger.warning(
+                "Context file missing; returning empty result", extra={"path": self.file_path}
+            )
             return []
+        except json.JSONDecodeError:
+            self.logger.error(
+                "Failed to decode context file; ignoring corrupted contents",
+                extra={"path": self.file_path},
+            )
+            return []
+        except OSError:
+            self.logger.exception(
+                "Failed to read context file", extra={"path": self.file_path}
+            )
+            raise
 
     def _save_entries(self, entries: List[dict]):
-        with open(self.file_path, "w", encoding="utf-8") as f:
-            json.dump(entries, f, indent=2)
+        try:
+            with open(self.file_path, "w", encoding="utf-8") as f:
+                json.dump(entries, f, indent=2)
+        except OSError:
+            self.logger.exception(
+                "Failed to persist context entries", extra={"path": self.file_path}
+            )
+            raise
 
     def ingest_context(
         self,
@@ -61,8 +85,15 @@ class FileContextProvider:
             }
         )
         self._save_entries(entries)
-        for cb in self.subscribers.values():
-            cb(cd)
+        self.logger.info(
+            "Context entry ingested",
+            extra={
+                "path": self.file_path,
+                "entry_id": context_id,
+                "entries": len(entries),
+            },
+        )
+        super().publish_context(cd)
         return context_id
 
     def fetch_context(self, query_params: ContextQuery) -> List[ContextData]:
@@ -91,9 +122,7 @@ class FileContextProvider:
         return [self._to_dict(cd) for cd in raw_contexts]
 
     def subscribe_context(self, callback: Callable[[ContextData], None]) -> SubscriptionHandle:
-        handle = uuid.uuid4()
-        self.subscribers[handle] = callback
-        return handle
+        return super().subscribe_context(callback)
 
     def publish_context(
         self,

@@ -1,4 +1,5 @@
 import json
+import logging
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from datetime import datetime
 from importlib import import_module
@@ -25,6 +26,11 @@ class HTTPContextProvider:
         self.backend = self._prepare_backend(backend)
         self._server: Optional[HTTPServer] = None
         self._thread: Optional[threading.Thread] = None
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+        self.logger.debug(
+            "HTTP context provider initialised",
+            extra={"host": self.host, "port": self.port, "backend": self.backend.__class__.__name__},
+        )
 
     def _prepare_backend(self, backend: Optional[object]) -> object:
         if backend is None:
@@ -71,6 +77,9 @@ class HTTPContextProvider:
 
             def do_POST(self):
                 if self.path != "/context":
+                    provider.logger.warning(
+                        "Received request for unknown path", extra={"path": self.path}
+                    )
                     self._respond(404, {"error": "not found"})
                     return
                 length = int(self.headers.get("Content-Length", "0"))
@@ -78,6 +87,10 @@ class HTTPContextProvider:
                 try:
                     payload = json.loads(body)
                 except json.JSONDecodeError:
+                    provider.logger.warning(
+                        "Rejected context ingestion due to invalid JSON",
+                        extra={"remote_ip": self.client_address[0]},
+                    )
                     self._respond(400, {"error": "invalid json"})
                     return
 
@@ -90,10 +103,17 @@ class HTTPContextProvider:
                     source_id=payload.get("source_id", "http"),
                     confidence=float(payload.get("confidence", 1.0)),
                 )
+                provider.logger.info(
+                    "Accepted context ingestion via HTTP",
+                    extra={"context_id": context_id, "remote_ip": self.client_address[0]},
+                )
                 self._respond(200, {"id": context_id})
 
             def do_GET(self):
                 if not self.path.startswith("/context"):
+                    provider.logger.warning(
+                        "Received request for unknown path", extra={"path": self.path}
+                    )
                     self._respond(404, {"error": "not found"})
                     return
                 qs = parse_qs(urlparse(self.path).query)
@@ -103,6 +123,9 @@ class HTTPContextProvider:
                 end = datetime.fromisoformat(end_s) if end_s else datetime.utcnow()
                 query = ContextQuery(roles=[], time_range=(start, end), scope="", data_type="")
                 data = provider.backend.get_context(query)
+                provider.logger.debug(
+                    "Served context fetch", extra={"count": len(data), "remote_ip": self.client_address[0]}
+                )
                 self._respond(200, data)
 
             def log_message(self, format, *args):  # silence default logging
@@ -113,11 +136,13 @@ class HTTPContextProvider:
     # ---- Server Lifecycle ----------------------------------------------
     def start(self):
         if self._server:
+            self.logger.debug("HTTP server already running; start ignored")
             return
         handler = self._make_handler()
         self._server = HTTPServer((self.host, self.port), handler)
         self._thread = threading.Thread(target=self._server.serve_forever, daemon=True)
         self._thread.start()
+        self.logger.info("HTTP context provider started", extra={"host": self.host, "port": self.port})
 
     def stop(self):
         if self._server:
@@ -127,6 +152,7 @@ class HTTPContextProvider:
             self._server.server_close()
             self._server = None
             self._thread = None
+            self.logger.info("HTTP context provider stopped")
 
     # ---- Direct API wrappers ------------------------------------------
     def ingest_context(self, *args, **kwargs):

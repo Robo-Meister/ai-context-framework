@@ -1,6 +1,7 @@
+import json
+import logging
 import sqlite3
 import uuid
-import json
 from datetime import datetime, timedelta
 from typing import Callable, List, Optional, Union
 
@@ -28,6 +29,8 @@ class SQLiteContextProvider:
         )
         self.conn.commit()
         self.subscribers: dict[SubscriptionHandle, Callable[[ContextData], None]] = {}
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+        self.logger.debug("SQLite context provider initialised", extra={"db_path": db_path})
 
     def ingest_context(
         self,
@@ -64,6 +67,10 @@ class SQLiteContextProvider:
             ),
         )
         self.conn.commit()
+        self.logger.info(
+            "Persisted context entry to SQLite",
+            extra={"entry_id": context_id, "ttl": ttl, "source_id": source_id},
+        )
         for cb in self.subscribers.values():
             cb(cd)
         return context_id
@@ -96,6 +103,10 @@ class SQLiteContextProvider:
                 content=metadata.get("content", ""),
             )
             result.append(cd)
+        self.logger.debug(
+            "Fetched SQLite context entries",
+            extra={"count": len(result), "start": start, "end": end},
+        )
         return result
 
     def get_context(self, query: ContextQuery) -> List[dict]:
@@ -105,6 +116,9 @@ class SQLiteContextProvider:
     def subscribe_context(self, callback: Callable[[ContextData], None]) -> SubscriptionHandle:
         handle = uuid.uuid4()
         self.subscribers[handle] = callback
+        self.logger.debug(
+            "Subscriber registered", extra={"subscriber_count": len(self.subscribers)}
+        )
         return handle
 
     def publish_context(

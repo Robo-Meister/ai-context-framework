@@ -15,6 +15,7 @@ class MemoryContextProvider(BaseContextProvider):
     def __init__(self):
         super().__init__()
         self.cache = CacheManager()
+        self.logger.debug("Memory context provider initialised")
 
     def ingest_context(
             self,
@@ -25,7 +26,7 @@ class MemoryContextProvider(BaseContextProvider):
             confidence: float = 1.0,
             ttl: Union[int, None] = None,
             ocr_metadata: Optional[OCRMetadata] = None,
-    ) -> str:
+        ) -> str:
         """Store a new context entry and notify subscribers."""
         context_id = str(uuid.uuid4())
         cd = ContextData(
@@ -40,6 +41,10 @@ class MemoryContextProvider(BaseContextProvider):
             ocr_metadata=ocr_metadata,
         )
         self.cache.set(context_id, cd, ttl)
+        self.logger.info(
+            "Cached context entry",
+            extra={"entry_id": context_id, "ttl": ttl, "source_id": cd.source_id},
+        )
         super().publish_context(cd)
         return context_id
 
@@ -51,6 +56,10 @@ class MemoryContextProvider(BaseContextProvider):
                 continue
             if query_params.time_range[0] <= cd.timestamp <= query_params.time_range[1]:
                 results.append(cd)
+        self.logger.debug(
+            "Fetched context entries",
+            extra={"count": len(results), "start": query_params.time_range[0], "end": query_params.time_range[1]},
+        )
         return results
 
     def get_context(self, query: ContextQuery) -> List[dict]:

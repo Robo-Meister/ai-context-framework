@@ -14,6 +14,7 @@ class SimpleContextProvider(BaseContextProvider):
     def __init__(self):
         super().__init__()
         self._data: List[ContextData.ContextData] = []
+        self.logger.debug("Simple context provider initialised")
 
     def ingest_context(
         self,
@@ -23,7 +24,7 @@ class SimpleContextProvider(BaseContextProvider):
         source_id: str = "simple",
         confidence: float = 1.0,
         ocr_metadata: Optional[OCRMetadata] = None,
-    ) -> str:
+        ) -> str:
         context_id = str(uuid.uuid4())
         cd = ContextData.ContextData(
             payload=payload,
@@ -37,6 +38,10 @@ class SimpleContextProvider(BaseContextProvider):
             ocr_metadata=ocr_metadata,
         )
         self._data.append(cd)
+        self.logger.info(
+            "Stored context entry",
+            extra={"entry_id": context_id, "source_id": cd.source_id, "total_entries": len(self._data)},
+        )
         super().publish_context(cd)
         return context_id
 
@@ -45,6 +50,10 @@ class SimpleContextProvider(BaseContextProvider):
         for cd in self._data:
             if query_params.time_range[0] <= cd.timestamp <= query_params.time_range[1]:
                 results.append(cd)
+        self.logger.debug(
+            "Fetched simple context entries",
+            extra={"count": len(results)},
+        )
         return results
 
     def get_context(self, query: ContextQuery.ContextQuery) -> List[dict]:
