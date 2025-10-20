@@ -135,3 +135,28 @@ for item in results:
 Running the script prints the categorised entry enriched with trust scores and
 `goal_suggestion` feedback. Replace the in-memory provider configuration with
 Redis, Kafka, or SQL options as your deployment requires.
+
+### Provider configuration keys
+
+`ConfigurablePipeline.from_dict` accepts a short provider identifier and
+translates it to the underlying class from `caiengine.providers`.
+
+| Key            | Provider class                              | Notes |
+| -------------- | -------------------------------------------- | ----- |
+| `memory`       | `MemoryContextProvider`                      | Ephemeral in-memory storage suitable for tests and demos. |
+| `simple`       | `SimpleContextProvider`                      | Lightweight in-memory provider with peer broadcasting support. |
+| `mock`         | `MockContextProvider`                        | Deterministic fixtures used by example pipelines. |
+| `json` / `file`| `FileContextProvider`                        | Persists context items to a local JSON file. |
+| `xml`          | `XMLContextProvider`                         | Reads structured context data from XML files. |
+| `csv`          | `CSVContextProvider`                         | Streams CSV rows as context entries. |
+| `ocr`          | `OCRContextProvider`                         | Wraps OCR results with metadata preservation. |
+| `http`         | `HTTPContextProvider`                        | Pulls context from HTTP/REST endpoints. |
+| `redis`        | `RedisContextProvider`                       | Durable Redis-backed cache with pub/sub updates. |
+| `kafka`        | `KafkaContextProvider`                       | Consumes and republishes context via Kafka topics. |
+| `sqlite`       | `SQLiteContextProvider`                      | Local file-based SQL storage (uses SQLite). |
+| `mysql`        | `MySQLContextProvider`                       | Connects to external MySQL-compatible databases. |
+| `postgres`     | `PostgresContextProvider`                    | PostgreSQL connector (alias: `postgresql`). |
+
+All providers accept keyword arguments under `provider.args` that match their
+constructor signatures. Durable backends (Redis, Kafka, and the SQL options)
+require the corresponding optional extras to be installed.
