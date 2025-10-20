@@ -7,6 +7,8 @@ from typing import Any
 
 __all__ = ["safe_dump", "safe_load"]
 
+_CAIENGINE_STUB = True
+
 
 def safe_dump(data: Any, stream=None, **kwargs):  # pragma: no cover - thin wrapper
     text = json.dumps(data, indent=2, sort_keys=True)
