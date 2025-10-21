@@ -37,6 +37,28 @@ collectors can capture metadata (for example `pending_actions`,
 field names you care about, e.g. `%(message)s pending=%(pending_actions)s`, or
 use a JSON formatter to retain the structured attributes automatically.
 
+### Goal Feedback Loop Diagnostics
+
+`GoalFeedbackWorker` escalates retries into exponential backoff while tagging
+every failure with `attempt` and `backoff_seconds`. A follow-up debug log then
+emits `backoff_remaining` while the worker sleeps. Configure your logging
+pipeline to alert when those fields remain high for several cycles—this usually
+means the underlying provider keeps raising and the loop is stuck.
+
+`GoalStateTracker` and the storage backends also log when they fall back to
+in-memory persistence. Treat that warning as an operational smell in
+environments where resilience matters and override the backend with SQLite or
+Redis in production deployments.
+
+### Provider Error Visibility
+
+Each context provider now emits structured errors if a subscriber callback
+crashes or if ingestion fails. The records include the `subscriber_id`,
+`context_id`, and backend-specific identifiers (for example, the SQLite
+database path). Attach handlers with filters that forward these errors to the
+same observability system as the rest of your application so that failed
+downstream consumers are visible without reproducing the issue locally.
+
 ## Token Usage Telemetry
 
 Inference engines wrapped by `TokenUsageTracker` now emit structured telemetry

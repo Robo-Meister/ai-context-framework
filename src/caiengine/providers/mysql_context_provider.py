@@ -1,4 +1,5 @@
 import json
+import logging
 import uuid
 from datetime import datetime, timedelta
 from typing import Callable, List, Optional, Union
@@ -22,6 +23,9 @@ class MySQLContextProvider:
             raise ImportError(
                 "mysql-connector-python is required for MySQLContextProvider. Install with `pip install mysql-connector-python`."
             )
+        self.logger = logging.getLogger(
+            f"{self.__class__.__module__}.{self.__class__.__name__}"
+        )
         self.conn = mysql.connect(**connect_kwargs)
         self.conn.autocommit = True
         cur = self.conn.cursor()
@@ -40,6 +44,10 @@ class MySQLContextProvider:
         )
         cur.close()
         self.subscribers: dict[SubscriptionHandle, Callable[[ContextData], None]] = {}
+        self.logger.debug(
+            "MySQLContextProvider initialised",
+            extra={"options": {k: v for k, v in connect_kwargs.items() if k != "password"}},
+        )
 
     def ingest_context(
         self,
@@ -77,8 +85,24 @@ class MySQLContextProvider:
             ),
         )
         cur.close()
-        for cb in self.subscribers.values():
-            cb(cd)
+        for handle, cb in list(self.subscribers.items()):
+            try:
+                cb(cd)
+            except Exception:
+                self.logger.exception(
+                    "Subscriber callback failed during MySQL ingest",
+                    extra={
+                        "subscriber_id": str(handle),
+                        "context_id": context_id,
+                    },
+                )
+        self.logger.info(
+            "Context stored in MySQL backend",
+            extra={
+                "context_id": context_id,
+                "source_id": source_id,
+            },
+        )
         return context_id
 
     def fetch_context(self, query_params: ContextQuery) -> List[ContextData]:
@@ -113,6 +137,10 @@ class MySQLContextProvider:
                 content=metadata.get("content", ""),
             )
             result.append(cd)
+        self.logger.debug(
+            "Fetched context rows from MySQL",
+            extra={"result_count": len(result)},
+        )
         return result
 
     def get_context(self, query: ContextQuery) -> List[dict]:
@@ -122,6 +150,10 @@ class MySQLContextProvider:
     def subscribe_context(self, callback: Callable[[ContextData], None]) -> SubscriptionHandle:
         handle = uuid.uuid4()
         self.subscribers[handle] = callback
+        self.logger.debug(
+            "Registered MySQL subscriber",
+            extra={"subscriber_id": str(handle)},
+        )
         return handle
 
     def publish_context(

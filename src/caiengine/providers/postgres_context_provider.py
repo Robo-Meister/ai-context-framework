@@ -1,4 +1,5 @@
 import json
+import logging
 import uuid
 from datetime import datetime, timedelta
 from typing import Callable, List, Optional, Union
@@ -20,6 +21,9 @@ class PostgresContextProvider:
             raise ImportError(
                 "psycopg2 is required for PostgresContextProvider. Install with `pip install psycopg2-binary`."
             )
+        self.logger = logging.getLogger(
+            f"{self.__class__.__module__}.{self.__class__.__name__}"
+        )
         self.conn = psycopg2.connect(dsn)
         self.conn.autocommit = True
         with self.conn.cursor() as cur:
@@ -35,8 +39,12 @@ class PostgresContextProvider:
                     expiry TIMESTAMP
                 )
                 """
-            )
+        )
         self.subscribers: dict[SubscriptionHandle, Callable[[ContextData], None]] = {}
+        self.logger.debug(
+            "PostgresContextProvider initialised",
+            extra={"dsn": dsn.split("@")[0] if "@" in dsn else "redacted"},
+        )
 
     def ingest_context(
         self,
@@ -73,8 +81,24 @@ class PostgresContextProvider:
                     expiry_ts,
                 ),
             )
-        for cb in self.subscribers.values():
-            cb(cd)
+        for handle, cb in list(self.subscribers.items()):
+            try:
+                cb(cd)
+            except Exception:
+                self.logger.exception(
+                    "Subscriber callback failed during Postgres ingest",
+                    extra={
+                        "subscriber_id": str(handle),
+                        "context_id": context_id,
+                    },
+                )
+        self.logger.info(
+            "Context stored in Postgres backend",
+            extra={
+                "context_id": context_id,
+                "source_id": source_id,
+            },
+        )
         return context_id
 
     def fetch_context(self, query_params: ContextQuery) -> List[ContextData]:
@@ -108,6 +132,10 @@ class PostgresContextProvider:
                 content=metadata.get("content", ""),
             )
             result.append(cd)
+        self.logger.debug(
+            "Fetched context rows from Postgres",
+            extra={"result_count": len(result)},
+        )
         return result
 
     def get_context(self, query: ContextQuery) -> List[dict]:
@@ -117,6 +145,10 @@ class PostgresContextProvider:
     def subscribe_context(self, callback: Callable[[ContextData], None]) -> SubscriptionHandle:
         handle = uuid.uuid4()
         self.subscribers[handle] = callback
+        self.logger.debug(
+            "Registered Postgres subscriber",
+            extra={"subscriber_id": str(handle)},
+        )
         return handle
 
     def publish_context(
