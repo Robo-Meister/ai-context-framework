@@ -1,6 +1,7 @@
+import json
+import logging
 import sqlite3
 import uuid
-import json
 from datetime import datetime, timedelta
 from typing import Callable, List, Optional, Union
 
@@ -12,6 +13,10 @@ class SQLiteContextProvider:
     """SQLite-backed context provider for local storage."""
 
     def __init__(self, db_path: str = ":memory:"):
+        self.logger = logging.getLogger(
+            f"{self.__class__.__module__}.{self.__class__.__name__}"
+        )
+        self._db_path = db_path
         self.conn = sqlite3.connect(db_path, check_same_thread=False)
         self.conn.execute(
             """
@@ -28,6 +33,10 @@ class SQLiteContextProvider:
         )
         self.conn.commit()
         self.subscribers: dict[SubscriptionHandle, Callable[[ContextData], None]] = {}
+        self.logger.debug(
+            "SQLiteContextProvider initialised",
+            extra={"db_path": db_path},
+        )
 
     def ingest_context(
         self,
@@ -64,8 +73,26 @@ class SQLiteContextProvider:
             ),
         )
         self.conn.commit()
-        for cb in self.subscribers.values():
-            cb(cd)
+        for handle, cb in list(self.subscribers.items()):
+            try:
+                cb(cd)
+            except Exception:
+                self.logger.exception(
+                    "Subscriber callback failed during SQLite ingest",
+                    extra={
+                        "subscriber_id": str(handle),
+                        "context_id": context_id,
+                        "db_path": self._db_path,
+                    },
+                )
+        self.logger.info(
+            "Context stored in SQLite backend",
+            extra={
+                "context_id": context_id,
+                "db_path": self._db_path,
+                "source_id": source_id,
+            },
+        )
         return context_id
 
     def fetch_context(self, query_params: ContextQuery) -> List[ContextData]:
@@ -96,6 +123,13 @@ class SQLiteContextProvider:
                 content=metadata.get("content", ""),
             )
             result.append(cd)
+        self.logger.debug(
+            "Fetched context rows from SQLite",
+            extra={
+                "db_path": self._db_path,
+                "result_count": len(result),
+            },
+        )
         return result
 
     def get_context(self, query: ContextQuery) -> List[dict]:
@@ -105,6 +139,10 @@ class SQLiteContextProvider:
     def subscribe_context(self, callback: Callable[[ContextData], None]) -> SubscriptionHandle:
         handle = uuid.uuid4()
         self.subscribers[handle] = callback
+        self.logger.debug(
+            "Registered SQLite subscriber",
+            extra={"subscriber_id": str(handle)},
+        )
         return handle
 
     def publish_context(

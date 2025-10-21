@@ -5,8 +5,13 @@ Client applications often need to steer actions toward a target without pausing 
 ## Background Worker
 Run the loop inside a background worker, service worker, or scheduled task. The worker should periodically poll for new actions or subscribe to an event stream.
 
-Use the scaffold in ``GoalFeedbackWorker`` as a starting point.
-TODO: implement real polling logic and persistence integration.
+Use the scaffold in ``GoalFeedbackWorker`` as a starting point. In production,
+back the accompanying ``GoalStateTracker`` with a durable backend such as
+``SQLiteGoalStateBackend`` or ``RedisGoalStateBackend`` so restarts do not drop
+pending actions. The worker already emits structured log warnings when it falls
+back to the in-process poller or when the loop enters exponential backoff; wire
+those into your observability pipeline to surface stalled feedback processing
+quickly.
 
 ## State Tracking
 Persist the current goal state and any progress metrics in storage accessible by the worker (memory, local database, etc.). Update this state whenever goals change so the loop can compare new actions against the latest target.
@@ -34,8 +39,10 @@ Both policies can be combined. After pruning, baselines automatically recalculat
 ## Event-Driven Updates
 When a new action appears, send it to the worker through a queue or message channel. The worker computes suggestions only when history or goal state changes, limiting needless work.
 
-``FeedbackEventBus`` offers a minimal publish/subscribe interface.
-TODO: replace with an async queue or external message broker.
+``FeedbackEventBus`` offers a minimal publish/subscribe interface. For higher
+throughput deployments attach ``AsyncFeedbackEventBus`` or adapt the
+``GoalFeedbackWorker._handle_event`` callback to your message broker of choice
+so that goal and action updates arrive without relying on the periodic poller.
 
 ## Suggestion Logic
 Instantiate `GoalDrivenFeedbackLoop` with a strategy such as `SimpleGoalFeedbackStrategy` or `PersonalityGoalFeedbackStrategy`. Call `suggest_actions` with the current history and new actions to receive nudges toward the goal state.

@@ -119,6 +119,10 @@ class FileContextProvider:
     def subscribe_context(self, callback: Callable[[ContextData], None]) -> SubscriptionHandle:
         handle = uuid.uuid4()
         self.subscribers[handle] = callback
+        self.logger.debug(
+            "Registered file backend subscriber",
+            extra={"subscriber_id": str(handle), "file_path": self.file_path},
+        )
         return handle
 
     def publish_context(
