@@ -6,12 +6,19 @@ from typing import Any, Dict, List, Optional
 from caiengine.pipelines.context_pipeline import ContextPipeline
 from caiengine.pipelines.feedback_pipeline import FeedbackPipeline
 from caiengine.providers import (
+    CSVContextProvider,
     FileContextProvider,
-    XMLContextProvider,
-    SQLiteContextProvider,
-    MySQLContextProvider,
-    PostgresContextProvider,
+    HTTPContextProvider,
+    KafkaContextProvider,
     MemoryContextProvider,
+    MockContextProvider,
+    MySQLContextProvider,
+    OCRContextProvider,
+    PostgresContextProvider,
+    RedisContextProvider,
+    SQLiteContextProvider,
+    SimpleContextProvider,
+    XMLContextProvider,
 )
 from caiengine.interfaces.context_provider import ContextProvider
 from caiengine.inference.dummy_engine import DummyAIInferenceEngine
@@ -26,13 +33,46 @@ from caiengine.common import AuditLogger
 
 _PROVIDER_MAP = {
     "json": FileContextProvider,
+    "file": FileContextProvider,
     "xml": XMLContextProvider,
     "sqlite": SQLiteContextProvider,
     "mysql": MySQLContextProvider,
     "postgres": PostgresContextProvider,
     "postgresql": PostgresContextProvider,
-    "memory": lambda **kwargs: ContextProvider(**kwargs),
+    "memory": MemoryContextProvider,
+    "redis": RedisContextProvider,
+    "kafka": KafkaContextProvider,
+    "http": HTTPContextProvider,
+    "csv": CSVContextProvider,
+    "ocr": OCRContextProvider,
+    "mock": MockContextProvider,
+    "simple": SimpleContextProvider,
 }
+
+
+class _TrustWrappingProvider:
+    """Proxy that augments providers with trust weighting helpers."""
+
+    def __init__(
+        self,
+        provider: Any,
+        *,
+        trust_weights: dict | None = None,
+        layer_types: dict | None = None,
+    ) -> None:
+        self._provider = provider
+        self._delegate = ContextProvider(
+            context_weights=trust_weights, layer_types=layer_types
+        )
+
+    def __getattr__(self, item: str) -> Any:
+        return getattr(self._provider, item)
+
+    def calculate_trust(self, context_data: dict) -> float:
+        return self._delegate.calculate_trust(context_data)
+
+    def get_adjusted_weight(self, base_weight: float, context_data: dict) -> float:
+        return self._delegate.get_adjusted_weight(base_weight, context_data)
 
 
 @dataclass
@@ -54,10 +94,13 @@ class ConfigurablePipeline:
         if prov_type not in _PROVIDER_MAP:
             raise ValueError(f"Unsupported provider type: {prov_type}")
         provider_factory = _PROVIDER_MAP[prov_type]
-        if prov_type == "memory" and "context_weights" not in prov_args and "trust_weights" in cfg:
-            prov_args = dict(prov_args)
-            prov_args["context_weights"] = cfg["trust_weights"]
         provider = provider_factory(**prov_args)
+
+        pipeline_provider: Any = provider
+        if not hasattr(pipeline_provider, "get_adjusted_weight"):
+            pipeline_provider = _TrustWrappingProvider(
+                pipeline_provider, trust_weights=cfg.get("trust_weights")
+            )
 
         parser = LogParser() if cfg.get("parser") == "log" else None
 
@@ -70,7 +113,7 @@ class ConfigurablePipeline:
         feedback_cfg = cfg.get("feedback") or {}
         feedback_loop = None
         if not feedback_cfg:
-            pipeline = ContextPipeline(provider, audit_logger=audit_logger)
+            pipeline = ContextPipeline(pipeline_provider, audit_logger=audit_logger)
         elif feedback_cfg.get("type") == "complex_nn":
             from caiengine.core.learning.learning_manager import LearningManager
             manager = LearningManager(
@@ -82,11 +125,16 @@ class ConfigurablePipeline:
             engine = TokenUsageTracker(manager.inference_engine)
             manager.inference_engine = engine
             pipeline = FeedbackPipeline(
-                provider, engine, learning_manager=manager, audit_logger=audit_logger
+                pipeline_provider,
+                engine,
+                learning_manager=manager,
+                audit_logger=audit_logger,
             )
         elif feedback_cfg.get("type") == "goal":
             engine = TokenUsageTracker(DummyAIInferenceEngine())
-            pipeline = FeedbackPipeline(provider, engine, audit_logger=audit_logger)
+            pipeline = FeedbackPipeline(
+                pipeline_provider, engine, audit_logger=audit_logger
+            )
             strategy = SimpleGoalFeedbackStrategy(
                 feedback_cfg.get("one_direction_layers", [])
             )
