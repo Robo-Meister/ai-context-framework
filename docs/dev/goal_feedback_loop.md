@@ -11,8 +11,25 @@ TODO: implement real polling logic and persistence integration.
 ## State Tracking
 Persist the current goal state and any progress metrics in storage accessible by the worker (memory, local database, etc.). Update this state whenever goals change so the loop can compare new actions against the latest target.
 
-``GoalStateTracker`` currently stores data in memory only.
-TODO: hook this into a durable database or cache.
+`GoalDrivenFeedbackLoop` now supports pluggable persistence providers. Pass a custom provider that implements `GoalFeedbackPersistence` when constructing the loop to persist the action history and calculated baselines into durable storage (e.g. SQLite, Redis, or a managed cache). The default provider keeps data in memory inside the current process.
+
+```python
+from caiengine.core.goal_feedback_loop import (
+    GoalDrivenFeedbackLoop,
+    SQLiteGoalFeedbackPersistence,
+)
+
+persistence = SQLiteGoalFeedbackPersistence("/var/lib/app/goal_feedback.db")
+loop = GoalDrivenFeedbackLoop(strategy, goal_state=my_goal, persistence=persistence)
+```
+
+### Retention controls
+To prevent unbounded growth, configure retention parameters when creating the loop:
+
+* `retention_limit` trims the stored history to the most recent *N* entries.
+* `retention_window` discards entries older than the supplied duration (seconds or `timedelta`).
+
+Both policies can be combined. After pruning, baselines automatically recalculate so that analytics continue to reflect the oldest retained datapoints.
 
 ## Event-Driven Updates
 When a new action appears, send it to the worker through a queue or message channel. The worker computes suggestions only when history or goal state changes, limiting needless work.
