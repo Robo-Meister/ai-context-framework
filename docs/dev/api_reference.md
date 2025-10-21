@@ -40,6 +40,8 @@ Importing ``caiengine`` exposes the following stable objects via lazy loaders:
 - `PersonalityGoalFeedbackStrategy`
 - `GoalFeedbackWorker`
 - `GoalStateTracker`
+- `SQLiteGoalStateBackend`
+- `RedisGoalStateBackend`*
 - `FeedbackEventBus`
 - `CAIBridge`
 - `FileModelRegistry`
@@ -57,7 +59,7 @@ error unless the matching extra set is installed.
 | Extra name | Symbols |
 | ---------- | ------- |
 | `kafka`    | `KafkaContextProvider`, `KafkaPubSubChannel` |
-| `redis`    | `RedisPubSubChannel` |
+| `redis`    | `RedisPubSubChannel`, `RedisGoalStateBackend` |
 
 Install extras with standard pip syntax, e.g. ``pip install caiengine[kafka]``.
 
@@ -80,3 +82,31 @@ change without notice. Current experimental exports include:
 
 When importing ``caiengine`` these symbols are no longer re-exported at the top
 level, making their experimental status explicit.
+
+## Goal state persistence backends
+
+`GoalStateTracker` accepts either a fully constructed backend instance or a
+configuration mapping describing how to build one. This makes it easy to wire
+the tracker using dependency injection containers or settings files.
+
+Example configuration loaded from application settings::
+
+    goal_state_backend = {"type": "sqlite", "database": "/var/app/goal_state.db"}
+    tracker = GoalStateTracker(backend_config=goal_state_backend)
+
+To integrate with Redis, provide either a pre-configured client instance or a
+connection URL::
+
+    tracker = GoalStateTracker(
+        backend_config={
+            "type": "redis",
+            "url": "redis://localhost:6379/0",
+            "key": "myapp:goal_state",
+        }
+    )
+
+When using dependency injection frameworks, instantiate the backend externally
+and pass it directly::
+
+    backend = SQLiteGoalStateBackend("/var/app/goal_state.db")
+    tracker = GoalStateTracker(backend=backend)

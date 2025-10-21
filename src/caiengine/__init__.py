@@ -49,6 +49,8 @@ _EXPORT_ORDER = [
     "PersonalityGoalFeedbackStrategy",
     "GoalFeedbackWorker",
     "GoalStateTracker",
+    "SQLiteGoalStateBackend",
+    "RedisGoalStateBackend",
     "FeedbackEventBus",
     "CAIBridge",
     "FileModelRegistry",
@@ -114,6 +116,12 @@ _EXPORT_SPECS: Dict[str, _ExportSpec] = {
     ),
     "GoalFeedbackWorker": _ExportSpec("caiengine.core.goal_feedback_worker", "GoalFeedbackWorker"),
     "GoalStateTracker": _ExportSpec("caiengine.core.goal_state_tracker", "GoalStateTracker"),
+    "SQLiteGoalStateBackend": _ExportSpec(
+        "caiengine.core.goal_state_tracker", "SQLiteGoalStateBackend"
+    ),
+    "RedisGoalStateBackend": _ExportSpec(
+        "caiengine.core.goal_state_tracker", "RedisGoalStateBackend", "redis"
+    ),
     "FeedbackEventBus": _ExportSpec("caiengine.core.feedback_event_bus", "FeedbackEventBus"),
     "CAIBridge": _ExportSpec("caiengine.cai_bridge", "CAIBridge"),
     "FileModelRegistry": _ExportSpec("caiengine.providers.file_model_registry", "FileModelRegistry"),

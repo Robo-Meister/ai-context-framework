@@ -44,7 +44,11 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         PersonalityGoalFeedbackStrategy,
     )
     from .goal_feedback_worker import GoalFeedbackWorker
-    from .goal_state_tracker import GoalStateTracker
+    from .goal_state_tracker import (
+        GoalStateTracker,
+        RedisGoalStateBackend,
+        SQLiteGoalStateBackend,
+    )
     from .feedback_event_bus import FeedbackEventBus
     try:
         from .model_storage import save_model_with_metadata, load_model_with_metadata
@@ -81,6 +85,8 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         "PersonalityGoalFeedbackStrategy",
         "GoalFeedbackWorker",
         "GoalStateTracker",
+        "SQLiteGoalStateBackend",
+        "RedisGoalStateBackend",
         "FeedbackEventBus",
         "save_model_with_metadata",
         "load_model_with_metadata",
