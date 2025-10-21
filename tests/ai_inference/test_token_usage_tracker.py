@@ -39,3 +39,22 @@ def test_usage_accumulates_across_calls():
     first_total = engine.usage["total_tokens"]
     engine.predict({"msg": "three four"})
     assert engine.usage["total_tokens"] > first_total
+
+
+def test_usage_event_includes_metadata():
+    events = []
+    engine = TokenUsageTracker(
+        DummyAIInferenceEngine(),
+        provider="memory",
+        usage_listeners=[events.append],
+    )
+    payload = {"category": "support", "msg": "hello"}
+    engine.predict(payload)
+
+    assert events, "usage events should be emitted"
+    event = events[0]
+    assert event["operation"] == "predict"
+    assert event["provider"] == "memory"
+    assert event["category"] == "support"
+    assert event["usage"]["total_tokens"] > 0
+    assert "timestamp" in event

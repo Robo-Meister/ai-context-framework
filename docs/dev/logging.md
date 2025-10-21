@@ -37,6 +37,32 @@ collectors can capture metadata (for example `pending_actions`,
 field names you care about, e.g. `%(message)s pending=%(pending_actions)s`, or
 use a JSON formatter to retain the structured attributes automatically.
 
+## Token Usage Telemetry
+
+Inference engines wrapped by `TokenUsageTracker` now emit structured telemetry
+for every model invocation. Pipelines created through
+`ConfigurablePipeline.from_dict` automatically forward these events to the
+`AuditLogger` so downstream systems can observe prompt/completion token
+consumption per provider/category combination. Each audit record uses the
+`token_usage` step name and provides a payload similar to:
+
+```json
+{
+  "timestamp": "2024-05-12T10:15:32.123456",
+  "operation": "predict",
+  "provider": "memory",
+  "category": "support",
+  "usage": {
+    "prompt_tokens": 42,
+    "completion_tokens": 13,
+    "total_tokens": 55
+  }
+}
+```
+
+Attach custom listeners to `TokenUsageTracker.register_usage_listener` if you
+need to ship the telemetry to additional observability sinks.
+
 ## Hooking into External Observability
 
 If you need to forward logs to an external sink, attach handlers to the relevant

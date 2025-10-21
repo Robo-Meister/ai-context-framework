@@ -112,6 +112,17 @@ class ConfigurablePipeline:
 
         feedback_cfg = cfg.get("feedback") or {}
         feedback_loop = None
+        provider_label = prov_type
+
+        def _attach_usage_logging(tracker: TokenUsageTracker) -> TokenUsageTracker:
+            if audit_logger:
+                tracker.register_usage_listener(
+                    lambda event, audit_logger=audit_logger: audit_logger.log(
+                        "Inference", "token_usage", event
+                    )
+                )
+            return tracker
+
         if not feedback_cfg:
             pipeline = ContextPipeline(pipeline_provider, audit_logger=audit_logger)
         elif feedback_cfg.get("type") == "complex_nn":
@@ -122,7 +133,11 @@ class ConfigurablePipeline:
                 output_size=feedback_cfg.get("output_size", 1),
                 parser=parser,
             )
-            engine = TokenUsageTracker(manager.inference_engine)
+            engine = TokenUsageTracker(
+                manager.inference_engine,
+                provider=provider_label,
+            )
+            engine = _attach_usage_logging(engine)
             manager.inference_engine = engine
             pipeline = FeedbackPipeline(
                 pipeline_provider,
@@ -131,7 +146,11 @@ class ConfigurablePipeline:
                 audit_logger=audit_logger,
             )
         elif feedback_cfg.get("type") == "goal":
-            engine = TokenUsageTracker(DummyAIInferenceEngine())
+            engine = TokenUsageTracker(
+                DummyAIInferenceEngine(),
+                provider=provider_label,
+            )
+            engine = _attach_usage_logging(engine)
             pipeline = FeedbackPipeline(
                 pipeline_provider, engine, audit_logger=audit_logger
             )

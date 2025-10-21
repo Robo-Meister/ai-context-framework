@@ -6,6 +6,7 @@ from pathlib import Path
 from caiengine.pipelines.configurable_pipeline import ConfigurablePipeline
 from caiengine.pipelines.configurable_pipeline import _PROVIDER_MAP
 from caiengine.providers.sqlite_context_provider import SQLiteContextProvider
+from caiengine.common import AuditLogger
 
 
 class TestConfigurablePipeline(unittest.TestCase):
@@ -87,6 +88,49 @@ class TestConfigurablePipeline(unittest.TestCase):
 
             results = pipeline.run(data_batch)
             self.assertIsInstance(results, list)
+
+    def test_pipeline_logs_token_usage_events(self):
+        audit_logger = AuditLogger()
+        cfg = {
+            "provider": {"type": "memory"},
+            "candidates": [
+                {
+                    "category": "support",
+                    "context": {"channel": "email"},
+                    "base_weight": 1.0,
+                }
+            ],
+            "feedback": {"type": "goal"},
+        }
+
+        pipeline = ConfigurablePipeline.from_dict(cfg, audit_logger=audit_logger)
+
+        now = datetime.utcnow()
+        data_batch = [
+            {
+                "timestamp": now,
+                "context": {"channel": "email"},
+                "roles": [],
+                "situations": [],
+                "role": "user",
+                "content": "Ticket update",
+                "confidence": 1.0,
+            }
+        ]
+
+        results = pipeline.run(data_batch)
+
+        records = audit_logger.get_records()
+        usage_records = [
+            record for record in records if record["step"] == "token_usage"
+        ]
+        self.assertTrue(usage_records, "token usage events should be audited")
+        detail = usage_records[0]["detail"]
+        self.assertEqual(detail["provider"], "memory")
+        inferred_category = results[0]["category"] if results else None
+        self.assertEqual(detail["category"], inferred_category)
+        self.assertIn("usage", detail)
+        self.assertGreater(detail["usage"]["total_tokens"], 0)
 
 
 if __name__ == "__main__":
