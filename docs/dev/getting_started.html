@@ -74,6 +74,20 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate</code></pre>
   <p>Try running the example script to see the pipeline in action:</p>
   <pre><code>python core/example.py</code></pre>
 
+  <h3>Control cache retention with TTL</h3>
+  <p>
+    Context entries can optionally include a time-to-live (TTL) so transient data is
+    automatically evicted from provider caches. When using the CLI you can supply the
+    value (in seconds) via the <code>--ttl</code> flag:
+  </p>
+  <pre><code>context --provider providers.memory_context_provider.MemoryContextProvider \
+  add --payload '{"foo": "bar"}' --ttl 3600</code></pre>
+  <p>
+    The same <code>ttl</code> field is also accepted by the HTTP
+    <code>/context</code> ingestion endpoint, allowing remote clients to tune cache
+    retention without additional configuration.
+  </p>
+
   <h2>Troubleshooting</h2>
   <p>If you encounter issues, check the FAQ page or contact support.</p>
 
