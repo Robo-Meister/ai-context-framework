@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import threading
 import time
@@ -7,7 +8,7 @@ from typing import Dict, List, Optional
 
 from .goal_feedback_loop import GoalDrivenFeedbackLoop
 from .goal_state_tracker import GoalStateTracker
-from .feedback_event_bus import FeedbackEventBus
+from .feedback_event_bus import AsyncFeedbackEventBus, FeedbackEventBus
 
 
 class GoalFeedbackWorker:
@@ -33,10 +34,11 @@ class GoalFeedbackWorker:
         self._backoff_until = 0.0
         self._threading_warning_emitted = False
         self._poll_warning_logged = False
+        self._using_async_bus = False
         self.logger = logging.getLogger(
             f"{__name__}.{self.__class__.__name__}"
         )
-        self.event_bus.subscribe(self._handle_event)
+        self._register_event_consumer()
 
     def start(self) -> None:
         """Start the background thread."""
@@ -186,3 +188,35 @@ class GoalFeedbackWorker:
             "Generated goal feedback suggestions",
             extra={"suggestion_count": len(suggestions)},
         )
+
+    # ------------------------------------------------------------------
+    # Event bus helpers
+    # ------------------------------------------------------------------
+    def _register_event_consumer(self) -> None:
+        """Subscribe to the configured event bus."""
+
+        if isinstance(self.event_bus, AsyncFeedbackEventBus):
+            loop = self._maybe_get_running_loop()
+            self._using_async_bus = self.event_bus.add_background_consumer(
+                self._handle_event,
+                loop=loop,
+            )
+            if self._using_async_bus:
+                worker_count = len(getattr(self.event_bus, "_workers", []))
+                self.logger.debug(
+                    "Registered async feedback event consumer",
+                    extra={"worker_tasks": worker_count},
+                )
+            else:
+                self.logger.debug(
+                    "Async event bus unavailable; falling back to synchronous dispatch",
+                )
+            return
+        self.event_bus.subscribe(self._handle_event)
+
+    @staticmethod
+    def _maybe_get_running_loop() -> asyncio.AbstractEventLoop | None:
+        try:
+            return asyncio.get_running_loop()
+        except RuntimeError:
+            return None
