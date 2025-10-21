@@ -7,13 +7,12 @@ import inspect
 import logging
 import time
 from collections import defaultdict, deque
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Awaitable, Callable, Deque, Dict, Iterable, List
 
 from fastapi import FastAPI, HTTPException, Query, Request, Response, status
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
-from starlette.middleware.base import BaseHTTPMiddleware
 
 from caiengine.common.token_usage import TokenCounter
 from caiengine.core.goal_feedback_loop import GoalDrivenFeedbackLoop
@@ -27,11 +26,11 @@ ErrorHandler = Callable[
 RateLimitIdentifier = Callable[[Request], Awaitable[str] | str]
 
 
-class AuthHookMiddleware(BaseHTTPMiddleware):
+class AuthHookMiddleware:
     """Invoke an authentication hook before processing requests."""
 
     def __init__(self, app: FastAPI, hook: AuthHook):
-        super().__init__(app)
+        self.app = app
         self.hook = hook
 
     async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]):
@@ -47,7 +46,7 @@ class AuthHookMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
-class ErrorHandlingMiddleware(BaseHTTPMiddleware):
+class ErrorHandlingMiddleware:
     """Catch unhandled exceptions and translate them into JSON responses."""
 
     def __init__(
@@ -56,7 +55,7 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
         handler: ErrorHandler | None = None,
         include_details: bool = False,
     ):
-        super().__init__(app)
+        self.app = app
         self.handler = handler
         self.include_details = include_details
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
@@ -86,7 +85,7 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
             )
 
 
-class RateLimitMiddleware(BaseHTTPMiddleware):
+class RateLimitMiddleware:
     """Apply a simple in-memory rate limit per identifier."""
 
     def __init__(
@@ -96,7 +95,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         window_seconds: float,
         identifier: RateLimitIdentifier | None = None,
     ):
-        super().__init__(app)
+        self.app = app
         self.limit = limit
         self.window = window_seconds
         self.identifier = identifier or self._default_identifier
@@ -130,49 +129,102 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
-class ContextIngestionRequest(BaseModel):
+def _parse_datetime(value: Any) -> datetime | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value
+    try:
+        return datetime.fromisoformat(value)
+    except Exception as exc:  # pragma: no cover - defensive
+        raise ValueError(f"Invalid datetime value: {value!r}") from exc
+
+
+@dataclass
+class ContextIngestionRequest:
     payload: Dict[str, Any]
     timestamp: datetime | None = None
     metadata: Dict[str, Any] | None = None
-    source_id: str = Field(default="http", description="Identifier for the data source.")
-    confidence: float = Field(default=1.0, ge=0.0)
-    ttl: int | None = Field(
-        default=None,
-        ge=0,
-        description="Optional time-to-live in seconds for the ingested context entry.",
-    )
+    source_id: str = "http"
+    confidence: float = 1.0
+    ttl: int | None = None
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "ContextIngestionRequest":
+        if "payload" not in data:
+            raise ValueError("payload is required")
+        payload = data.get("payload")
+        if not isinstance(payload, dict):
+            raise ValueError("payload must be a mapping")
+        return cls(
+            payload=dict(payload),
+            timestamp=_parse_datetime(data.get("timestamp")),
+            metadata=data.get("metadata"),
+            source_id=data.get("source_id", "http"),
+            confidence=float(data.get("confidence", 1.0)),
+            ttl=data.get("ttl"),
+        )
 
 
-class ContextIngestionResponse(BaseModel):
+@dataclass
+class ContextIngestionResponse:
     id: str
 
 
-class ContextRecord(BaseModel):
+@dataclass
+class ContextRecord:
     id: str | None = None
-    timestamp: datetime
-    context: Dict[str, Any] = Field(default_factory=dict)
-    roles: List[str] = Field(default_factory=list)
-    situations: List[str] = Field(default_factory=list)
+    timestamp: datetime = field(default_factory=datetime.utcnow)
+    context: Dict[str, Any] = field(default_factory=dict)
+    roles: List[str] = field(default_factory=list)
+    situations: List[str] = field(default_factory=list)
     content: Any | None = None
     confidence: float = 1.0
     ocr_metadata: Dict[str, Any] | None = None
 
+    @classmethod
+    def from_mapping(cls, data: Any) -> "ContextRecord":
+        mapping = dict(data)
+        timestamp = _parse_datetime(mapping.get("timestamp")) or datetime.utcnow()
+        return cls(
+            id=mapping.get("id"),
+            timestamp=timestamp,
+            context=dict(mapping.get("context", {})),
+            roles=list(mapping.get("roles", [])),
+            situations=list(mapping.get("situations", [])),
+            content=mapping.get("content"),
+            confidence=float(mapping.get("confidence", 1.0)),
+            ocr_metadata=mapping.get("ocr_metadata"),
+        )
 
-class ContextQueryResponse(BaseModel):
+
+@dataclass
+class ContextQueryResponse:
     items: List[ContextRecord]
 
 
-class GoalSuggestionRequest(BaseModel):
-    history: List[Dict[str, Any]] = Field(default_factory=list)
-    current_actions: List[Dict[str, Any]] = Field(default_factory=list)
+@dataclass
+class GoalSuggestionRequest:
+    history: List[Dict[str, Any]] = field(default_factory=list)
+    current_actions: List[Dict[str, Any]] = field(default_factory=list)
     goal_state: Dict[str, Any] | None = None
 
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "GoalSuggestionRequest":
+        return cls(
+            history=list(data.get("history", [])),
+            current_actions=list(data.get("current_actions", [])),
+            goal_state=data.get("goal_state"),
+        )
 
-class GoalSuggestionResponse(BaseModel):
+
+@dataclass
+class GoalSuggestionResponse:
     suggestions: List[Dict[str, Any]]
 
 
-class TokenUsageResponse(BaseModel):
+@dataclass
+class TokenUsageResponse:
     prompt_tokens: int
     completion_tokens: int
     total_tokens: int
@@ -247,7 +299,7 @@ def create_http_service_app(
         except Exception as exc:  # noqa: BLE001
             svc_logger.exception("Context retrieval failed")
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc))
-        items = [ContextRecord.model_validate(record) for record in raw_records]
+        items = [ContextRecord.from_mapping(record) for record in raw_records]
         return ContextQueryResponse(items=items)
 
     if include_goal_routes:
