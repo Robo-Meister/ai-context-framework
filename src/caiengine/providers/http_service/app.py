@@ -10,9 +10,8 @@ from collections import defaultdict, deque
 from datetime import datetime
 from typing import Any, Awaitable, Callable, Deque, Dict, Iterable, List
 
-from fastapi import FastAPI, HTTPException, Query, Request, Response, status
+from fastapi import FastAPI, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from caiengine.common.token_usage import TokenCounter
@@ -130,54 +129,6 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
-class ContextIngestionRequest(BaseModel):
-    payload: Dict[str, Any]
-    timestamp: datetime | None = None
-    metadata: Dict[str, Any] | None = None
-    source_id: str = Field(default="http", description="Identifier for the data source.")
-    confidence: float = Field(default=1.0, ge=0.0)
-    ttl: int | None = Field(
-        default=None,
-        ge=0,
-        description="Optional time-to-live in seconds for the ingested context entry.",
-    )
-
-
-class ContextIngestionResponse(BaseModel):
-    id: str
-
-
-class ContextRecord(BaseModel):
-    id: str | None = None
-    timestamp: datetime
-    context: Dict[str, Any] = Field(default_factory=dict)
-    roles: List[str] = Field(default_factory=list)
-    situations: List[str] = Field(default_factory=list)
-    content: Any | None = None
-    confidence: float = 1.0
-    ocr_metadata: Dict[str, Any] | None = None
-
-
-class ContextQueryResponse(BaseModel):
-    items: List[ContextRecord]
-
-
-class GoalSuggestionRequest(BaseModel):
-    history: List[Dict[str, Any]] = Field(default_factory=list)
-    current_actions: List[Dict[str, Any]] = Field(default_factory=list)
-    goal_state: Dict[str, Any] | None = None
-
-
-class GoalSuggestionResponse(BaseModel):
-    suggestions: List[Dict[str, Any]]
-
-
-class TokenUsageResponse(BaseModel):
-    prompt_tokens: int
-    completion_tokens: int
-    total_tokens: int
-
-
 def create_http_service_app(
     *,
     provider: Any,
@@ -216,39 +167,48 @@ def create_http_service_app(
 
     svc_logger = logger or logging.getLogger("caiengine.http_service")
 
-    @app.post("/context", response_model=ContextIngestionResponse)
-    async def ingest_context(request: ContextIngestionRequest) -> ContextIngestionResponse:
+    @app.post("/context")
+    async def ingest_context(request: Request) -> Dict[str, Any]:
+        payload = _ensure_json_dict(request)
+        context_payload = payload.get("payload")
+        if not isinstance(context_payload, dict):
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail="payload must be an object")
+
+        timestamp = _parse_optional_datetime(payload.get("timestamp"))
+        metadata = payload.get("metadata") if isinstance(payload.get("metadata"), dict) else None
+        source_id = payload.get("source_id", "http")
+        confidence = _parse_optional_float(payload.get("confidence"), default=1.0, field="confidence", min_value=0.0)
+        ttl = _parse_optional_int(payload.get("ttl"), field="ttl", min_value=0)
+
         try:
             context_id = provider.ingest_context(
-                request.payload,
-                timestamp=request.timestamp,
-                metadata=request.metadata,
-                source_id=request.source_id,
-                confidence=request.confidence,
-                ttl=request.ttl,
+                context_payload,
+                timestamp=timestamp,
+                metadata=metadata,
+                source_id=source_id,
+                confidence=confidence,
+                ttl=ttl,
             )
         except Exception as exc:  # noqa: BLE001
             svc_logger.exception("Context ingestion failed")
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc))
-        return ContextIngestionResponse(id=context_id)
+        return {"id": context_id}
 
-    @app.get("/context", response_model=ContextQueryResponse)
-    async def fetch_context(
-        start: datetime | None = Query(default=None, description="Start of the time window."),
-        end: datetime | None = Query(default=None, description="End of the time window."),
-        scope: str = Query(default="", description="Context scope filter."),
-        data_type: str = Query(default="", description="Context data type filter."),
-    ) -> ContextQueryResponse:
-        start_dt = start or datetime.min
-        end_dt = end or datetime.utcnow()
+    @app.get("/context")
+    async def fetch_context(request: Request) -> Dict[str, Any]:
+        params = dict(request.query_params)
+        start_dt = _parse_optional_datetime(params.get("start")) or datetime.min
+        end_dt = _parse_optional_datetime(params.get("end")) or datetime.utcnow()
+        scope = params.get("scope", "") or ""
+        data_type = params.get("data_type", "") or ""
         query = ContextQuery(roles=[], time_range=(start_dt, end_dt), scope=scope, data_type=data_type)
         try:
             raw_records = provider.get_context(query)
         except Exception as exc:  # noqa: BLE001
             svc_logger.exception("Context retrieval failed")
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc))
-        items = [ContextRecord.model_validate(record) for record in raw_records]
-        return ContextQueryResponse(items=items)
+        items = [_normalise_context_record(record) for record in raw_records]
+        return {"items": items}
 
     if include_goal_routes:
         if feedback_loop is None:
@@ -256,20 +216,97 @@ def create_http_service_app(
         if token_counter is None:
             raise ValueError("token_counter must be provided when include_goal_routes is True")
 
-        @app.post("/suggest", response_model=GoalSuggestionResponse)
-        async def suggest_actions(request: GoalSuggestionRequest) -> GoalSuggestionResponse:
-            if request.goal_state is not None:
-                feedback_loop.set_goal_state(request.goal_state)
-            suggestions = feedback_loop.suggest(request.history, request.current_actions)
+        @app.post("/suggest")
+        async def suggest_actions(request: Request) -> Dict[str, Any]:
+            payload = _ensure_json_dict(request)
+            history = _ensure_list_of_dict(payload.get("history", []), field="history")
+            current_actions = _ensure_list_of_dict(payload.get("current_actions", []), field="current_actions")
+            goal_state = payload.get("goal_state")
+            if goal_state is not None and not isinstance(goal_state, dict):
+                raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail="goal_state must be an object")
+            if goal_state is not None:
+                feedback_loop.set_goal_state(goal_state)
+            suggestions = feedback_loop.suggest(history, current_actions)
             for suggestion in suggestions:
                 usage = suggestion.get("usage") if isinstance(suggestion, dict) else None
                 if usage:
                     token_counter.add(usage)
-            return GoalSuggestionResponse(suggestions=suggestions)
+            return {"suggestions": suggestions}
 
-        @app.get("/usage", response_model=TokenUsageResponse)
-        async def usage() -> TokenUsageResponse:
-            usage_payload = token_counter.as_dict()
-            return TokenUsageResponse(**usage_payload)
+        @app.get("/usage")
+        async def usage() -> Dict[str, Any]:
+            return token_counter.as_dict()
 
     return app
+
+
+def _ensure_json_dict(request: Request) -> Dict[str, Any]:
+    data = request.json()
+    if not isinstance(data, dict):
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Request body must be a JSON object")
+    return data
+
+
+def _parse_optional_datetime(value: Any) -> datetime | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value
+    if isinstance(value, str):
+        try:
+            return datetime.fromisoformat(value)
+        except ValueError as exc:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid datetime format") from exc
+    raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid datetime value")
+
+
+def _parse_optional_float(value: Any, *, default: float, field: str, min_value: float | None = None) -> float:
+    if value is None:
+        result = default
+    else:
+        try:
+            result = float(value)
+        except (TypeError, ValueError) as exc:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"{field} must be a number") from exc
+    if min_value is not None and result < min_value:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"{field} must be >= {min_value}")
+    return result
+
+
+def _parse_optional_int(value: Any, *, field: str, min_value: int | None = None) -> int | None:
+    if value is None:
+        return None
+    try:
+        result = int(value)
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"{field} must be an integer") from exc
+    if min_value is not None and result < min_value:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"{field} must be >= {min_value}")
+    return result
+
+
+def _ensure_list_of_dict(value: Any, *, field: str) -> List[Dict[str, Any]]:
+    if value is None:
+        return []
+    if not isinstance(value, Iterable) or isinstance(value, (str, bytes, dict)):
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"{field} must be a list of objects")
+    result: List[Dict[str, Any]] = []
+    for item in value:
+        if not isinstance(item, dict):
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"{field} must contain only objects")
+        result.append(item)
+    return result
+
+
+def _normalise_context_record(record: Dict[str, Any]) -> Dict[str, Any]:
+    if not isinstance(record, dict):
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Invalid context record")
+    normalised = dict(record)
+    normalised.setdefault("id", None)
+    normalised.setdefault("roles", [])
+    normalised.setdefault("situations", [])
+    normalised.setdefault("context", {})
+    normalised.setdefault("confidence", 1.0)
+    normalised.setdefault("content", None)
+    normalised.setdefault("ocr_metadata", None)
+    return normalised

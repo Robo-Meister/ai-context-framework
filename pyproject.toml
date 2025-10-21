@@ -60,5 +60,5 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["caiengine*", "sitecustomize"]
+include = ["caiengine*", "sitecustomize", "fastapi*", "starlette*"]
 

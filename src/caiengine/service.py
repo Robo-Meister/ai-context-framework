@@ -14,14 +14,8 @@ from caiengine.core.goal_strategies import SimpleGoalFeedbackStrategy
 from caiengine.providers.http_context_provider import HTTPContextProvider
 from caiengine.providers.http_service import (
     AuthHook,
-    ContextIngestionRequest,
-    ContextIngestionResponse,
-    ContextQueryResponse,
     ErrorHandler,
-    GoalSuggestionRequest,
-    GoalSuggestionResponse,
     RateLimitIdentifier,
-    TokenUsageResponse,
     create_http_service_app,
 )
 
