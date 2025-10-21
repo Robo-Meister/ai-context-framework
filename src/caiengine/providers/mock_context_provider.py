@@ -38,5 +38,8 @@ class MockContextProvider:
                 "confidence": 0.95
             }
         ]
+        if not hasattr(self, "logger"):
+            self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+
         self.logger.debug("Returning mock context entries", extra={"count": len(contexts)})
         return contexts
