@@ -51,3 +51,27 @@ logging.getLogger("caiengine.providers.kafka_context_provider.KafkaContextProvid
 Handlers inherit levels from their parent logger hierarchy. Set
 `propagate = False` if you want to suppress duplicate entries once a custom
 handler is attached.
+
+## Service Middleware Hooks
+
+`CAIService` now exposes its HTTP surface through FastAPI which makes it easy to
+insert cross-cutting concerns via middleware. Three lightweight middlewares are
+enabled out of the box and can be tuned when the service is constructed:
+
+| Concern        | Configuration knob | Notes |
+| -------------- | ------------------ | ----- |
+| Authentication | `auth_hook: Callable[[Request], Awaitable[AuthDecision] | AuthDecision]` | Hook receives the incoming `Request` and may return a `Response`, a `dict` payload, or `False` to reject the call. |
+| Error handling | `error_handler: Callable[[Exception, Request], Awaitable[Response | dict] | Response | dict]`, `include_error_details: bool` | Translate exceptions into custom JSON payloads or expose the original error message when `include_error_details` is set. |
+| Rate limiting  | `rate_limit_per_minute: int`, `rate_limit_window_seconds: float`, `rate_limit_identifier: Callable[[Request], Awaitable[str] | str]` | Configure the number of allowed requests per window and optionally derive a custom identifier (for example from an API key). A limit of `0` disables the middleware. |
+
+When running from the CLI the following flags surface the same controls:
+
+```bash
+python -m caiengine.service --host 0.0.0.0 --port 8080 \
+  --rate-limit 120 --rate-limit-window 60 \
+  --include-error-details
+```
+
+Applications embedding the service can also inspect metrics via the `/usage`
+endpoint which reports aggregated token counts from the goal feedback loop so
+that traffic shaping can be correlated with model consumption.
