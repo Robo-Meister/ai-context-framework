@@ -136,6 +136,11 @@ class ContextIngestionRequest(BaseModel):
     metadata: Dict[str, Any] | None = None
     source_id: str = Field(default="http", description="Identifier for the data source.")
     confidence: float = Field(default=1.0, ge=0.0)
+    ttl: int | None = Field(
+        default=None,
+        ge=0,
+        description="Optional time-to-live in seconds for the ingested context entry.",
+    )
 
 
 class ContextIngestionResponse(BaseModel):
@@ -220,6 +225,7 @@ def create_http_service_app(
                 metadata=request.metadata,
                 source_id=request.source_id,
                 confidence=request.confidence,
+                ttl=request.ttl,
             )
         except Exception as exc:  # noqa: BLE001
             svc_logger.exception("Context ingestion failed")

@@ -27,6 +27,7 @@ def cmd_add(args):
         metadata=metadata,
         source_id=args.source_id,
         confidence=float(args.confidence),
+        ttl=args.ttl,
     )
     logger.info(ctx_id)
 
@@ -62,6 +63,7 @@ def main(argv=None):
     add_p.add_argument("--timestamp", default=None, help="ISO timestamp")
     add_p.add_argument("--source-id", default="cli", help="Source identifier")
     add_p.add_argument("--confidence", default="1.0", help="Confidence score")
+    add_p.add_argument("--ttl", type=int, default=None, help="TTL in seconds for cache retention")
 
     query_p = sub.add_parser("query", help="Query context entries")
     query_p.add_argument("--start", required=True, help="Start timestamp (ISO)")
