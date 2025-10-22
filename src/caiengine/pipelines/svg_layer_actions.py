@@ -1,8 +1,10 @@
-"""Utilities for turning validated SVG plans into executable layer actions."""
+"""Utilities for turning validated SVG (and related) plans into executable actions."""
 
 from __future__ import annotations
 
+import base64
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
 
@@ -13,8 +15,17 @@ def _default_asset_fetcher(path: str) -> str:
     focused on orchestration logic while making it easy to stub in tests.
     """
 
-    with open(path, "r", encoding="utf-8") as handle:
-        return handle.read()
+    try:
+        with open(path, "r", encoding="utf-8") as handle:
+            return handle.read()
+    except UnicodeDecodeError:
+        # Binary payloads (for example GLB 3D models) cannot be decoded as
+        # UTF-8.  Fallback to returning a base64 encoded representation so the
+        # caller still receives a serialisable string payload.
+        with open(path, "rb") as handle:
+            data = handle.read()
+        encoded = base64.b64encode(data).decode("ascii")
+        return f"data:application/octet-stream;base64,{encoded}"
 
 
 @dataclass
@@ -25,6 +36,13 @@ class SvgAssetLink:
     asset_path: Optional[str] = None
     fragment_id: Optional[str] = None
     inline_svg: Optional[str] = None
+    asset_type: Optional[str] = None
+    inline_model: Optional[str] = None
+    model_path: Optional[str] = None
+    model_format: Optional[str] = None
+    model_content: Optional[str] = None
+    materials: Dict[str, Any] = field(default_factory=dict)
+    textures: Dict[str, Any] = field(default_factory=dict)
     bounding_box: Optional[Any] = None
     layer_metadata: Dict[str, Any] = field(default_factory=dict)
     svg_content: Optional[str] = None
@@ -39,6 +57,20 @@ class SvgAssetLink:
             payload["fragment_id"] = self.fragment_id
         if self.inline_svg is not None:
             payload["inline_svg"] = self.inline_svg
+        if self.asset_type is not None:
+            payload["asset_type"] = self.asset_type
+        if self.inline_model is not None:
+            payload["inline_model"] = self.inline_model
+        if self.model_path is not None:
+            payload["model_path"] = self.model_path
+        if self.model_format is not None:
+            payload["model_format"] = self.model_format
+        if self.model_content is not None:
+            payload["model_content"] = self.model_content
+        if self.materials:
+            payload["materials"] = dict(self.materials)
+        if self.textures:
+            payload["textures"] = dict(self.textures)
         if self.bounding_box is not None:
             payload["bounding_box"] = self.bounding_box
         if self.layer_metadata:
@@ -79,9 +111,14 @@ class SvgActionPlanner:
         "translate",
         "scale",
         "rotate",
+        "rotation",
         "resize",
         "position",
         "skew",
+        "orientation",
+        "quaternion",
+        "scale3d",
+        "pivot",
     }
 
     _ASSET_KEYS = {
@@ -92,6 +129,11 @@ class SvgActionPlanner:
         "new_svg",
         "inline_svg",
         "svg",
+        "model_path",
+        "inline_model",
+        "model",
+        "model_format",
+        "asset_type",
     }
 
     def __init__(
@@ -180,6 +222,16 @@ class SvgActionPlanner:
         assets: Dict[str, Dict[str, Any]],
     ) -> Optional[SvgAssetLink]:
         inline_svg = layer.get("new_svg") or layer.get("inline_svg") or layer.get("svg")
+        inline_model = layer.get("inline_model") or layer.get("model")
+        model_path = layer.get("model_path")
+        model_format = layer.get("model_format")
+        asset_type = layer.get("asset_type")
+
+        is_model_layer = False
+        if inline_model or model_path:
+            is_model_layer = True
+        elif isinstance(asset_type, str) and "3d" in asset_type.lower():
+            is_model_layer = True
 
         asset_name = layer.get("asset_name")
         asset_path = layer.get("asset_path")
@@ -191,6 +243,9 @@ class SvgActionPlanner:
                 asset_path, _, fragment_candidate = source.partition("#")
                 fragment_id = fragment_id or (fragment_candidate or None)
                 asset_name = self._resolve_asset_name_from_path(assets, asset_path)
+
+        if is_model_layer and model_path and not asset_path:
+            asset_path = model_path
 
         asset_name = asset_name or self._resolve_asset_name_from_path(assets, asset_path)
         manifest = assets.get(asset_name) if asset_name else None
@@ -204,11 +259,22 @@ class SvgActionPlanner:
                     layer_metadata = dict(entry)
                     break
 
-        if not any((asset_name, asset_path, inline_svg)):
+        if is_model_layer and not model_format and model_path:
+            model_format = self._infer_model_format(model_path)
+
+        if not any((asset_name, asset_path, inline_svg, inline_model)):
             return None
 
         svg_content: Optional[str] = None
-        if asset_path and self._asset_fetcher:
+        model_content: Optional[str] = None
+        if is_model_layer and model_path and self._asset_fetcher:
+            try:
+                model_content = self._asset_fetcher(model_path)
+            except FileNotFoundError:
+                model_content = None
+            except OSError:
+                model_content = None
+        elif asset_path and self._asset_fetcher and not is_model_layer:
             try:
                 svg_content = self._asset_fetcher(asset_path)
             except FileNotFoundError:
@@ -216,11 +282,29 @@ class SvgActionPlanner:
             except OSError:
                 svg_content = None
 
+        materials = layer.get("materials")
+        if not isinstance(materials, dict):
+            materials = {}
+        textures = layer.get("textures")
+        if not isinstance(textures, dict):
+            textures = {}
+
+        asset_type_payload = asset_type
+        if is_model_layer and not asset_type_payload:
+            asset_type_payload = "3d_model"
+
         return SvgAssetLink(
             asset_name=asset_name,
             asset_path=asset_path,
             fragment_id=fragment_id,
             inline_svg=inline_svg,
+            asset_type=asset_type_payload,
+            inline_model=inline_model,
+            model_path=model_path,
+            model_format=model_format,
+            model_content=model_content,
+            materials=materials,
+            textures=textures,
             bounding_box=bounding_box,
             layer_metadata=layer_metadata,
             svg_content=svg_content,
@@ -253,8 +337,18 @@ class SvgActionPlanner:
             "action",
             "remove",
             "bounding_box",
+            "model_content",
+            "materials",
+            "textures",
         }
         return {key: value for key, value in layer.items() if key not in ignored}
+
+    def _infer_model_format(self, path: str) -> Optional[str]:
+        suffix = Path(path).suffix
+        if not suffix:
+            return None
+        formatted = suffix.lstrip(".").lower()
+        return formatted or None
 
 
 def build_svg_action_plan(
