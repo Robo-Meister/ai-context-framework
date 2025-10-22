@@ -137,3 +137,56 @@ def test_action_planner_skips_non_dict_layers():
         }
     ]
 
+
+def test_action_planner_supports_3d_models(tmp_path):
+    model_path = tmp_path / "models" / "drone.glb"
+    model_path.parent.mkdir(parents=True)
+    model_path.write_bytes(b"glbdata")
+
+    plan = {
+        "layers": [
+            {
+                "layer_id": "drone_model",
+                "asset_name": "vehicles/drone",
+                "asset_type": "3d_model",
+                "model_path": str(model_path),
+                "rotation": {"x": 0, "y": 90, "z": 0},
+                "materials": {"primary": "mat_alloy"},
+                "textures": {"albedo": "textures/drone_albedo.png"},
+            }
+        ]
+    }
+
+    manifest: Dict[str, Dict[str, any]] = {
+        "vehicles/drone": {
+            "name": "vehicles/drone",
+            "path": str(model_path),
+            "layers": [],
+            "bounding_boxes": {},
+        }
+    }
+
+    planner = SvgActionPlanner()
+    actions = planner.build_actions(plan, manifest)
+
+    assert len(actions) == 1
+    action = actions[0]
+
+    assert action["action"] == "add"
+    assert action["layer_id"] == "drone_model"
+    assert action["transforms"]["rotation"] == {"x": 0, "y": 90, "z": 0}
+
+    asset = action["asset"]
+    assert asset["asset_type"] == "3d_model"
+    assert asset["model_path"] == str(model_path)
+    assert asset["model_format"] == "glb"
+    model_content = asset["model_content"]
+    assert isinstance(model_content, str) and model_content
+    if model_content.startswith("data:application/octet-stream;base64,"):
+        # Binary payloads are base64 encoded
+        pass
+    else:
+        assert model_content == "glbdata"
+    assert asset["materials"] == {"primary": "mat_alloy"}
+    assert asset["textures"] == {"albedo": "textures/drone_albedo.png"}
+
