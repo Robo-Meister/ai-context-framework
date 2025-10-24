@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contextual AI - Getting Started</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 2rem;
+      line-height: 1.6;
+      max-width: 960px;
+      color: #2c3e50;
+    }
+    h1, h2, h3 {
+      color: #34495e;
+      margin-top: 2rem;
+    }
+    pre, code {
+      background-color: #f4f4f4;
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-family: Consolas, monospace;
+    }
+    nav a {
+      margin-right: 1rem;
+      text-decoration: none;
+      color: #3498db;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">Overview</a>
+  <a href="getting_started.html">Getting Started</a>
+  <a href="api_reference.html">API Reference</a>
+  <a href="architecture.html">Architecture</a>
+  <a href="contributing.html">Contributing</a>
+  <a href="faq.html">FAQ</a>
+</nav>
+
+  <h1>🚀 Getting Started with Contextual AI</h1>
+
+  <p>This guide will help you quickly set up and run the Contextual AI Module on your machine.</p>
+
+  <h2>Prerequisites</h2>
+  <ul>
+    <li>Python 3.9 or later</li>
+    <li>Git installed</li>
+    <li>Virtual environment tool (venv or virtualenv)</li>
+  </ul>
+
+  <h2>Step 1: Clone the repository</h2>
+  <pre><code>git clone https://github.com/Robo-Meister/ai-context-framework.git
+cd ai-context-framework</code></pre>
+
+  <h2>Step 2: Create and activate virtual environment</h2>
+  <pre><code>python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate</code></pre>
+
+  <h2>Step 3: Install dependencies</h2>
+  <p>Select the installation profile that matches your environment:</p>
+  <ul>
+    <li><strong>Minimal core runtime</strong>: <code>pip install caiengine</code></li>
+    <li><strong>Full AI toolchain</strong>: <code>pip install caiengine[ai]</code></li>
+  </ul>
+  <p>For local development, install the project in editable mode with tooling:</p>
+  <pre><code>pip install -e .[dev]</code></pre>
+  <p>The helper script <code>./install_test_requirements.sh &lt;core|ai&gt;</code> mirrors the CI setup and
+    installs either the minimal or full dependency set (defaulting to <code>ai</code>).</p>
+
+  <h2>Step 4: Run a basic example</h2>
+  <p>Try running the example script to see the pipeline in action:</p>
+  <pre><code>python core/example.py</code></pre>
+
+  <h3>Control cache retention with TTL</h3>
+  <p>
+    Context entries can optionally include a time-to-live (TTL) so transient data is
+    automatically evicted from provider caches. When using the CLI you can supply the
+    value (in seconds) via the <code>--ttl</code> flag:
+  </p>
+  <pre><code>context --provider providers.memory_context_provider.MemoryContextProvider \
+  add --payload '{"foo": "bar"}' --ttl 3600</code></pre>
+  <p>
+    The same <code>ttl</code> field is also accepted by the HTTP
+    <code>/context</code> ingestion endpoint, allowing remote clients to tune cache
+    retention without additional configuration.
+  </p>
+
+  <h2>Troubleshooting</h2>
+  <p>If you encounter issues, check the FAQ page or contact support.</p>
+
+</body>
+</html>

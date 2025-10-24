@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://robo-meister.github.io/ai-context-framework/dev/model_storage_plan.html" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Model Storage &amp; Registry Plan - CAIEngine Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Model Storage \u0026amp; Registry Plan";
+        var mkdocs_page_input_path = "dev/model_storage_plan.md";
+        var mkdocs_page_url = "/ai-context-framework/dev/model_storage_plan.html";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> CAIEngine Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="index.html">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../getting_started/quickstart.html">Quickstart</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Developer Guides</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="extending.html">Extending CAIEngine</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="network.html">Network Guide</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Examples</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../goal-driven-feedback-loop.html">Goal-driven Feedback Loop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../event-context-standard.html">Event Context Standard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../svg_layered_generation.html">SVG Layered Generation</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">CAIEngine Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Model Storage &amp; Registry Plan</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="model-storage-registry-plan">Model Storage &amp; Registry Plan<a class="headerlink" href="#model-storage-registry-plan" title="Permanent link">&para;</a></h1>
+<p>This document outlines the approach for Phase 6 of the project, delivering
+portable and context‑aware model bundles.</p>
+<h2 id="1-standard-representation">1. Standard Representation<a class="headerlink" href="#1-standard-representation" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>ONNX as the core model format</strong> for interoperability across runtimes.</li>
+<li>A companion <code>manifest.yaml</code> or <code>manifest.toml</code> captures metadata such as
+  model name, version, training context, required preprocessing and
+  postprocessing steps, dependencies, and license details.</li>
+</ul>
+<h2 id="2-packaging">2. Packaging<a class="headerlink" href="#2-packaging" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Package <code>model.onnx</code> and the manifest in a single archive (ZIP or OCI
+  artifact).</li>
+<li>Optionally use content‑addressed or hashed file names to support
+  reproducibility.</li>
+</ul>
+<h2 id="3-tooling">3. Tooling<a class="headerlink" href="#3-tooling" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Provide utilities to load, validate, and migrate bundles across
+  environments.</li>
+<li>Include simple CLI helpers for exporting, importing, and verifying model
+  compatibility with the manifest.</li>
+</ul>
+<h2 id="4-registry-integration">4. Registry Integration<a class="headerlink" href="#4-registry-integration" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Adopt a predictable bundle layout so a future registry can index manifest
+  fields for discovery.</li>
+<li>Support context‑aware search and retrieval based on metadata such as
+  task, framework version, and required hardware.</li>
+</ul>
+<p>This plan establishes a portable "ONNX + manifest" standard, enabling
+consistent model management, transport, and discovery across the project.</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

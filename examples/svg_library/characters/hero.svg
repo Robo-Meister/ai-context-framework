@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240">
+  <defs>
+    <style>
+      :root {
+        --skin: #f2c9a0;
+        --cape: #4d6fff;
+        --suit: #30395c;
+        --accent: #f8ba1b;
+      }
+    </style>
+  </defs>
+  <g id="hero_character/body">
+    <path d="M90 120h20v40H90z" fill="var(--suit)" />
+    <circle cx="100" cy="80" r="24" fill="var(--skin)" />
+    <path d="M70 110c20 10 40 10 60 0v50H70z" fill="var(--suit)" />
+  </g>
+  <g id="hero_character/cape" opacity="0.95">
+    <path d="M60 120c10 50 0 90 0 90h80s-10-60 0-90c-20 10-60 10-80 0z" fill="var(--cape)" />
+  </g>
+  <g id="hero_character/emblem">
+    <polygon points="100,130 90,150 110,150" fill="var(--accent)" />
+  </g>
+</svg>

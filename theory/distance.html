@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Contextual AI Roles & Distance Calculation</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 2rem;
+    max-width: 900px;
+    line-height: 1.6;
+    color: #2c3e50;
+  }
+  h1, h2, h3 {
+    color: #34495e;
+  }
+  code {
+    background-color: #f4f4f4;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+  .formula {
+    background-color: #f9f9f9;
+    border-left: 4px solid #2980b9;
+    padding: 1rem;
+    margin: 1rem 0;
+    font-family: monospace;
+    font-size: 1.1rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 2rem 0;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+  th {
+    background-color: #ecf0f1;
+  }
+  ul {
+    margin-top: 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>Contextual AI: Roles & Distance Calculation</h1>
+
+<h2>1. Roles in Contextual AI</h2>
+<p>
+Roles define the identity or function of the message source or the entity related to the message. Examples include:</p>
+<ul>
+  <li><strong>Client</strong> (e.g., Client A)</li>
+  <li><strong>Project</strong> (e.g., Project B)</li>
+  <li><strong>User Role</strong> (e.g., Admin, Developer, Support)</li>
+  <li><strong>Network Location</strong> (e.g., Mesh Node ID)</li>
+</ul>
+<p>Roles help anchor messages within specific "context clouds," grouping related information together.</p>
+
+<h2>2. Distance in Context Space</h2>
+<p>
+Messages closer in the context space are more relevant or related. Distance is a measure of dissimilarity between two messages based on their contextual attributes.</p>
+
+<h3>2.1 Context Vectors</h3>
+<p>Each message can be represented as a <em>context vector</em> where each dimension corresponds to a contextual attribute (e.g., client, project, role).</p>
+<pre><code>Message A: [ClientA=1, ProjectB=1, RoleAdmin=0, MoodHappy=0.5, ...]
+Message B: [ClientA=1, ProjectB=0, RoleAdmin=1, MoodHappy=0.7, ...]
+</code></pre>
+
+<h3>2.2 Distance Metrics</h3>
+<p>Common distance metrics include:</p>
+<ul>
+  <li><strong>Euclidean Distance</strong> (L2 norm):<br />
+    <code>d = sqrt(∑ (x_i - y_i)²)</code></li>
+  <li><strong>Cosine Similarity</strong> (measures angle between vectors):<br />
+    <code>cos(θ) = (X · Y) / (||X|| ||Y||)</code>, Distance = 1 - cos(θ)</li>
+</ul>
+
+<div class="formula">
+  <strong>Euclidean Distance:</strong><br />
+  d(A,B) = √∑<sub>i=1</sub><sup>n</sup> (x<sub>i</sub> - y<sub>i</sub>)²
+</div>
+
+<div class="formula">
+  <strong>Cosine Distance:</strong><br />
+  d(A,B) = 1 - (X · Y) / (||X|| × ||Y||)
+</div>
+
+<h2>3. Application: Measuring Message Closeness</h2>
+<p>When two messages share the same client and project, their context vectors overlap more, resulting in a smaller distance.</p>
+<p>This distance can be used to:</p>
+<ul>
+  <li>Determine importance or influence of past messages on current processing</li>
+  <li>Cluster related messages for efficient retrieval</li>
+  <li>Adjust trust or weight based on proximity</li>
+</ul>
+
+<h2>4. Role Weighting</h2>
+<p>Different roles can have different importance weights in the context vector, e.g., a message from an Admin may weigh more than from a Guest:</p>
+<div class="formula">
+  Weighted Vector Component:<br />
+  x'<sub>i</sub> = w<sub>role</sub> × x<sub>i</sub>
+</div>
+<p>Weights can be tuned based on domain knowledge or learned dynamically.</p>
+
+<h2>5. Summary</h2>
+<ul>
+  <li>Roles act as key anchors in context clouds, helping group messages.</li>
+  <li>Distance between messages in context space quantifies relatedness.</li>
+  <li>Weights can adjust role importance dynamically.</li>
+  <li>Distance metrics like Euclidean or Cosine are used to calculate closeness.</li>
+</ul>
+
+</body>
+</html>

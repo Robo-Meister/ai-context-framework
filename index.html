@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="Documentation for the Context-Aware Intelligence Engine" /><link rel="canonical" href="https://robo-meister.github.io/ai-context-framework/index.html" />
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <title>CAIEngine Docs</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Documentation";
+        var mkdocs_page_input_path = "README.md";
+        var mkdocs_page_url = "/ai-context-framework/index.html";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="." class="icon icon-home"> CAIEngine Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="dev/index.html">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="getting_started/quickstart.html">Quickstart</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Developer Guides</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="dev/extending.html">Extending CAIEngine</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="dev/api_reference.html">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="dev/architecture.html">Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="dev/network.html">Network Guide</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="theory/index.html">Theory</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Examples</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="goal-driven-feedback-loop.html">Goal-driven Feedback Loop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="event-context-standard.html">Event Context Standard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="svg_layered_generation.html">SVG Layered Generation</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href=".">CAIEngine Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Documentation</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h1>
+<p>This project ships developer guides and design notes as static HTML and Markdown
+files. You can browse them directly from the repository or render them through
+MkDocs.</p>
+<ul>
+<li>Open <code>dev/index.html</code> for developer-focused documentation.</li>
+<li>Open <code>theory/index.html</code> for theoretical background and architecture notes.</li>
+<li>See <code>event-context-standard.md</code> for the event/context data model.</li>
+<li>Follow <code>getting_started/quickstart.md</code> for PyPI installation and pipeline
+  examples.</li>
+</ul>
+<p>To serve the documentation locally, install the docs extra and run MkDocs:</p>
+<pre><code class="language-bash">pip install caiengine[docs]
+mkdocs serve
+</code></pre>
+<p>The site will be available at http://127.0.0.1:8000/ using the navigation from
+<code>mkdocs.yml</code>.</p>
+<h2 id="mass-testing">Mass Testing<a class="headerlink" href="#mass-testing" title="Permanent link">&para;</a></h2>
+<p>Before going live, stress test the goal feedback loop and learning pipeline with synthetic data:</p>
+<pre><code class="language-bash">pytest tests/test_goal_feedback_loop.py::test_goal_feedback_loop_randomized_batch \
+       tests/test_feedback_pipeline.py::TestFeedbackPipeline::test_feedback_pipeline_randomized_batch
+</code></pre>
+<p>These tests generate many fake context maps to ensure the system behaves correctly under load. Extend them as needed for your own scenarios.</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = ".";</script>
+    <script src="js/theme_extra.js"></script>
+    <script src="js/theme.js"></script>
+      <script src="search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.6.1
+Build Date UTC : 2025-10-24 08:39:37.754845+00:00
+-->

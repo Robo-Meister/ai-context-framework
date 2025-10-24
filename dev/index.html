@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contextual AI - Developer Documentation</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 2rem;
+      line-height: 1.6;
+      max-width: 960px;
+      color: #2c3e50;
+    }
+    h1, h2, h3 {
+      color: #34495e;
+      margin-top: 2rem;
+    }
+    pre, code {
+      background-color: #f4f4f4;
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-family: Consolas, monospace;
+    }
+    .section {
+      margin-bottom: 3rem;
+    }
+    .note {
+      background: #e8f4fc;
+      border-left: 5px solid #3498db;
+      padding: 1rem;
+      margin: 1.5rem 0;
+    }
+    ul {
+      margin-left: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🧠 Contextual AI: Developer Documentation</h1>
+
+  <div class="note">
+    <strong>Live docs:</strong>
+    <a href="https://robo-meister.github.io/ai-context-framework/">https://robo-meister.github.io/ai-context-framework/</a>
+    ·
+    <strong>Contributions:</strong>
+    <a href="contributing.html">Developer contribution guide</a>
+  </div>
+
+  <div class="section" id="overview">
+    <h2>1. Overview</h2>
+    <p>
+      The Contextual AI Module is responsible for message understanding, role-based context mapping, and intelligent distance-based relevance handling. This system integrates with Redis and file-based backends and supports fusion, deduplication, and semantic categorization.
+    </p>
+  </div>
+
+  <div class="section" id="architecture">
+    <h2>2. Architecture</h2>
+    <ul>
+      <li><strong>Input:</strong> Raw messages or event logs</li>
+      <li><strong>Context Providers:</strong> RedisContextProvider, FileBasedContextProvider, FileContextProvider, SimpleContextProvider</li>
+      <li><strong>Core Modules:</strong> Fuser, FuzzyDeduplicator, Categorizer</li>
+      <li><strong>Distance Engine:</strong> Vector-based comparison using Cosine/Euclidean metrics</li>
+    </ul>
+  </div>
+
+  <div class="section" id="components">
+    <h2>3. Core Components</h2>
+
+    <h3>3.1 Fuser</h3>
+    <p>
+      Combines similar messages based on context distance and predefined merge logic.
+    </p>
+
+    <h3>3.2 FuzzyDeduplicator</h3>
+    <p>
+      Removes duplicate or redundant messages based on hash, timestamp, or semantic match.
+    </p>
+
+    <h3>3.3 Categorizer</h3>
+    <p>
+      Classifies messages into predefined categories using either rule-based logic or AI models.
+    </p>
+
+    <h3>3.4 ContextProvider</h3>
+    <p>
+      Abstract interface for accessing context. Implementations:
+    </p>
+    <ul>
+      <li><code>RedisContextProvider</code>: Uses Redis to store and retrieve context vectors.</li>
+      <li><code>FileBasedContextProvider</code>: Simple filesystem-based storage for development or testing.</li>
+      <li><code>FileContextProvider</code>: Persists context entries to a local JSON file for offline demos.</li>
+      <li><code>CSVContextProvider</code>: Stores context entries in a CSV file.</li>
+      <li><code>SimpleContextProvider</code>: Minimal in-memory example for quick experiments.</li>
+      <li><code>XMLContextProvider</code>: Stores context in a simple XML file.</li>
+      <li><code>PostgresContextProvider</code>: Persists context to a PostgreSQL database.</li>
+      <li><code>MySQLContextProvider</code>: Persists context to a MySQL database.</li>
+    </ul>
+  </div>
+
+  <div class="section" id="distance">
+    <h2>4. Distance Calculation</h2>
+    <p>
+      Context vectors are compared using the following metrics:
+    </p>
+    <ul>
+      <li><strong>Euclidean Distance</strong>: <code>d = sqrt(∑ (x_i - y_i)²)</code></li>
+      <li><strong>Cosine Distance</strong>: <code>1 - (X · Y) / (||X|| × ||Y||)</code></li>
+    </ul>
+
+    <div class="note">
+      Role weighting is supported. Each dimension in the context vector can be scaled using domain-specific importance weights.
+    </div>
+  </div>
+
+  <div class="section" id="extending">
+    <h2>5. Extending the System</h2>
+    <p>You can extend the module with additional providers or processors:</p>
+    <ul>
+      <li><strong>Add a new ContextProvider:</strong> Implement the <code>ContextProvider</code> interface.</li>
+      <li><strong>Plug in Vector Search Engines:</strong> Integrate FAISS, RedisVector, or similar.</li>
+      <li><strong>Define New Roles/Layers:</strong> Update the role schema registry.</li>
+    </ul>
+  </div>
+
+  <div class="section" id="next">
+    <h2>6. Next Steps</h2>
+    <ul>
+      <li>Define a role schema JSON.</li>
+      <li>Implement vector normalization.</li>
+      <li>Plug in time-decay and approximate nearest neighbor (ANN) search.</li>
+      <li>Plan a goal-driven feedback loop that nudges context toward desired states (<em>see Technical Roadmap #24</em>).</li>
+    </ul>
+  </div>
+
+  <div class="section" id="release-process">
+    <h2>7. Release Automation</h2>
+    <p>
+      Publishing is handled by GitHub Actions in <code>.github/workflows/publish.yml</code> and reuses the standard
+      <code>tests</code> job to ensure the suite passes before any artifacts are built.
+    </p>
+    <ul>
+      <li><strong>Release branches:</strong> pushing to <code>release/*</code> runs the test suite, builds the package, and uploads the distribution to <strong>TestPyPI</strong>.</li>
+      <li><strong>Version tags:</strong> pushing a tag that matches <code>v*</code> (for example, <code>v1.2.3</code>) runs the same verification and build steps, then publishes to the production <strong>PyPI</strong> index.</li>
+    </ul>
+    <p>
+      Configure the following repository secrets before attempting to cut a release:
+    </p>
+    <ul>
+      <li><code>TEST_PYPI_API_TOKEN</code> – an API token with upload permissions to the project's TestPyPI repository.</li>
+      <li><code>PYPI_API_TOKEN</code> – an API token with upload permissions to the project's production PyPI repository.</li>
+    </ul>
+    <p>
+      To ship a new version, create or update a <code>release/&lt;series&gt;</code> branch to validate the build on TestPyPI, then tag the release with <code>v&lt;major.minor.patch&gt;</code> once you are ready for the official PyPI publication.
+    </p>
+  </div>
+
+</body>
+</html>

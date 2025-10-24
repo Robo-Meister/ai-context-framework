@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://robo-meister.github.io/ai-context-framework/dev/TECHNICAL_ROADMAP.html" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>TECHNICAL ROADMAP - CAIEngine Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "TECHNICAL ROADMAP";
+        var mkdocs_page_input_path = "dev/TECHNICAL_ROADMAP.md";
+        var mkdocs_page_url = "/ai-context-framework/dev/TECHNICAL_ROADMAP.html";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> CAIEngine Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="index.html">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../getting_started/quickstart.html">Quickstart</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Developer Guides</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="extending.html">Extending CAIEngine</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="network.html">Network Guide</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Examples</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../goal-driven-feedback-loop.html">Goal-driven Feedback Loop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../event-context-standard.html">Event Context Standard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../svg_layered_generation.html">SVG Layered Generation</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">CAIEngine Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">TECHNICAL ROADMAP</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <p>🔬 Priority 4: Provider Abstractions &amp; Expansion</p>
+<h1 id="9-kafkacontextprovider-pubsub-support">9. KafkaContextProvider (Pub/Sub Support)<a class="headerlink" href="#9-kafkacontextprovider-pubsub-support" title="Permanent link">&para;</a></h1>
+<p>✅ Read from Kafka topic, deserialize, store internally or forward to context engine
+✅ Publish ingested context and feedback via Kafka
+🔧 Why: Prepares ground for high-velocity, scalable deployments.
+🚧 Priority 5: Preparation for Extensibility &amp; Learning</p>
+<h1 id="13-data-standardizer-for-robo-connector-workflows">13. Data Standardizer for Robo Connector Workflows<a class="headerlink" href="#13-data-standardizer-for-robo-connector-workflows" title="Permanent link">&para;</a></h1>
+<p>⛔️ Original integration likely dropped
+⏳ Provide JSON-based normalization of Robo Connector logs
+🔧 Why: Maintains compatibility with legacy flows without full integration</p>
+<h1 id="16-packaging-improvements-pypi-publishing">16. Packaging Improvements &amp; PyPI Publishing<a class="headerlink" href="#16-packaging-improvements-pypi-publishing" title="Permanent link">&para;</a></h1>
+<p>⏳ Finalize module layout and import paths (see <strong>Phase 2</strong> in <a href="../../Roadmap.md">Roadmap</a>)
+✅ Provide <code>extras_require</code> for optional dependencies
+⏳ Build and upload distribution artifacts to PyPI
+🔧 Why: Makes installation and distribution straightforward for users.</p>
+<h1 id="17-cicd-pipeline-integration">17. CI/CD Pipeline Integration<a class="headerlink" href="#17-cicd-pipeline-integration" title="Permanent link">&para;</a></h1>
+<p>⏳ Add GitHub Actions workflow for linting, tests and packaging
+⏳ Automate PyPI deployment on version tags (Phase 2 milestone)
+🔧 Why: Ensures consistent releases and quick feedback on pull requests.</p>
+<h1 id="18-documentation-site-community-tooling">18. Documentation Site &amp; Community Tooling<a class="headerlink" href="#18-documentation-site-community-tooling" title="Permanent link">&para;</a></h1>
+<p>⏳ Publish a docs site with mkdocs or docsify (refer to <strong>Phase 5</strong> in <a href="../../Roadmap.md">Roadmap</a>)
+⏳ Showcase examples and plugin discovery helpers
+⏳ Add issue and PR templates to grow community engagement
+🔧 Why: Phase 5 focuses on user adoption and community growth.</p>
+<h2 id="completed">Completed<a class="headerlink" href="#completed" title="Permanent link">&para;</a></h2>
+<h1 id="priority-1-core-debugging-infrastructure">🥇 Priority 1: Core Debugging Infrastructure<a class="headerlink" href="#priority-1-core-debugging-infrastructure" title="Permanent link">&para;</a></h1>
+<ol>
+<li>Context Inspector API
+✅ Basic API: list, fetch, filter by time, source, roles
+✅ Raw + filtered (Kalman-ready) context view
+✅ Support Redis first (extendable to others)
+🔧 Why: Base for UI, CLI tools, test harnesses, confidence checking.
+🥈 Priority 2: Vector/Embedding Analysis</li>
+</ol>
+<h1 id="2-vector-comparison-api-diff-tools">2. Vector Comparison API + Diff Tools<a class="headerlink" href="#2-vector-comparison-api-diff-tools" title="Permanent link">&para;</a></h1>
+<p>✅ Pairwise comparison (cosine, distance, trust-aware)
+✅ VectorCalculator &amp; Filter fused API
+✅ Dump vectors to file or visualize drift
+🔧 Why: Helps track semantic matching, AI misfires, similarity thresholds.</p>
+<h1 id="3-kalman-filter-integration">3. Kalman Filter Integration<a class="headerlink" href="#3-kalman-filter-integration" title="Permanent link">&para;</a></h1>
+<p>✅ Add Kalman filter as optional layer in vector calculator
+✅ Flag in provider whether to use it
+✅ Dump raw vs filtered output for debug
+🔧 Why: Adds signal smoothing, suppresses noise in evolving context streams.</p>
+<h1 id="4-vector-normalization-implementation">4. Vector Normalization Implementation<a class="headerlink" href="#4-vector-normalization-implementation" title="Permanent link">&para;</a></h1>
+<p>✅ Normalize embeddings to unit vectors
+✅ Enforce consistent magnitude across providers
+🔧 Why: Ensures stable similarity calculations.
+🥉 Priority 3: Trust + Flow Debugging</p>
+<h1 id="5-trust-calculation-trace">5. Trust Calculation Trace<a class="headerlink" href="#5-trust-calculation-trace" title="Permanent link">&para;</a></h1>
+<p>✅ Output intermediate trust values
+✅ Identify influence of actor history, vector similarity, and metadata
+✅ Enable override for testing
+🔧 Why: Trust drift or anomalies are hard to diagnose without this.</p>
+<h1 id="6-context-trigger-flow-tracing">6. Context Trigger Flow Tracing<a class="headerlink" href="#6-context-trigger-flow-tracing" title="Permanent link">&para;</a></h1>
+<p>✅ Record “context → matched rule → trigger fired”
+✅ Capture matching similarity score
+✅ (Later) Tie to Robo Connector flow matching engine
+🔧 Why: Explains why something happened — a major ask in audits or validation.</p>
+<h1 id="7-standardized-context-provider-interface">7. Standardized Context Provider Interface<a class="headerlink" href="#7-standardized-context-provider-interface" title="Permanent link">&para;</a></h1>
+<p>✅ Formal interface (BaseContextProvider)
+✅ Existing RedisContextProvider refactored to implement it
+✅ Hooks for filtering and post-processing
+🔧 Why: Enables plug-in logic for Redis/Kafka/Static/Memory/etc.</p>
+<h1 id="8-cachememorycontextprovider-in-memory-only">8. Cache/MemoryContextProvider (In-Memory Only)<a class="headerlink" href="#8-cachememorycontextprovider-in-memory-only" title="Permanent link">&para;</a></h1>
+<p>✅ No Redis/Kafka dependency
+✅ Use for dev, testing, and minimal setups
+✅ Support filtering and similarity search
+🔧 Why: Reduces friction for newcomers and local testing.</p>
+<h1 id="10-role-schema-json-definition">10. Role Schema JSON Definition<a class="headerlink" href="#10-role-schema-json-definition" title="Permanent link">&para;</a></h1>
+<p>✅ Describe standard role fields and metadata
+✅ Publish example schema file
+🔧 Why: Provides consistent role handling across providers and tools.</p>
+<h1 id="11-time-decay-ann-search-support">11. Time-Decay &amp; ANN Search Support<a class="headerlink" href="#11-time-decay-ann-search-support" title="Permanent link">&para;</a></h1>
+<p>✅ Apply time-decay weighting for older context
+✅ Integrate approximate nearest neighbor indexes
+🔧 Why: Improves relevance and speeds up context lookups.</p>
+<h1 id="12-model-interface-for-inference-feedback">12. Model Interface for Inference &amp; Feedback<a class="headerlink" href="#12-model-interface-for-inference-feedback" title="Permanent link">&para;</a></h1>
+<p>✅ Abstract NN behind interface (e.g. ContextEncoderInterface)
+✅ Swap in local model, OpenAI, or any provider
+✅ (Later) Feedback hook: “was this match correct?”
+🔧 Why: Critical to enable learning, personalization, or modular deployments.</p>
+<h1 id="14-context-relay-contextbus-internal-mesh">🔌 14. Context Relay / ContextBus (Internal Mesh)<a class="headerlink" href="#14-context-relay-contextbus-internal-mesh" title="Permanent link">&para;</a></h1>
+<p>✅ Accept context from multiple sources (Redis, Kafka, Memory, etc.)
+✅ Relay/mirror context to other nodes (via HTTP, gRPC, or message broker)
+✅ Optional: context filtering before relaying
+📎 Use cases: multi-node AI, real-time cooperation, mesh architecture
+🔧 Why: Enables distributed agents or Robo Assistants to share situational data in real-time.
+📌 Suggestion: Add to Priority 3 or 4, as it's foundational for scaling and very reusable.</p>
+<h1 id="15-network-aware-context-hooks">🧠 15. Network-Aware Context Hooks<a class="headerlink" href="#15-network-aware-context-hooks" title="Permanent link">&para;</a></h1>
+<p>✅ Define external hooks/triggers based on context change
+✅ Push matched context (or diff) to other services
+✅ Allow action broadcasting / event chaining
+🔧 Why: Turns your system into a live graph of interconnected services — critical for Robo Assistant, swarm logic, and long-term Neuraflow.
+📌 Suggestion: Add to Priority 5, after filter + trigger tracing.</p>
+<h1 id="19-cli-for-manual-ingestion-querying-roadmap-phase-3-plugin-provider-expansion">19. CLI for Manual Ingestion &amp; Querying (Roadmap Phase 3 - Plugin &amp; Provider Expansion)<a class="headerlink" href="#19-cli-for-manual-ingestion-querying-roadmap-phase-3-plugin-provider-expansion" title="Permanent link">&para;</a></h1>
+<p>✅ Provide <code>context add</code> and <code>context query</code> commands
+✅ Works with any BaseContextProvider
+🔧 Why: Enables quick manual testing and debugging.</p>
+<h1 id="20-filecontextprovider-json-roadmap-phase-3-plugin-provider-expansion">20. FileContextProvider (JSON) (Roadmap Phase 3 - Plugin &amp; Provider Expansion)<a class="headerlink" href="#20-filecontextprovider-json-roadmap-phase-3-plugin-provider-expansion" title="Permanent link">&para;</a></h1>
+<p>✅ Persist context entries to local JSON files
+✅ Useful for demos and offline experiments</p>
+<h1 id="21-sqlitecontextprovider-roadmap-phase-3-plugin-provider-expansion">21. SQLiteContextProvider (Roadmap Phase 3 - Plugin &amp; Provider Expansion)<a class="headerlink" href="#21-sqlitecontextprovider-roadmap-phase-3-plugin-provider-expansion" title="Permanent link">&para;</a></h1>
+<p>✅ Lightweight SQL-backed provider for local storage
+✅ Reuse existing filter and query logic</p>
+<h1 id="21a-xmlcontextprovider-roadmap-phase-3-plugin-provider-expansion">21a. XMLContextProvider (Roadmap Phase 3 - Plugin &amp; Provider Expansion)<a class="headerlink" href="#21a-xmlcontextprovider-roadmap-phase-3-plugin-provider-expansion" title="Permanent link">&para;</a></h1>
+<p>✅ Simple XML file persistence</p>
+<h1 id="21b-postgrescontextprovider-roadmap-phase-3-plugin-provider-expansion">21b. PostgresContextProvider (Roadmap Phase 3 - Plugin &amp; Provider Expansion)<a class="headerlink" href="#21b-postgrescontextprovider-roadmap-phase-3-plugin-provider-expansion" title="Permanent link">&para;</a></h1>
+<p>✅ PostgreSQL-backed storage option</p>
+<h1 id="21c-mysqlcontextprovider-roadmap-phase-3-plugin-provider-expansion">21c. MySQLContextProvider (Roadmap Phase 3 - Plugin &amp; Provider Expansion)<a class="headerlink" href="#21c-mysqlcontextprovider-roadmap-phase-3-plugin-provider-expansion" title="Permanent link">&para;</a></h1>
+<p>✅ MySQL-backed storage option</p>
+<h1 id="22-httpcontextprovider-rest-roadmap-phase-3-plugin-provider-expansion">22. HTTPContextProvider (REST) (Roadmap Phase 3 - Plugin &amp; Provider Expansion)<a class="headerlink" href="#22-httpcontextprovider-rest-roadmap-phase-3-plugin-provider-expansion" title="Permanent link">&para;</a></h1>
+<p>✅ POST/GET endpoints for remote ingestion and retrieval
+✅ Bridge external services with context engine</p>
+<h1 id="23-provider-pubsub-broadcast-enhancements-roadmap-phase-3-plugin-provider-expansion">23. Provider Pub/Sub &amp; Broadcast Enhancements (Roadmap Phase 3 - Plugin &amp; Provider Expansion)<a class="headerlink" href="#23-provider-pubsub-broadcast-enhancements-roadmap-phase-3-plugin-provider-expansion" title="Permanent link">&para;</a></h1>
+<p>✅ Unified publish/subscribe hooks in BaseContextProvider
+✅ Broadcast context updates across providers
+🔧 Why: Completes subscription support in Phase 3.</p>
+<h1 id="24-goal-driven-feedback-loop">24. Goal-Driven Feedback Loop<a class="headerlink" href="#24-goal-driven-feedback-loop" title="Permanent link">&para;</a></h1>
+<p>✅ Basic loop with <code>SimpleGoalFeedbackStrategy</code> nudges actions toward a goal state
+🔧 Why: Enables proactive course correction toward desired states.</p>
+<h2 id="release-community-infrastructure">📦 Release &amp; Community Infrastructure<a class="headerlink" href="#release-community-infrastructure" title="Permanent link">&para;</a></h2>
+<p>Packaging, automated publishing and a public documentation hub will make the project easier to consume and contribute to. The tasks above align with key roadmap phases:</p>
+<ul>
+<li><strong>Phase 2: Stabilization &amp; Distribution</strong> – lines 13–24 in <a href="../../Roadmap.md#L13-L24">Roadmap</a> describe finalizing the package layout, publishing to PyPI and adding CI/CD workflows. Tasks <strong>16</strong> and <strong>17</strong> deliver these goals.</li>
+<li><strong>Phase 5: Community &amp; Growth</strong> – lines 40–46 in <a href="../../Roadmap.md#L40-L46">Roadmap</a> cover launching a docs site and other community tooling. Task <strong>18</strong> implements this milestone.</li>
+</ul>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

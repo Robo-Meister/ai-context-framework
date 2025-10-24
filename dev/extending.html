@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://robo-meister.github.io/ai-context-framework/dev/extending.html" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Extending CAIEngine - CAIEngine Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Extending CAIEngine";
+        var mkdocs_page_input_path = "dev/extending.md";
+        var mkdocs_page_url = "/ai-context-framework/dev/extending.html";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> CAIEngine Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="index.html">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../getting_started/quickstart.html">Quickstart</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Developer Guides</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Extending CAIEngine</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#build-a-custom-context-provider">Build a custom context provider</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#create-a-goal-feedback-strategy">Create a goal feedback strategy</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="network.html">Network Guide</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Examples</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../goal-driven-feedback-loop.html">Goal-driven Feedback Loop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../event-context-standard.html">Event Context Standard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../svg_layered_generation.html">SVG Layered Generation</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">CAIEngine Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Developer Guides</li>
+      <li class="breadcrumb-item active">Extending CAIEngine</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="extending-caiengine">Extending CAIEngine<a class="headerlink" href="#extending-caiengine" title="Permanent link">&para;</a></h1>
+<p>The core architecture is intentionally modular so that you can introduce new
+context sources and goal-driven behaviours without rewriting pipelines. Review
+the diagrams in <a href="architecture.html"><code>architecture.html</code></a> and the class tables on
+the <a href="index.html">developer hub</a> to understand how providers, feedback loops, and
+pipelines compose—their relationships are reflected in those visuals.</p>
+<h2 id="build-a-custom-context-provider">Build a custom context provider<a class="headerlink" href="#build-a-custom-context-provider" title="Permanent link">&para;</a></h2>
+<p>Context providers transform external data into <code>ContextData</code> objects and feed
+them into the pipelines. Existing implementations live under
+<code>caiengine.providers</code> and typically inherit from two helper classes:</p>
+<ul>
+<li><code>BaseContextProvider</code> (<code>src/caiengine/providers/base_context_provider.py</code>)
+  implements subscriber management and peer broadcasting.</li>
+<li><code>ContextProvider</code> (<code>src/caiengine/interfaces/context_provider.py</code>) supplies
+  trust-weight calculations so downstream modules can score the completeness of
+  each context payload.</li>
+</ul>
+<p>Follow this checklist when creating your own provider:</p>
+<ol>
+<li><strong>Inherit from <code>BaseContextProvider</code>.</strong> Add any optional mixins you need
+   (e.g. extend <code>ContextProvider</code> when trust weighting is required).</li>
+<li><strong>Map incoming records to <code>ContextData</code>.</strong> Construct instances from
+   <code>caiengine.objects.context_data.ContextData</code> so the rest of the engine can
+   reason about timestamps, confidence, roles, and situations uniformly.</li>
+<li><strong>Expose ingestion hooks.</strong> Provide <code>ingest_context</code>/<code>fetch_context</code> methods
+   that convert raw payloads into <code>ContextData</code>. Look at
+   <code>RedisContextProvider</code> and <code>KafkaContextProvider</code> under
+   <code>src/caiengine/providers/</code> for examples of streaming integrations.</li>
+<li><strong>Broadcast new context.</strong> Call <code>self.publish_context(context_data)</code> after
+   each ingestion so subscribers (pipelines, distributed peers, audits) receive
+   updates immediately.</li>
+<li><strong>Register with helpers.</strong> If you want your provider to work with
+   <code>ConfigurablePipeline.from_dict</code>, add it to the <code>_PROVIDER_MAP</code> in
+   <code>src/caiengine/pipelines/configurable_pipeline.py</code>.</li>
+<li><strong>Document required extras.</strong> If the provider needs third-party packages,
+   declare them under <code>[project.optional-dependencies]</code> in <code>pyproject.toml</code> and
+   mention the extra in the docs so users install it with <code>pip install caiengine[extra]</code>.</li>
+</ol>
+<h2 id="create-a-goal-feedback-strategy">Create a goal feedback strategy<a class="headerlink" href="#create-a-goal-feedback-strategy" title="Permanent link">&para;</a></h2>
+<p>Goal strategies steer the <code>GoalDrivenFeedbackLoop</code> toward a desired state. The
+loop calls <code>suggest_actions</code> with a history of outcomes, the candidate actions
+returned by the pipeline, and the structured goal definition.</p>
+<p>Start from the <code>GoalFeedbackStrategy</code> interface
+(<code>src/caiengine/interfaces/goal_feedback_strategy.py</code>) and implement the
+<code>suggest_actions</code> method. Use the existing strategies for inspiration:</p>
+<ul>
+<li><code>SimpleGoalFeedbackStrategy</code> (<code>src/caiengine/core/goal_strategies/simple_goal_strategy.py</code>)
+  applies rule-based nudges by reading <code>one_direction_layers</code> weights.</li>
+<li><code>PersonalityGoalFeedbackStrategy</code>
+  (<code>src/caiengine/core/goal_strategies/personality_goal_strategy.py</code>) layers
+  persona traits on top of the base heuristics.</li>
+<li>The experimental <code>MarketingGoalFeedbackStrategy</code>
+  (<code>src/caiengine/experimental/goal_strategies/marketing_goal_strategy.py</code>)
+  demonstrates a richer scoring model that tracks campaign metrics over time.</li>
+</ul>
+<p>When designing a new strategy:</p>
+<ol>
+<li><strong>Define your goal schema.</strong> Decide which keys in the <code>goal_state</code> payload you
+   require (e.g. tone, latency, risk scores) and document them.</li>
+<li><strong>Normalise inputs.</strong> Ensure the history and action dictionaries are cleaned
+   before comparison—strategies often calculate averages or deltas.</li>
+<li><strong>Return actionable feedback.</strong> Match the structure used by the pipelines:
+   return a list aligned with the incoming <code>current_actions</code>, optionally adding
+   fields such as <code>confidence</code>, <code>next_step</code>, or <code>target_delta</code>.</li>
+<li><strong>Test with the loop.</strong> Instantiate <code>GoalDrivenFeedbackLoop</code> with your
+   strategy and verify it works with the sample pipelines in
+   <a href="../getting_started/quickstart.html"><code>docs/getting_started/quickstart.md</code></a>.</li>
+</ol>
+<p>Link your strategy in the developer docs or README so users know which extra (if
+any) they must install. For complex behaviours you can also provide diagrams or
+state machines alongside the existing architecture visuals.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../getting_started/quickstart.html" class="btn btn-neutral float-left" title="Quickstart"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="api_reference.html" class="btn btn-neutral float-right" title="API Reference">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../getting_started/quickstart.html" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="api_reference.html" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

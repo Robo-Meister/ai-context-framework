@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://robo-meister.github.io/ai-context-framework/dev/ocr_to_structured_data.html" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Integrating OCR Pipelines with CAIEngine - CAIEngine Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Integrating OCR Pipelines with CAIEngine";
+        var mkdocs_page_input_path = "dev/ocr_to_structured_data.md";
+        var mkdocs_page_url = "/ai-context-framework/dev/ocr_to_structured_data.html";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> CAIEngine Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="index.html">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../getting_started/quickstart.html">Quickstart</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Developer Guides</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="extending.html">Extending CAIEngine</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="network.html">Network Guide</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Examples</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../goal-driven-feedback-loop.html">Goal-driven Feedback Loop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../event-context-standard.html">Event Context Standard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../svg_layered_generation.html">SVG Layered Generation</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">CAIEngine Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Integrating OCR Pipelines with CAIEngine</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="integrating-ocr-pipelines-with-caiengine">Integrating OCR Pipelines with CAIEngine<a class="headerlink" href="#integrating-ocr-pipelines-with-caiengine" title="Permanent link">&para;</a></h1>
+<p>This guide describes how to connect an existing OCR service that already produces
+plain text, document type predictions, and preliminary key/value candidates with
+CAIEngine so you can replace brittle regular-expression post-processing with the
+framework's context routing and inference hooks.</p>
+<h2 id="1-high-level-flow">1. High-Level Flow<a class="headerlink" href="#1-high-level-flow" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Run OCR outside of CAIEngine.</strong> Use your OCR system to obtain (a) the raw
+   text of each document and (b) any metadata it provides such as page
+   segmentation, document type guesses, or candidate key/value pairs.</li>
+<li><strong>Wrap OCR output in a <code>ContextProvider</code>.</strong> Create a provider class that
+   yields <code>ContextItem</code> objects representing each document or logical section.
+   Attach the OCR metadata to the context payload so downstream modules can use
+   it for scoring and extraction.</li>
+<li><strong>Apply CAIEngine's deduplication and categorization stages.</strong> Use the
+   built-in <code>Deduplicator</code> and <code>Categorizer</code> modules to cluster content snippets
+   and filter noise. You can feed your OCR type guess into the categorizer as an
+   initial signal, while allowing the engine's embedding similarity and rules to
+   refine the classification.</li>
+<li><strong>Fuse signals into a clean record.</strong> Configure the <code>Fuser</code> to consolidate
+   overlapping snippets (e.g., repeated headers) and to merge OCR metadata with
+   context-based insights.</li>
+<li><strong>Invoke an <code>AIInferenceEngine</code>.</strong> Implement an inference hook that maps the
+   fused context into your structured schema (résumé, invoice, contract, etc.).
+   This component can use LLM prompts, ML classifiers, or deterministic logic
+   tailored to your domain.</li>
+<li><strong>Export to your target format.</strong> After inference, serialize the structured
+   data into the format your downstream systems expect (JSON, CSV, database
+   rows, etc.).</li>
+</ol>
+<h2 id="2-implementing-the-ocr-context-provider">2. Implementing the OCR Context Provider<a class="headerlink" href="#2-implementing-the-ocr-context-provider" title="Permanent link">&para;</a></h2>
+<p>Create a provider class under <code>src/caiengine/providers</code> (or your preferred
+module) that reads OCR output (files, API responses, or database rows) and yields
+<code>ContextItem</code> instances. Include fields such as:</p>
+<ul>
+<li><code>raw_text</code>: the OCR-extracted text.</li>
+<li><code>document_type_hint</code>: the OCR service's predicted type (e.g., invoice, CV).</li>
+<li><code>spans</code>: offsets or bounding boxes for each candidate field the OCR detected.</li>
+<li><code>confidence_scores</code>: numeric confidence metrics from the OCR service.</li>
+</ul>
+<p>By keeping these signals inside the context, CAIEngine modules can incorporate
+confidence and structural hints rather than relying on regexes.</p>
+<h3 id="21-use-the-built-in-ocrcontextprovider">2.1 Use the Built-in <code>OCRContextProvider</code><a class="headerlink" href="#21-use-the-built-in-ocrcontextprovider" title="Permanent link">&para;</a></h3>
+<p>The repository now ships with an <code>OCRContextProvider</code> that implements the
+pattern above. It accepts raw OCR text, optional <code>display_text</code>, confidence
+scores, and either <code>OCRSpan</code> objects or dictionaries describing bounding boxes.
+Each ingested document is stored in a <code>ContextData</code> record with the
+<code>ocr_metadata</code> field populated so downstream modules can access both the
+structured payload and the spatial metadata.</p>
+<p>If you already have OCR spans represented as dictionaries, pass them directly to
+<code>ingest_ocr_document</code>; they will be normalised into strongly-typed <code>OCRSpan</code>
+instances. This simplifies integrating new OCR sources without rewriting your
+data mapping logic.</p>
+<h2 id="3-smarter-categorization-than-regex">3. Smarter Categorization than Regex<a class="headerlink" href="#3-smarter-categorization-than-regex" title="Permanent link">&para;</a></h2>
+<p>Instead of regular expressions, leverage the <code>TextEmbeddingComparer</code> plus your
+OCR metadata:</p>
+<ul>
+<li>Seed the categorizer with representative exemplars for each document type.</li>
+<li>Combine embedding similarity with the OCR-provided <code>document_type_hint</code> to
+  boost accuracy (e.g., accept the OCR label only if similarity exceeds a
+  threshold; otherwise fall back to the most similar exemplar).</li>
+<li>Store hard rules only for high-precision cues (e.g., specific tax identifiers)
+  rather than broad regex heuristics.</li>
+</ul>
+<p>This hybrid approach reduces false positives and allows the categorizer to adapt
+as you feed more training data.</p>
+<h3 id="31-extending-the-categorizer-for-ocr-signals">3.1 Extending the Categorizer for OCR Signals<a class="headerlink" href="#31-extending-the-categorizer-for-ocr-signals" title="Permanent link">&para;</a></h3>
+<p>For tricky OCR documents—such as those with mixed languages, tables embedded as
+images, or heavily rotated scans—augment the categorizer with richer signals so
+it can disambiguate near-duplicate content:</p>
+<ol>
+<li><strong>Create OCR-aware features.</strong> In your <code>ContextItem</code> payload, add fields that
+   capture layout hints (page numbers, column indexes), language detection
+   results, and OCR confidence scores. These features give the categorizer more
+   than just text similarity when deciding among competing categories.</li>
+<li><strong>Add metadata-based scorers.</strong> Implement a custom <code>SimilarityScorer</code> that
+   rewards matches where the OCR metadata aligns with category expectations
+   (e.g., invoices usually contain currency symbols; resumes reference job
+   titles). Register this scorer alongside the default embedding comparer.</li>
+<li><strong>Handle weak OCR predictions.</strong> When the OCR engine emits low-confidence
+   labels, fall back to embedding similarity plus rule-based overrides. This
+   prevents a noisy OCR guess from locking the item into the wrong category.</li>
+<li><strong>Log ambiguous assignments.</strong> Track cases where the categorizer returns
+   multiple candidates with close scores. Review these examples, tune your OCR
+   pipeline (deskewing, contrast boosting), and add new exemplars to narrow the
+   margin over time.</li>
+</ol>
+<p>By enriching the categorizer with OCR-specific metadata and feedback, you can
+support documents that would otherwise be misrouted by pure text similarity or
+regex heuristics.</p>
+<h3 id="32-returning-structured-ocr-fields-with-spatial-context">3.2 Returning Structured OCR Fields with Spatial Context<a class="headerlink" href="#32-returning-structured-ocr-fields-with-spatial-context" title="Permanent link">&para;</a></h3>
+<p>Meeting downstream OCR consumers—such as invoice ingestion systems that expect
+values plus their on-page position—typically requires augmenting the categorizer
+with a richer payload than just raw text. A practical recipe is:</p>
+<ol>
+<li><strong>Preserve whitespace-aligned text.</strong> Instead of normalising all whitespace,
+   keep the OCR provider's spacing so you can reconstruct columnar layouts
+   (tables, totals blocks). Store both the raw text and a "display" version that
+   pads each line with spaces to mirror the original grid. Your
+   <code>ContextItem.payload</code> might expose <code>{"text": raw_text, "display_text": formatted_text}</code>.</li>
+<li><strong>Attach geometric spans per candidate field.</strong> Include bounding boxes or
+   character-offset ranges for key OCR detections (invoice number, line items,
+   totals). For example, add <code>{"field": "invoice_number", "bbox": [x1, y1, x2, y2]}</code>
+   entries. When the categorizer selects a document type, downstream inference
+   can recover both the value and its location.</li>
+<li><strong>Score against layout-aware prototypes.</strong> Seed each category with exemplar
+   snippets that include structured hints (e.g., a JSON blob of expected fields
+   and their spatial relationships). Implement a custom <code>SimilarityScorer</code> that
+   rewards OCR items whose detected fields align with the exemplar schema—helping
+   distinguish invoices with line-item tables from quotes or purchase orders.</li>
+<li><strong>Emit structured context for inference.</strong> After categorization, package the
+   enriched OCR payload into the fused context so your <code>AIInferenceEngine</code> can
+   format the final record. For invoices, the inference step can iterate over the
+   <code>line_items</code> span list, reconstruct each row's text via the preserved spacing,
+   and output an ordered table alongside header fields such as invoice number and
+   totals.</li>
+</ol>
+<p>These additions let the categorizer maintain spatial fidelity while still
+benefiting from embedding similarity and metadata signals.</p>
+<h2 id="4-structured-extraction-via-inference-engines">4. Structured Extraction via Inference Engines<a class="headerlink" href="#4-structured-extraction-via-inference-engines" title="Permanent link">&para;</a></h2>
+<p>Inside your <code>AIInferenceEngine</code> implementation:</p>
+<ol>
+<li>Receive the fused context items plus OCR metadata.</li>
+<li>Prompt an LLM or run a classifier to extract fields such as totals, vendor
+   names, employment dates, or contract clauses.</li>
+<li>Use the OCR <code>spans</code>/coordinates to map extracted values back to the original
+   document for auditing or highlighting.</li>
+<li>Validate required fields (e.g., totals &gt; 0, presence of currency) before
+   finalizing the record.</li>
+</ol>
+<p>Because the inference layer works on cleaned, categorized context, it can focus
+on semantic extraction rather than compensating for noisy regex groupings.</p>
+<h2 id="5-output-formatting-and-feedback-loops">5. Output Formatting and Feedback Loops<a class="headerlink" href="#5-output-formatting-and-feedback-loops" title="Permanent link">&para;</a></h2>
+<p>After extraction, push the structured record to your downstream format. Capture
+feedback from users (corrections, approvals) and feed it into CAIEngine's goal
+feedback loop so the categorizer and inference prompts improve over time.</p>
+<p>By isolating OCR as a pre-processing step and letting CAIEngine handle context
+management, categorization, and inference, you can replace fragile regex logic
+with a modular pipeline that is easier to extend and maintain.</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

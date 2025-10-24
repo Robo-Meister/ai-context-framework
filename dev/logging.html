@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://robo-meister.github.io/ai-context-framework/dev/logging.html" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Logging and Observability - CAIEngine Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Logging and Observability";
+        var mkdocs_page_input_path = "dev/logging.md";
+        var mkdocs_page_url = "/ai-context-framework/dev/logging.html";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> CAIEngine Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="index.html">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../getting_started/quickstart.html">Quickstart</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Developer Guides</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="extending.html">Extending CAIEngine</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="network.html">Network Guide</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Examples</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../goal-driven-feedback-loop.html">Goal-driven Feedback Loop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../event-context-standard.html">Event Context Standard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../svg_layered_generation.html">SVG Layered Generation</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">CAIEngine Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Logging and Observability</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="logging-and-observability">Logging and Observability<a class="headerlink" href="#logging-and-observability" title="Permanent link">&para;</a></h1>
+<p>The AI Context Framework standardises on Python's built-in <code>logging</code> module for
+all observability hooks. Workers and providers create named loggers using their
+fully-qualified module and class names so that deployments can selectively tune
+verbosity.</p>
+<h2 id="configuring-log-levels">Configuring Log Levels<a class="headerlink" href="#configuring-log-levels" title="Permanent link">&para;</a></h2>
+<p>The framework does not install a global logging configuration. Downstream
+applications are expected to configure handlers and levels at process start-up,
+for example:</p>
+<pre><code class="language-python">import logging
+
+logging.basicConfig(
+    level=&quot;INFO&quot;,
+    format=&quot;%(asctime)s %(name)s %(levelname)s %(message)s&quot;,
+)
+</code></pre>
+<p>To increase verbosity for a specific component you can adjust its logger name.
+The goal feedback worker uses the logger name
+<code>"caiengine.core.goal_feedback_worker.GoalFeedbackWorker"</code>, while context
+providers follow the pattern <code>"&lt;module&gt;.&lt;ClassName&gt;"</code>.</p>
+<pre><code class="language-python">logging.getLogger(&quot;caiengine.core.goal_feedback_worker.GoalFeedbackWorker&quot;).setLevel(&quot;DEBUG&quot;)
+</code></pre>
+<h2 id="structured-log-fields">Structured Log Fields<a class="headerlink" href="#structured-log-fields" title="Permanent link">&para;</a></h2>
+<p>Critical log entries add structured fields via <code>extra</code> so that centralised log
+collectors can capture metadata (for example <code>pending_actions</code>,
+<code>backoff_seconds</code>, or <code>subscriber_id</code>). When configuring formatters include the
+field names you care about, e.g. <code>%(message)s pending=%(pending_actions)s</code>, or
+use a JSON formatter to retain the structured attributes automatically.</p>
+<h3 id="goal-feedback-loop-diagnostics">Goal Feedback Loop Diagnostics<a class="headerlink" href="#goal-feedback-loop-diagnostics" title="Permanent link">&para;</a></h3>
+<p><code>GoalFeedbackWorker</code> escalates retries into exponential backoff while tagging
+every failure with <code>attempt</code> and <code>backoff_seconds</code>. A follow-up debug log then
+emits <code>backoff_remaining</code> while the worker sleeps. Configure your logging
+pipeline to alert when those fields remain high for several cycles—this usually
+means the underlying provider keeps raising and the loop is stuck.</p>
+<p><code>GoalStateTracker</code> and the storage backends also log when they fall back to
+in-memory persistence. Treat that warning as an operational smell in
+environments where resilience matters and override the backend with SQLite or
+Redis in production deployments.</p>
+<h3 id="provider-error-visibility">Provider Error Visibility<a class="headerlink" href="#provider-error-visibility" title="Permanent link">&para;</a></h3>
+<p>Each context provider now emits structured errors if a subscriber callback
+crashes or if ingestion fails. The records include the <code>subscriber_id</code>,
+<code>context_id</code>, and backend-specific identifiers (for example, the SQLite
+database path). Attach handlers with filters that forward these errors to the
+same observability system as the rest of your application so that failed
+downstream consumers are visible without reproducing the issue locally.</p>
+<h2 id="token-usage-telemetry">Token Usage Telemetry<a class="headerlink" href="#token-usage-telemetry" title="Permanent link">&para;</a></h2>
+<p>Inference engines wrapped by <code>TokenUsageTracker</code> now emit structured telemetry
+for every model invocation. Pipelines created through
+<code>ConfigurablePipeline.from_dict</code> automatically forward these events to the
+<code>AuditLogger</code> so downstream systems can observe prompt/completion token
+consumption per provider/category combination. Each audit record uses the
+<code>token_usage</code> step name and provides a payload similar to:</p>
+<pre><code class="language-json">{
+  &quot;timestamp&quot;: &quot;2024-05-12T10:15:32.123456&quot;,
+  &quot;operation&quot;: &quot;predict&quot;,
+  &quot;provider&quot;: &quot;memory&quot;,
+  &quot;category&quot;: &quot;support&quot;,
+  &quot;usage&quot;: {
+    &quot;prompt_tokens&quot;: 42,
+    &quot;completion_tokens&quot;: 13,
+    &quot;total_tokens&quot;: 55
+  }
+}
+</code></pre>
+<p>Attach custom listeners to <code>TokenUsageTracker.register_usage_listener</code> if you
+need to ship the telemetry to additional observability sinks.</p>
+<h2 id="hooking-into-external-observability">Hooking into External Observability<a class="headerlink" href="#hooking-into-external-observability" title="Permanent link">&para;</a></h2>
+<p>If you need to forward logs to an external sink, attach handlers to the relevant
+logger:</p>
+<pre><code class="language-python">handler = logging.StreamHandler()
+handler.setLevel(&quot;WARNING&quot;)
+logging.getLogger(&quot;caiengine.providers.kafka_context_provider.KafkaContextProvider&quot;).addHandler(handler)
+</code></pre>
+<p>Handlers inherit levels from their parent logger hierarchy. Set
+<code>propagate = False</code> if you want to suppress duplicate entries once a custom
+handler is attached.</p>
+<h2 id="service-middleware-hooks">Service Middleware Hooks<a class="headerlink" href="#service-middleware-hooks" title="Permanent link">&para;</a></h2>
+<p><code>CAIService</code> now exposes its HTTP surface through FastAPI which makes it easy to
+insert cross-cutting concerns via middleware. Three lightweight middlewares are
+enabled out of the box and can be tuned when the service is constructed:</p>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Configuration knob</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Authentication</td>
+<td><code>auth_hook: Callable[[Request], Awaitable[AuthDecision] | AuthDecision]</code></td>
+<td>Hook receives the incoming <code>Request</code> and may return a <code>Response</code>, a <code>dict</code> payload, or <code>False</code> to reject the call.</td>
+</tr>
+<tr>
+<td>Error handling</td>
+<td><code>error_handler: Callable[[Exception, Request], Awaitable[Response | dict] | Response | dict]</code>, <code>include_error_details: bool</code></td>
+<td>Translate exceptions into custom JSON payloads or expose the original error message when <code>include_error_details</code> is set.</td>
+</tr>
+<tr>
+<td>Rate limiting</td>
+<td><code>rate_limit_per_minute: int</code>, <code>rate_limit_window_seconds: float</code>, <code>rate_limit_identifier: Callable[[Request], Awaitable[str] | str]</code></td>
+<td>Configure the number of allowed requests per window and optionally derive a custom identifier (for example from an API key). A limit of <code>0</code> disables the middleware.</td>
+</tr>
+</tbody>
+</table>
+<p>When running from the CLI the following flags surface the same controls:</p>
+<pre><code class="language-bash">python -m caiengine.service --host 0.0.0.0 --port 8080 \
+  --rate-limit 120 --rate-limit-window 60 \
+  --include-error-details
+</code></pre>
+<p>Applications embedding the service can also inspect metrics via the <code>/usage</code>
+endpoint which reports aggregated token counts from the goal feedback loop so
+that traffic shaping can be correlated with model consumption.</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

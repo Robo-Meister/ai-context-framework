@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Contextual AI Engine - Core Documentation</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      margin: 40px;
+      background-color: #f8f9fa;
+      color: #333;
+    }
+    h1, h2, h3 {
+      color: #0056b3;
+    }
+    code {
+      background-color: #eef;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    .equation {
+      background: #fff;
+      padding: 10px;
+      margin: 15px 0;
+      border-left: 4px solid #0056b3;
+      font-family: 'Courier New', monospace;
+    }
+    .legend {
+      background: #eef;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .footer {
+      margin-top: 60px;
+      font-size: 0.9em;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🧠 Contextual AI Engine</h1>
+  <p>
+    A logic model for adaptive AI reasoning based on context-aware memory, distance-based influence, and distributed mesh execution.
+  </p>
+
+  <h2>📘 Legend</h2>
+  <div class="legend">
+    <ul>
+      <li><code>m</code> – A message or memory (context-aware)</li>
+      <li><code>M</code> – Main message (intent)</li>
+      <li><code>σ</code> – Certainty of a value (0–1)</li>
+      <li><code>w_k</code> – Importance weight of context dimension <code>k</code></li>
+      <li><code>D(m₁, m₂)</code> – Contextual distance between two messages</li>
+      <li><code>μ(i, j)</code> – Mutual influence between context layers</li>
+      <li><code>V_m</code> – Vector representation of a memory</li>
+      <li><code>α</code> – Context decay factor</li>
+    </ul>
+  </div>
+
+  <h2>🔍 Core Concepts</h2>
+  <ul>
+    <li>Context is a multi-dimensional space with dimensions like Client, Project, Time, Role, etc.</li>
+    <li>Messages and memories are points in this space.</li>
+    <li>Relevance is calculated by proximity to the current context (smaller distance = higher influence).</li>
+    <li>Contextual influence fades exponentially with distance.</li>
+  </ul>
+
+  <h2>📐 Important Equations</h2>
+
+  <h3>1. Distance between Messages</h3>
+  <div class="equation">
+    D(m_i, m_j) = √( Σ w_k · d_k² )
+  </div>
+  <p>
+    Where <code>d_k</code> is the difference between values in context dimension <code>k</code>.
+  </p>
+
+  <h3>2. Contextual Influence</h3>
+  <div class="equation">
+    Influence(m_i) = exp( -α · D(m_i, m_current) )
+  </div>
+
+  <h3>3. Final AI Intent Vector</h3>
+  <div class="equation">
+    AI_Intent = M + i · Σ [ Influence(m_i) · V_m ]
+  </div>
+  <p>
+    Combines the main message and the sum of weighted memory influences.
+  </p>
+
+  <h3>4. Optional – Mutual Layer Reinforcement</h3>
+  <div class="equation">
+    w_k = (1/N) · Σ μ(k, j)
+  </div>
+
+  <div class="footer">
+    © 2025 Contextual AI Initiative. Draft version – for prototyping and concept review.
+  </div>
+
+</body>
+</html>

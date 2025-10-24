@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://robo-meister.github.io/ai-context-framework/dev/goal_feedback_loop.html" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Goal-Driven Feedback Loop - CAIEngine Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Goal-Driven Feedback Loop";
+        var mkdocs_page_input_path = "dev/goal_feedback_loop.md";
+        var mkdocs_page_url = "/ai-context-framework/dev/goal_feedback_loop.html";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> CAIEngine Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="index.html">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../getting_started/quickstart.html">Quickstart</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Developer Guides</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="extending.html">Extending CAIEngine</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="network.html">Network Guide</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Examples</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../goal-driven-feedback-loop.html">Goal-driven Feedback Loop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../event-context-standard.html">Event Context Standard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../svg_layered_generation.html">SVG Layered Generation</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">CAIEngine Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Goal-Driven Feedback Loop</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="goal-driven-feedback-loop">Goal-Driven Feedback Loop<a class="headerlink" href="#goal-driven-feedback-loop" title="Permanent link">&para;</a></h1>
+<p>Client applications often need to steer actions toward a target without pausing for user input. The goal-driven feedback loop can run as a lightweight background task to nudge progress quietly.</p>
+<h2 id="background-worker">Background Worker<a class="headerlink" href="#background-worker" title="Permanent link">&para;</a></h2>
+<p>Run the loop inside a background worker, service worker, or scheduled task. The worker should periodically poll for new actions or subscribe to an event stream.</p>
+<p>Use the scaffold in <code>GoalFeedbackWorker</code> as a starting point. In production,
+back the accompanying <code>GoalStateTracker</code> with a durable backend such as
+<code>SQLiteGoalStateBackend</code> or <code>RedisGoalStateBackend</code> so restarts do not drop
+pending actions. The worker already emits structured log warnings when it falls
+back to the in-process poller or when the loop enters exponential backoff; wire
+those into your observability pipeline to surface stalled feedback processing
+quickly.</p>
+<h2 id="state-tracking">State Tracking<a class="headerlink" href="#state-tracking" title="Permanent link">&para;</a></h2>
+<p>Persist the current goal state and any progress metrics in storage accessible by the worker (memory, local database, etc.). Update this state whenever goals change so the loop can compare new actions against the latest target.</p>
+<p><code>GoalDrivenFeedbackLoop</code> now supports pluggable persistence providers. Pass a custom provider that implements <code>GoalFeedbackPersistence</code> when constructing the loop to persist the action history and calculated baselines into durable storage (e.g. SQLite, Redis, or a managed cache). The default provider keeps data in memory inside the current process.</p>
+<pre><code class="language-python">from caiengine.core.goal_feedback_loop import (
+    GoalDrivenFeedbackLoop,
+    SQLiteGoalFeedbackPersistence,
+)
+
+persistence = SQLiteGoalFeedbackPersistence(&quot;/var/lib/app/goal_feedback.db&quot;)
+loop = GoalDrivenFeedbackLoop(strategy, goal_state=my_goal, persistence=persistence)
+</code></pre>
+<h3 id="retention-controls">Retention controls<a class="headerlink" href="#retention-controls" title="Permanent link">&para;</a></h3>
+<p>To prevent unbounded growth, configure retention parameters when creating the loop:</p>
+<ul>
+<li><code>retention_limit</code> trims the stored history to the most recent <em>N</em> entries.</li>
+<li><code>retention_window</code> discards entries older than the supplied duration (seconds or <code>timedelta</code>).</li>
+</ul>
+<p>Both policies can be combined. After pruning, baselines automatically recalculate so that analytics continue to reflect the oldest retained datapoints.</p>
+<h2 id="event-driven-updates">Event-Driven Updates<a class="headerlink" href="#event-driven-updates" title="Permanent link">&para;</a></h2>
+<p>When a new action appears, send it to the worker through a queue or message channel. The worker computes suggestions only when history or goal state changes, limiting needless work.</p>
+<p><code>FeedbackEventBus</code> offers a minimal publish/subscribe interface. For higher
+throughput deployments attach <code>AsyncFeedbackEventBus</code> or adapt the
+<code>GoalFeedbackWorker._handle_event</code> callback to your message broker of choice
+so that goal and action updates arrive without relying on the periodic poller.</p>
+<h2 id="suggestion-logic">Suggestion Logic<a class="headerlink" href="#suggestion-logic" title="Permanent link">&para;</a></h2>
+<p>Instantiate <code>GoalDrivenFeedbackLoop</code> with a strategy such as <code>SimpleGoalFeedbackStrategy</code> or <code>PersonalityGoalFeedbackStrategy</code>. Call <code>suggest_actions</code> with the current history and new actions to receive nudges toward the goal state.</p>
+<h2 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h2>
+<pre><code class="language-python">from time import sleep
+from caiengine.core.goal_feedback_loop import GoalDrivenFeedbackLoop
+from caiengine.core.goal_strategies import SimpleGoalFeedbackStrategy
+
+loop = GoalDrivenFeedbackLoop(SimpleGoalFeedbackStrategy(), goal_state={&quot;progress&quot;: 10})
+history: list[dict] = []
+
+def worker():
+    while True:
+        new_actions = fetch_new_actions()
+        if new_actions:
+            suggestion = loop.suggest_actions(history, new_actions)
+            deliver(suggestion)
+            history.extend(new_actions)
+        sleep(5)
+</code></pre>
+<p>This pattern keeps the loop running quietly in the background and only surfaces suggestions when the goal or action history changes.</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

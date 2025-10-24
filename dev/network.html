@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contextual AI - Network System</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 2rem;
+      line-height: 1.6;
+      max-width: 960px;
+      color: #2c3e50;
+    }
+    h1, h2, h3 {
+      color: #34495e;
+      margin-top: 2rem;
+    }
+    pre, code {
+      background-color: #f4f4f4;
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-family: Consolas, monospace;
+    }
+    nav a {
+      margin-right: 1rem;
+      text-decoration: none;
+      color: #3498db;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">Overview</a>
+  <a href="getting_started.html">Getting Started</a>
+  <a href="api_reference.html">API Reference</a>
+  <a href="architecture.html">Architecture</a>
+  <a href="contributing.html">Contributing</a>
+  <a href="faq.html">FAQ</a>
+</nav>
+
+<h1>🔌 Network System</h1>
+<p>
+  The framework includes a lightweight networking layer for synchronizing context
+  between agents. It currently consists of the following components:
+</p>
+
+<h2>NetworkManager</h2>
+<p>
+  Wraps any <code>NetworkInterface</code> implementation and spawns a background
+  thread to deliver incoming messages.
+</p>
+
+<h2>SimpleNetworkMock</h2>
+<p>
+  An in-memory mock network used for development and unit tests. It queues
+  messages and invokes callbacks from a background thread.
+</p>
+
+<h2>DistributedContextManager</h2>
+<p>
+  Combines <code>ContextManager</code> with a network backend to broadcast
+  updates and apply changes received from peers.
+</p>
+
+<h2>Example Usage</h2>
+<pre><code>from core.context_manager import ContextManager
+from network.network_manager import NetworkManager
+from network.simple_network import SimpleNetworkMock
+from core.distributed_context_manager import DistributedContextManager
+
+cache = ContextManager()
+network = SimpleNetworkMock()
+manager = DistributedContextManager(cache, NetworkManager(network))
+
+manager.update_context("task", {"status": "in_progress"})
+# ... other nodes receive the update ...
+</code></pre>
+
+<h2>ContextBus</h2>
+<p>
+  <code>ContextBus</code> mirrors context updates across multiple network backends
+  and can optionally filter updates before relaying them. It enables real-time
+  multi-node cooperation.
+</p>
+
+<h2>NodeRegistry</h2>
+<p>
+  <code>NodeRegistry</code> is a small utility that records active nodes in Redis.
+  Each node registers its <em>RoboID</em> and network address, making discovery
+  of peers easy. See <a href="roboid.html">RoboID Addressing</a> for details on
+  the format and how existing protocols are mapped into CaiEngine.
+</p>
+
+<h2>Agent Mesh Topology</h2>
+<p>
+  To express relationships between agents the framework ships with
+  <code>AgentNetwork</code>, a light-weight undirected graph that keeps track of
+  neighbour links and their optional weights. It is deliberately minimal so it
+  can run entirely in-memory for orchestration experiments and the automated
+  tests.
+</p>
+
+<h3>What is still missing?</h3>
+<p>
+  The agent mesh does not by itself move messages between processes. For actual
+  inter-agent communication you need a <code>NetworkInterface</code>
+  implementation—such as <code>SimpleNetworkMock</code> for tests or
+  <code>PubSubNetwork</code> backed by a real <code>CommunicationChannel</code>
+  (Redis, Kafka, etc.). Today only the in-memory mock is bundled. To enable a
+  production mesh you must provide a concrete channel adapter that implements
+  publish/subscribe semantics and wire it into <code>NetworkManager</code> or
+  <code>DistributedContextManager</code> so that updates flow across nodes.
+</p>
+
+<h2>Network-Aware Hooks</h2>
+<p>
+  Hooks can be registered on <code>DistributedContextManager</code> and are
+  triggered whenever context updates occur. These hooks can broadcast new events
+  to the network or invoke external services.
+</p>
+
+</body>
+</html>

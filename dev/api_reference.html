@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://robo-meister.github.io/ai-context-framework/dev/api_reference.html" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>API Reference - CAIEngine Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "API Reference";
+        var mkdocs_page_input_path = "dev/api_reference.md";
+        var mkdocs_page_url = "/ai-context-framework/dev/api_reference.html";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> CAIEngine Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="index.html">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../getting_started/quickstart.html">Quickstart</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Developer Guides</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="extending.html">Extending CAIEngine</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">API Reference</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#stable-top-level-symbols">Stable top-level symbols</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#optional-extras">Optional extras</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#light-weight-imports">Light-weight imports</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#experimental-modules">Experimental modules</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#goal-state-persistence-backends">Goal state persistence backends</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="network.html">Network Guide</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Examples</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../goal-driven-feedback-loop.html">Goal-driven Feedback Loop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../event-context-standard.html">Event Context Standard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../svg_layered_generation.html">SVG Layered Generation</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">CAIEngine Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Developer Guides</li>
+      <li class="breadcrumb-item active">API Reference</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h1>
+<p>This document outlines the stable public API surface of <code>caiengine</code> along with
+optional extras and experimental modules. The package now performs lazy loading
+of heavy components during attribute access, so importing <code>caiengine</code> keeps
+startup time low while still exposing the documented entry points.</p>
+<h2 id="stable-top-level-symbols">Stable top-level symbols<a class="headerlink" href="#stable-top-level-symbols" title="Permanent link">&para;</a></h2>
+<p>Importing <code>caiengine</code> exposes the following stable objects via lazy loaders:</p>
+<ul>
+<li><code>CacheManager</code></li>
+<li><code>AIInferenceEngine</code></li>
+<li><code>ContextPipeline</code></li>
+<li><code>FeedbackPipeline</code></li>
+<li><code>QuestionPipeline</code></li>
+<li><code>PromptPipeline</code></li>
+<li><code>ConfigurablePipeline</code></li>
+<li><code>Fuser</code></li>
+<li><code>ContextManager</code></li>
+<li><code>DistributedContextManager</code></li>
+<li><code>ContextHookManager</code></li>
+<li><code>ContextHook</code></li>
+<li><code>MemoryContextProvider</code></li>
+<li><code>KafkaContextProvider</code>*</li>
+<li><code>PolicyEvaluator</code></li>
+<li><code>export_onnx_bundle</code></li>
+<li><code>load_model_manifest</code></li>
+<li><code>model_manager</code></li>
+<li><code>NetworkManager</code></li>
+<li><code>SimpleNetworkMock</code></li>
+<li><code>ContextBus</code></li>
+<li><code>NodeRegistry</code></li>
+<li><code>ModelRegistry</code></li>
+<li><code>RedisPubSubChannel</code>*</li>
+<li><code>KafkaPubSubChannel</code>*</li>
+<li><code>NetworkInterface</code></li>
+<li><code>GoalDrivenFeedbackLoop</code></li>
+<li><code>SimpleGoalFeedbackStrategy</code></li>
+<li><code>PersonalityGoalFeedbackStrategy</code></li>
+<li><code>GoalFeedbackWorker</code></li>
+<li><code>GoalStateTracker</code></li>
+<li><code>SQLiteGoalStateBackend</code></li>
+<li><code>RedisGoalStateBackend</code>*</li>
+<li><code>FeedbackEventBus</code></li>
+<li><code>CAIBridge</code></li>
+<li><code>FileModelRegistry</code></li>
+<li><code>cli</code></li>
+</ul>
+<p><code>__version__</code> is also available for compatibility. Items marked with <code>*</code>
+require optional extras that are described below.</p>
+<h2 id="optional-extras">Optional extras<a class="headerlink" href="#optional-extras" title="Permanent link">&para;</a></h2>
+<p>Some components rely on third-party libraries that are not installed by
+default. Attempting to access the corresponding symbol will raise a helpful
+error unless the matching extra set is installed.</p>
+<table>
+<thead>
+<tr>
+<th>Extra name</th>
+<th>Symbols</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>kafka</code></td>
+<td><code>KafkaContextProvider</code>, <code>KafkaPubSubChannel</code></td>
+</tr>
+<tr>
+<td><code>redis</code></td>
+<td><code>RedisPubSubChannel</code>, <code>RedisGoalStateBackend</code></td>
+</tr>
+</tbody>
+</table>
+<p>Install extras with standard pip syntax, e.g. <code>pip install caiengine[kafka]</code>.</p>
+<h2 id="light-weight-imports">Light-weight imports<a class="headerlink" href="#light-weight-imports" title="Permanent link">&para;</a></h2>
+<p>Setting the environment variable <code>CAIENGINE_LIGHT_IMPORT</code> restricts the
+package to exposing only <code>__version__</code> and the <code>cli</code> module for minimal
+CLI-focused usage. All other attributes remain accessible through their module
+paths, e.g. <code>from caiengine.pipelines import ContextPipeline</code>.</p>
+<h2 id="experimental-modules">Experimental modules<a class="headerlink" href="#experimental-modules" title="Permanent link">&para;</a></h2>
+<p>Experimental utilities have been moved under the <code>caiengine.experimental</code>
+namespace. They are not covered by the stability guarantees above and may
+change without notice. Current experimental exports include:</p>
+<ul>
+<li><code>caiengine.experimental.marketing_coach.AdaptiveCoach</code></li>
+<li><code>caiengine.experimental.marketing_coach.CoachingTip</code></li>
+<li><code>caiengine.experimental.goal_strategies.MarketingGoalFeedbackStrategy</code></li>
+</ul>
+<p>When importing <code>caiengine</code> these symbols are no longer re-exported at the top
+level, making their experimental status explicit.</p>
+<h2 id="goal-state-persistence-backends">Goal state persistence backends<a class="headerlink" href="#goal-state-persistence-backends" title="Permanent link">&para;</a></h2>
+<p><code>GoalStateTracker</code> accepts either a fully constructed backend instance or a
+configuration mapping describing how to build one. This makes it easy to wire
+the tracker using dependency injection containers or settings files.</p>
+<p>Example configuration loaded from application settings::</p>
+<pre><code>goal_state_backend = {"type": "sqlite", "database": "/var/app/goal_state.db"}
+tracker = GoalStateTracker(backend_config=goal_state_backend)
+</code></pre>
+<p>To integrate with Redis, provide either a pre-configured client instance or a
+connection URL::</p>
+<pre><code>tracker = GoalStateTracker(
+    backend_config={
+        "type": "redis",
+        "url": "redis://localhost:6379/0",
+        "key": "myapp:goal_state",
+    }
+)
+</code></pre>
+<p>When using dependency injection frameworks, instantiate the backend externally
+and pass it directly::</p>
+<pre><code>backend = SQLiteGoalStateBackend("/var/app/goal_state.db")
+tracker = GoalStateTracker(backend=backend)
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="extending.html" class="btn btn-neutral float-left" title="Extending CAIEngine"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="architecture.html" class="btn btn-neutral float-right" title="Architecture">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="extending.html" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="architecture.html" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

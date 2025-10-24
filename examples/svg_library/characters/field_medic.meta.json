@@ -1,0 +1,36 @@
+{
+  "summary": "Support android medic with reflective visor and dual supply packs.",
+  "groups": [
+    {
+      "id": "field_medic/body",
+      "role": "primary torso frame",
+      "bounding_box": { "x": 42, "y": 28, "width": 76, "height": 120 }
+    },
+    {
+      "id": "field_medic/visor",
+      "role": "translucent scanning visor",
+      "bounding_box": { "x": 54, "y": 38, "width": 52, "height": 28 }
+    },
+    {
+      "id": "field_medic/pack",
+      "role": "medic supply packs",
+      "bounding_box": { "x": 38, "y": 48, "width": 88, "height": 64 }
+    },
+    {
+      "id": "field_medic/accents",
+      "role": "status indicators and insignia",
+      "bounding_box": { "x": 56, "y": 96, "width": 48, "height": 44 }
+    }
+  ],
+  "palette_tokens": [
+    "--suit-top",
+    "--suit-base",
+    "--pack-light",
+    "--pack-dark",
+    "--visor-glow"
+  ],
+  "recommended_usage": [
+    "Foreground healer unit to pair with scouting drones",
+    "Contextual reference for medical support roles in prompts"
+  ]
+}

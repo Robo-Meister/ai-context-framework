@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <defs>
+    <linearGradient id="sky-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#5f7cff" />
+      <stop offset="100%" stop-color="#d0e3ff" />
+    </linearGradient>
+    <style>
+      :root {
+        --building-dark: #24304a;
+        --building-mid: #34415e;
+        --building-light: #4b5d83;
+      }
+    </style>
+  </defs>
+  <g id="cityscape/background">
+    <rect x="0" y="0" width="320" height="200" fill="url(#sky-gradient)" />
+  </g>
+  <g id="cityscape/buildings-back">
+    <rect x="20" y="80" width="60" height="120" fill="var(--building-light)" />
+    <rect x="110" y="70" width="50" height="130" fill="var(--building-mid)" />
+    <rect x="190" y="90" width="70" height="110" fill="var(--building-light)" />
+  </g>
+  <g id="cityscape/buildings-front">
+    <rect x="70" y="100" width="70" height="100" fill="var(--building-dark)" />
+    <rect x="150" y="110" width="80" height="90" fill="var(--building-mid)" />
+    <rect x="240" y="105" width="50" height="95" fill="var(--building-dark)" />
+  </g>
+</svg>

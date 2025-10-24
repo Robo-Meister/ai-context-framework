@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <defs>
+    <linearGradient id="canyon-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="var(--sky-dawn, #f6c27a)" />
+      <stop offset="100%" stop-color="var(--sky-horizon, #f3e3c9)" />
+    </linearGradient>
+    <linearGradient id="canyon-rock" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--rock-sunlit, #d0814c)" />
+      <stop offset="100%" stop-color="var(--rock-shadow, #8f4a2d)" />
+    </linearGradient>
+    <linearGradient id="canyon-rock-front" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--rock-front, #e09456)" />
+      <stop offset="100%" stop-color="var(--rock-depth, #b15d34)" />
+    </linearGradient>
+    <linearGradient id="desert-sand" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="var(--sand-light, #f2d4a0)" />
+      <stop offset="100%" stop-color="var(--sand-shadow, #d6a164)" />
+    </linearGradient>
+  </defs>
+  <g id="desert_canyon/sky">
+    <rect width="320" height="200" fill="url(#canyon-sky)" />
+    <circle cx="240" cy="56" r="28" fill="var(--sun, #ffdca3)" opacity="0.8" />
+  </g>
+  <g id="desert_canyon/mesas-back">
+    <path d="M0 120 L48 100 L96 110 L140 84 L192 94 L232 82 L320 110 L320 200 L0 200 Z" fill="url(#canyon-rock)" />
+    <path d="M50 122 h28 v18 h-28z" fill="var(--rock-highlight, #f0a46b)" opacity="0.6" />
+    <path d="M210 98 h32 v26 h-32z" fill="var(--rock-highlight, #f0a46b)" opacity="0.5" />
+  </g>
+  <g id="desert_canyon/mesas-front">
+    <path d="M0 148 L40 132 L88 144 L140 128 L180 142 L220 126 L270 136 L320 120 L320 200 L0 200 Z" fill="url(#canyon-rock-front)" />
+    <path d="M140 132 h18 v22 h-18z" fill="var(--rock-ridge, #d7713b)" opacity="0.6" />
+    <path d="M248 132 h20 v18 h-20z" fill="var(--rock-ridge, #d7713b)" opacity="0.6" />
+  </g>
+  <g id="desert_canyon/sand">
+    <path d="M0 170 C60 160 110 176 160 168 C220 158 270 182 320 170 L320 200 L0 200 Z" fill="url(#desert-sand)" />
+    <path d="M60 178 q30 -8 60 0" fill="none" stroke="var(--sand-line, #c68f4d)" stroke-width="3" stroke-linecap="round" opacity="0.4" />
+    <path d="M200 172 q30 -6 52 4" fill="none" stroke="var(--sand-line, #c68f4d)" stroke-width="3" stroke-linecap="round" opacity="0.35" />
+  </g>
+</svg>

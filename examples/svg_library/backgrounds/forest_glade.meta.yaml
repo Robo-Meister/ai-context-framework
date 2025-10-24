@@ -1,0 +1,23 @@
+summary: Sunlit forest clearing with layered evergreen silhouettes.
+groups:
+  - id: forest_glade/sky
+    role: soft blue sky backdrop
+    bounding_box: { x: 0, y: 0, width: 320, height: 200 }
+  - id: forest_glade/tree-line-back
+    role: distant tree canopy
+    bounding_box: { x: 0, y: 120, width: 320, height: 80 }
+  - id: forest_glade/tree-line-front
+    role: foreground tree canopy
+    bounding_box: { x: 0, y: 130, width: 320, height: 70 }
+  - id: forest_glade/meadow
+    role: grassy foreground strip
+    bounding_box: { x: 0, y: 170, width: 320, height: 30 }
+palette_tokens:
+  - --tree-deep
+  - --tree-mid
+  - --tree-light
+  - --meadow
+  - glade-sky
+recommended_usage:
+  - Natural backdrop for adventure scenes
+  - Combine with character layers for outdoor compositions

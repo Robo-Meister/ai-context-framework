@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://robo-meister.github.io/ai-context-framework/svg_layered_generation.html" />
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <title>SVG Layered Generation - CAIEngine Docs</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "SVG Layered Generation";
+        var mkdocs_page_input_path = "svg_layered_generation.md";
+        var mkdocs_page_url = "/ai-context-framework/svg_layered_generation.html";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="." class="icon icon-home"> CAIEngine Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="dev/index.html">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="getting_started/quickstart.html">Quickstart</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Developer Guides</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="dev/extending.html">Extending CAIEngine</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="dev/api_reference.html">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="dev/architecture.html">Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="dev/network.html">Network Guide</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="theory/index.html">Theory</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Examples</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="goal-driven-feedback-loop.html">Goal-driven Feedback Loop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="event-context-standard.html">Event Context Standard</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">SVG Layered Generation</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#asset-library-requirements">Asset Library Requirements</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#context-map-structure">Context Map Structure</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#prompting-pattern">Prompting Pattern</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#benefits">Benefits</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#limitations-and-mitigations">Limitations and Mitigations</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#example-asset-library">Example Asset Library</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#reference-pipeline">Reference Pipeline</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#converting-plans-into-layer-actions">Converting plans into layer actions</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href=".">CAIEngine Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Examples</li>
+      <li class="breadcrumb-item active">SVG Layered Generation</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="layered-svg-generation-via-context-aware-prompting">Layered SVG Generation via Context-Aware Prompting<a class="headerlink" href="#layered-svg-generation-via-context-aware-prompting" title="Permanent link">&para;</a></h1>
+<p>This note explains how to extend the AI Context Framework so that text-generation
+sessions can also request layered SVG artwork that is easy to post-process.
+The overall idea is to treat every SVG asset as contextual knowledge, expose
+that knowledge inside prompts, and let the language model describe how to reuse
+and compose the pieces when new imagery is required.</p>
+<h2 id="asset-library-requirements">Asset Library Requirements<a class="headerlink" href="#asset-library-requirements" title="Permanent link">&para;</a></h2>
+<p>To keep the generated artwork editable after the fact, organise the SVG library
+with the following conventions:</p>
+<ol>
+<li><strong>Semantic Grouping</strong> – Store related shapes inside <code>&lt;g&gt;</code> elements whose
+   <code>id</code> attributes are human-readable (e.g. <code>hero_character/body</code>), so that the
+   model can refer to them by name.</li>
+<li><strong>Layer Metadata</strong> – Add JSON or YAML sidecar files that describe the visual
+   purpose of each group ("foreground character", "background gradient", etc.).
+   This metadata can be ingested alongside the raw SVG markup when building the
+   context packet.</li>
+<li><strong>Reusable Palette Tokens</strong> – Encode colours and gradients as CSS variables
+   or named <code>&lt;defs&gt;</code> entries so that the model can remix palettes without
+   editing literal hex codes.</li>
+<li><strong>Fine-Grained Bounding Boxes</strong> – When possible, pre-compute simple bounding
+   box coordinates for key elements and store them inside the metadata so that
+   downstream tooling can reposition layers with minimal geometry work.</li>
+</ol>
+<h2 id="context-map-structure">Context Map Structure<a class="headerlink" href="#context-map-structure" title="Permanent link">&para;</a></h2>
+<p>When you prepare a generation run, attach the SVG metadata to the context map
+under a dedicated channel (e.g. <code>visual_assets</code>). Each entry should contain:</p>
+<ul>
+<li>A concise natural-language summary of the asset and its intended use.</li>
+<li>The path to the SVG file (or an inlined subset of its markup if the file is
+  small).</li>
+<li>Optional references to palette tokens, font choices, and reusable backgrounds.</li>
+</ul>
+<p>During prompt construction, point the model to the relevant entries by name, and
+explain how the asset descriptions map to layers inside the final composition.</p>
+<h2 id="prompting-pattern">Prompting Pattern<a class="headerlink" href="#prompting-pattern" title="Permanent link">&para;</a></h2>
+<p>In the task prompt, request the model to output a JSON (or another structured)
+plan that lists the layers to compose. For example:</p>
+<pre><code class="language-jsonc">{
+  &quot;canvas&quot;: { &quot;width&quot;: 1920, &quot;height&quot;: 1080 },
+  &quot;layers&quot;: [
+    { &quot;source&quot;: &quot;characters/hero.svg#pose-1&quot;, &quot;transform&quot;: &quot;scale(1.1) translate(40, -20)&quot; },
+    { &quot;source&quot;: &quot;backgrounds/cityscape.svg#layer-base&quot;, &quot;opacity&quot;: 0.85 },
+    { &quot;source&quot;: &quot;effects/sun_glow.svg&quot;, &quot;blend&quot;: &quot;screen&quot; }
+  ]
+}
+</code></pre>
+<p>Because the model is operating on textual context, it will not rasterise the
+final artwork; instead, it will suggest which pre-existing SVG fragments to
+compose, along with any transformations. A thin automation layer can then apply
+these instructions with a deterministic SVG manipulation library (such as
+<code>cairosvg</code>, <code>svgpathtools</code>, or browser-side DOM APIs).</p>
+<h2 id="benefits">Benefits<a class="headerlink" href="#benefits" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Editability</strong> – Each layer remains an SVG group, so designers can tweak the
+  shapes in vector tools without recreating the entire illustration.</li>
+<li><strong>Consistency</strong> – Palettes, iconography, and proportions stay aligned with
+  existing branding guidelines because all assets originate from a controlled
+  library.</li>
+<li><strong>Traceability</strong> – The prompt output doubles as a build manifest, making it
+  easy to track which assets were combined and how they were transformed.</li>
+</ul>
+<h2 id="limitations-and-mitigations">Limitations and Mitigations<a class="headerlink" href="#limitations-and-mitigations" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Library Coverage</strong> – The approach only works if the asset library already
+  contains suitable components. Fill gaps by commissioning new base assets or
+  by adding a "fallback" layer type that can be generated on the fly.</li>
+<li><strong>Prompt Budget</strong> – Large SVG files can exhaust context length. Use summaries
+  and only expose the relevant fragments when constructing the context map.</li>
+<li><strong>Geometric Precision</strong> – Free-form text instructions may need validation.
+  Couple the generation step with lightweight rules or a post-processing script
+  that verifies bounds and naming before committing the composed SVG.</li>
+</ul>
+<p>With these pieces in place, the framework can extend the same context-driven
+workflow it uses for text to orchestrate layered, editable SVG artwork.</p>
+<h2 id="example-asset-library">Example Asset Library<a class="headerlink" href="#example-asset-library" title="Permanent link">&para;</a></h2>
+<p>For a concrete illustration of these conventions, see the sample library under
+<a href="./examples/svg_library/"><code>docs/examples/svg_library</code></a>. It contains characters,
+backgrounds, and effects SVGs grouped semantically, paired with JSON or YAML
+metadata that encodes summaries, palette tokens, and bounding boxes. The
+accompanying README shows how to translate the metadata into a context packet
+and a model-generated layer plan.</p>
+<h2 id="reference-pipeline">Reference Pipeline<a class="headerlink" href="#reference-pipeline" title="Permanent link">&para;</a></h2>
+<p>The repository ships with a <code>SvgLayerPipeline</code> that automates the steps above.
+It gathers SVG metadata from any context provider, packages it into the
+<code>visual_assets</code> channel, asks an inference engine for a JSON plan, and
+post-processes the response so only resolvable layers remain. Bounding boxes
+defined in the metadata are merged into the final plan so downstream tooling can
+position fragments deterministically. See
+<code>src/caiengine/pipelines/svg_layer_pipeline.py</code> for the implementation and
+<code>tests/test_svg_layer_pipeline.py</code> for usage examples.</p>
+<h3 id="converting-plans-into-layer-actions">Converting plans into layer actions<a class="headerlink" href="#converting-plans-into-layer-actions" title="Permanent link">&para;</a></h3>
+<p>Once a plan has been validated you can feed it into <code>SvgActionPlanner</code> to obtain
+an ordered list of explicit actions. Each entry is tagged as an <code>add</code>,
+<code>transform</code>, <code>remove</code>, or <code>update</code> command and includes the resolved asset
+fragment, bounding boxes, inline SVG payloads, and any requested transforms.
+This keeps the orchestration service focused on high-level intent while your
+SVG manipulation layer performs precise DOM edits or compositing work.【F:src/caiengine/pipelines/svg_layer_actions.py†L1-L247】【F:tests/test_svg_layer_actions.py†L1-L123】</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="event-context-standard.html" class="btn btn-neutral float-left" title="Event Context Standard"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="event-context-standard.html" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = ".";</script>
+    <script src="js/theme_extra.js"></script>
+    <script src="js/theme.js"></script>
+      <script src="search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

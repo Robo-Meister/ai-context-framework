@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contextual AI - Architecture</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 2rem;
+      line-height: 1.6;
+      max-width: 960px;
+      color: #2c3e50;
+    }
+    h1, h2, h3 {
+      color: #34495e;
+      margin-top: 2rem;
+    }
+    nav a {
+      margin-right: 1rem;
+      text-decoration: none;
+      color: #3498db;
+    }
+    img.diagram {
+      max-width: 100%;
+      margin-top: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">Overview</a>
+  <a href="getting_started.html">Getting Started</a>
+  <a href="api_reference.html">API Reference</a>
+  <a href="architecture.html">Architecture</a>
+  <a href="network.html">Network</a>
+  <a href="contributing.html">Contributing</a>
+  <a href="faq.html">FAQ</a>
+</nav>
+
+  <h1>🏛️ System Architecture</h1>
+
+  <p>The Contextual AI system is composed of the following main layers:</p>
+
+  <h2>1. Input Layer</h2>
+  <p>Receives raw messages or event logs for processing.</p>
+
+  <h2>2. Context Providers</h2>
+  <ul>
+    <li><strong>RedisContextProvider:</strong> Stores and retrieves context vectors from Redis.</li>
+    <li><strong>FileBasedContextProvider:</strong> Local file storage for development and testing.</li>
+    <li><strong>FileContextProvider:</strong> Persists context entries to a JSON file for offline use.</li>
+    <li><strong>SimpleContextProvider:</strong> Minimal in-memory provider for examples.</li>
+  </ul>
+
+  <h2>3. Core Processing Modules</h2>
+  <ul>
+    <li><strong>Fuser:</strong> Combines similar messages.</li>
+    <li><strong>FuzzyDeduplicator:</strong> Eliminates duplicates.</li>
+    <li><strong>Categorizer:</strong> Categorizes messages.</li>
+    <li><strong>CacheManager:</strong> Manages caching with invalidation.</li>
+    <li><strong>AIInference:</strong> Executes AI decision engines.</li>
+  </ul>
+
+  <h2>4. Distance Engine</h2>
+  <p>Calculates semantic distances between context vectors using cosine or Euclidean metrics.</p>
+
+  <h2>5. Learning Layer</h2>
+  <p>Manages machine learning models for better categorization and decision-making.</p>
+
+  <h2>6. Output and Integration</h2>
+  <p>Exposes APIs and integrates with other systems or frontends.</p>
+
+  <!-- Example diagram placeholder -->
+  <img src="../assets/architecture_diagram.png" alt="Architecture Diagram" class="diagram" />
+
+</body>
+</html>
