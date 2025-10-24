@@ -4,16 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "caiengine"
-version = "0.2.0"
+version = "0.2.1"
 description = "A Context-Aware AI Engine for decision automation, workflow reasoning, and dynamic task orchestration"
 readme = "README.md"
 requires-python = ">=3.6"
 authors = [{name = "Paweł Nowak", email = "pawel.nowak@robo-meister.com"}]
-license = {text = "MIT"}
+license = "MIT"
 keywords = ["ai", "context", "framework"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
@@ -57,8 +56,10 @@ context = "caiengine.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
+include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["caiengine*", "sitecustomize"]
+
 
