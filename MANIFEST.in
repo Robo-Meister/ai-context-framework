@@ -1,3 +1,5 @@
 include README.md
 include LICENSE
+recursive-include docs *.md *.html *.png *.jpg *.svg
+recursive-include src/caiengine/providers *.py
 
