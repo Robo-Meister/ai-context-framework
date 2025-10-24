@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Quickstart guide
+    url: ../../docs/getting_started/quickstart.md
+    about: Review the Quickstart to confirm the baseline setup before filing issues.

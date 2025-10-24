@@ -1,5 +1,10 @@
 # Quickstart
 
+Get started quickly with CAIEngine using the resources below:
+
+- **Live documentation:** [CAIEngine Docs](https://robo-meister.github.io/ai-context-framework/)
+- **Contribution guide:** [docs/dev/contributing.html](../dev/contributing.html)
+
 This guide shows how to install CAIEngine from PyPI, enable the optional
 integrations, and run a minimal decision pipeline end-to-end.
 
