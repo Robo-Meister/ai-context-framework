@@ -126,12 +126,33 @@
     </ul>
   </div>
 
+  <div class="section" id="release-process">
+    <h2>7. Release Automation</h2>
+    <p>
+      Publishing is handled by GitHub Actions in <code>.github/workflows/publish.yml</code> and reuses the standard
+      <code>tests</code> job to ensure the suite passes before any artifacts are built.
+    </p>
+    <ul>
+      <li><strong>Release branches:</strong> pushing to <code>release/*</code> runs the test suite, builds the package, and uploads the distribution to <strong>TestPyPI</strong>.</li>
+      <li><strong>Version tags:</strong> pushing a tag that matches <code>v*</code> (for example, <code>v1.2.3</code>) runs the same verification and build steps, then publishes to the production <strong>PyPI</strong> index.</li>
+    </ul>
+    <p>
+      Configure the following repository secrets before attempting to cut a release:
+    </p>
+    <ul>
+      <li><code>TEST_PYPI_API_TOKEN</code> – an API token with upload permissions to the project's TestPyPI repository.</li>
+      <li><code>PYPI_API_TOKEN</code> – an API token with upload permissions to the project's production PyPI repository.</li>
+    </ul>
+    <p>
+      To ship a new version, create or update a <code>release/&lt;series&gt;</code> branch to validate the build on TestPyPI, then tag the release with <code>v&lt;major.minor.patch&gt;</code> once you are ready for the official PyPI publication.
+    </p>
+  </div>
   <div class="section" id="releasing">
     <h2>7. Release Checklist</h2>
     <p>
       Preparing a new package version? Follow the <a href="releasing.md">releasing checklist</a> to verify
       documentation updates, run the packaging smoke tests, and publish the wheel safely.
-    </p>
+          </p>
   </div>
 
 </body>

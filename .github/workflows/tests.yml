@@ -3,6 +3,7 @@ name: Test Suite
 
 on:
   pull_request:
+  workflow_call:
 
 jobs:
   tests:
