@@ -11,9 +11,25 @@ DEFAULT_PROVIDER = "providers.memory_context_provider.MemoryContextProvider"
 logger = logging.getLogger(__name__)
 
 def load_provider(path: str):
-    module_name, class_name = path.rsplit(".", 1)
-    module = importlib.import_module(module_name)
-    cls = getattr(module, class_name)
+    try:
+        module_name, class_name = path.rsplit(".", 1)
+    except ValueError as exc:
+        raise ValueError(
+            f"Invalid provider path '{path}'. Expected format 'module.ClassName'."
+        ) from exc
+
+    try:
+        module = importlib.import_module(module_name)
+    except ImportError as exc:
+        raise ImportError(f"Cannot import provider module '{module_name}'.") from exc
+
+    try:
+        cls = getattr(module, class_name)
+    except AttributeError as exc:
+        raise AttributeError(
+            f"Provider class '{class_name}' not found in module '{module_name}'."
+        ) from exc
+
     return cls()
 
 def cmd_add(args):
