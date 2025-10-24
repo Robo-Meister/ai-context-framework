@@ -7,7 +7,7 @@ except ImportError:
     redis = None  # or handle this differently, e.g. raise error on usage
 import uuid
 import json
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 from caiengine.objects.context_data import ContextData
 from caiengine.objects.context_query import ContextQuery
@@ -31,17 +31,58 @@ class RedisContextProvider(BaseContextProvider):
         self.listener_thread = threading.Thread(target=self._listen_to_pubsub, daemon=True)
         self.listener_thread.start()
 
-    def ingest_context(redis_conn, context_id: str, payload: dict, timestamp: datetime, metadata: dict,
-                       source_id="manual", confidence=1.0):
-        base = f"context:{context_id}"
-        redis_conn.set(f"{base}:payload", json.dumps(payload))
-        redis_conn.set(f"{base}:timestamp", timestamp.isoformat())
-        redis_conn.set(f"{base}:metadata", json.dumps(metadata))
-        redis_conn.set(f"{base}:source_id", source_id)
-        redis_conn.set(f"{base}:confidence", str(confidence))
+    def ingest_context(
+        self,
+        payload: dict,
+        timestamp: Optional[datetime] = None,
+        metadata: Optional[dict] = None,
+        source_id: str = "redis",
+        confidence: float = 1.0,
+        ttl: Optional[int] = None,
+    ) -> str:
+        if metadata is None:
+            metadata = {}
+        else:
+            metadata = dict(metadata)
 
-        # Notify listeners via pub/sub
-        redis_conn.publish("context:new", context_id)
+        context_id = str(uuid.uuid4())
+        metadata.setdefault("id", context_id)
+        ts = timestamp or datetime.utcnow()
+
+        base = f"{self.key_prefix}{context_id}"
+        encoded_metadata = json.dumps(metadata)
+        entries = {
+            f"{base}:payload": json.dumps(payload),
+            f"{base}:timestamp": ts.isoformat(),
+            f"{base}:metadata": encoded_metadata,
+            f"{base}:source_id": source_id,
+            f"{base}:confidence": str(confidence),
+        }
+
+        for key, value in entries.items():
+            if ttl:
+                self.redis.setex(key, ttl, value)
+            else:
+                self.redis.set(key, value)
+
+        context = ContextData(
+            payload=payload,
+            timestamp=ts,
+            source_id=source_id,
+            confidence=confidence,
+            metadata=metadata,
+            roles=metadata.get("roles", []),
+            situations=metadata.get("situations", []),
+            content=metadata.get("content", ""),
+        )
+
+        super().publish_context(context)
+        self.redis.publish("context:new", context_id)
+        logger.info(
+            "Stored context in Redis",
+            extra={"context_id": context_id, "source_id": source_id},
+        )
+        return context_id
     def fetch_context(self, query_params: ContextQuery) -> List[ContextData]:
         keys = self.redis.keys(f"{self.key_prefix}*")
         uuids = set(":".join(k.split(":")[1:2]) for k in keys)
@@ -63,7 +104,10 @@ class RedisContextProvider(BaseContextProvider):
                         timestamp=timestamp,
                         source_id=source_id,
                         confidence=confidence,
-                        metadata=metadata
+                        metadata=metadata,
+                        roles=metadata.get("roles", []),
+                        situations=metadata.get("situations", []),
+                        content=metadata.get("content", ""),
                     ))
             except Exception as e:
                 logger.error("Error parsing context %s: %s", context_id, e)
