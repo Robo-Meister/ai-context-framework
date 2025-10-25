@@ -6,7 +6,9 @@ from datetime import datetime
 from caiengine.objects.context_query import ContextQuery
 from caiengine.core import model_manager
 
-DEFAULT_PROVIDER = "providers.memory_context_provider.MemoryContextProvider"
+DEFAULT_PROVIDER = (
+    "caiengine.providers.memory_context_provider.MemoryContextProvider"
+)
 
 logger = logging.getLogger(__name__)
 
