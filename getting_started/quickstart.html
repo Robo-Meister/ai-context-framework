@@ -60,7 +60,13 @@
         </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#run-a-decision-pipeline">Run a decision pipeline</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#interact-from-the-cli">Interact from the CLI</a>
         <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#add-a-context-entry">Add a context entry</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#query-recent-context">Query recent context</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#provider-configuration-keys">Provider configuration keys</a>
     </li>
         </ul>
@@ -246,6 +252,53 @@ for item in results:
 <p>Running the script prints the categorised entry enriched with trust scores and
 <code>goal_suggestion</code> feedback. Replace the in-memory provider configuration with
 Redis, Kafka, or SQL options as your deployment requires.</p>
+<h2 id="interact-from-the-cli">Interact from the CLI<a class="headerlink" href="#interact-from-the-cli" title="Permanent link">&para;</a></h2>
+<p>The <code>context</code> command-line tool ships with CAIEngine and mirrors the provider
+APIs. It exposes subcommands for ingesting (<code>context add</code>) and retrieving
+(<code>context query</code>) context records. Use <code>--provider</code> to select the backing
+provider class; it defaults to the in-memory
+<code>providers.memory_context_provider.MemoryContextProvider</code>.</p>
+<h3 id="add-a-context-entry">Add a context entry<a class="headerlink" href="#add-a-context-entry" title="Permanent link">&para;</a></h3>
+<p>Compose a JSON payload that matches your provider schema and pass optional
+metadata or timestamps with the matching flags defined in <code>caiengine.cli</code>:</p>
+<pre><code class="language-bash">context --provider providers.redis_context_provider.RedisContextProvider \
+  add \
+  --payload '{&quot;id&quot;: &quot;ticket-123&quot;, &quot;content&quot;: &quot;Customer reported payment failure&quot;}' \
+  --metadata '{&quot;channel&quot;: &quot;email&quot;, &quot;attempts&quot;: 2}' \
+  --timestamp &quot;2024-05-01T09:30:00&quot; \
+  --source-id &quot;support-bot&quot; \
+  --confidence 0.92 \
+  --ttl 3600
+</code></pre>
+<p>Key options:</p>
+<ul>
+<li><code>--payload</code> (required): Raw JSON payload that will be ingested.</li>
+<li><code>--metadata</code>: Additional JSON metadata, default <code>{}</code>.</li>
+<li><code>--timestamp</code>: ISO 8601 timestamp; falls back to <code>datetime.utcnow()</code>.</li>
+<li><code>--source-id</code>: Identifier for the producer, default <code>cli</code>.</li>
+<li><code>--confidence</code>: Confidence score (string accepted by the parser, default <code>1.0</code>).</li>
+<li><code>--ttl</code>: Cache retention in seconds for providers that support expirations.</li>
+</ul>
+<h3 id="query-recent-context">Query recent context<a class="headerlink" href="#query-recent-context" title="Permanent link">&para;</a></h3>
+<p>Retrieve context entries from the same provider by specifying an ISO timestamp
+range and optional filters:</p>
+<pre><code class="language-bash">context --provider providers.redis_context_provider.RedisContextProvider \
+  query \
+  --start &quot;2024-05-01T00:00:00&quot; \
+  --end &quot;2024-05-02T00:00:00&quot; \
+  --roles &quot;support,customer&quot; \
+  --scope &quot;ticketing&quot; \
+  --data-type &quot;interaction&quot;
+</code></pre>
+<p>Important query arguments:</p>
+<ul>
+<li><code>--start</code> and <code>--end</code> (required): ISO timestamps describing the query window.</li>
+<li><code>--roles</code>: Comma-separated role identifiers to match.</li>
+<li><code>--scope</code>: Scope string forwarded to the provider.</li>
+<li><code>--data-type</code>: Data type hint for providers that differentiate entry schemas.</li>
+</ul>
+<p>Results are written as JSON to standard output. Pipe the output to <code>jq</code> or
+redirect it to a file for downstream processing.</p>
 <h3 id="provider-configuration-keys">Provider configuration keys<a class="headerlink" href="#provider-configuration-keys" title="Permanent link">&para;</a></h3>
 <p><code>ConfigurablePipeline.from_dict</code> accepts a short provider identifier and
 translates it to the underlying class from <code>caiengine.providers</code>.</p>
