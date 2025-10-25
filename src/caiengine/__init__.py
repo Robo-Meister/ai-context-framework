@@ -6,7 +6,7 @@ import importlib
 import os
 from typing import Any, Dict, NamedTuple
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 _LIGHT_IMPORT = bool(os.environ.get("CAIENGINE_LIGHT_IMPORT"))
 
