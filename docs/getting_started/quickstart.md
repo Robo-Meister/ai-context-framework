@@ -141,6 +141,64 @@ Running the script prints the categorised entry enriched with trust scores and
 `goal_suggestion` feedback. Replace the in-memory provider configuration with
 Redis, Kafka, or SQL options as your deployment requires.
 
+## Interact from the CLI
+
+The `context` command-line tool ships with CAIEngine and mirrors the provider
+APIs. It exposes subcommands for ingesting (`context add`) and retrieving
+(`context query`) context records. Use `--provider` to select the backing
+provider class; it defaults to the in-memory
+`providers.memory_context_provider.MemoryContextProvider`.
+
+### Add a context entry
+
+Compose a JSON payload that matches your provider schema and pass optional
+metadata or timestamps with the matching flags defined in `caiengine.cli`:
+
+```bash
+context --provider providers.redis_context_provider.RedisContextProvider \
+  add \
+  --payload '{"id": "ticket-123", "content": "Customer reported payment failure"}' \
+  --metadata '{"channel": "email", "attempts": 2}' \
+  --timestamp "2024-05-01T09:30:00" \
+  --source-id "support-bot" \
+  --confidence 0.92 \
+  --ttl 3600
+```
+
+Key options:
+
+- `--payload` (required): Raw JSON payload that will be ingested.
+- `--metadata`: Additional JSON metadata, default `{}`.
+- `--timestamp`: ISO 8601 timestamp; falls back to `datetime.utcnow()`.
+- `--source-id`: Identifier for the producer, default `cli`.
+- `--confidence`: Confidence score (string accepted by the parser, default `1.0`).
+- `--ttl`: Cache retention in seconds for providers that support expirations.
+
+### Query recent context
+
+Retrieve context entries from the same provider by specifying an ISO timestamp
+range and optional filters:
+
+```bash
+context --provider providers.redis_context_provider.RedisContextProvider \
+  query \
+  --start "2024-05-01T00:00:00" \
+  --end "2024-05-02T00:00:00" \
+  --roles "support,customer" \
+  --scope "ticketing" \
+  --data-type "interaction"
+```
+
+Important query arguments:
+
+- `--start` and `--end` (required): ISO timestamps describing the query window.
+- `--roles`: Comma-separated role identifiers to match.
+- `--scope`: Scope string forwarded to the provider.
+- `--data-type`: Data type hint for providers that differentiate entry schemas.
+
+Results are written as JSON to standard output. Pipe the output to `jq` or
+redirect it to a file for downstream processing.
+
 ### Provider configuration keys
 
 `ConfigurablePipeline.from_dict` accepts a short provider identifier and
