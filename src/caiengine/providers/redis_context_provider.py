@@ -21,7 +21,7 @@ class RedisContextProvider(BaseContextProvider):
     def __init__(self, redis_url: str, key_prefix: str = "context:"):
         if redis is None:
             raise ImportError("Redis package is required for RedisContextProvider. "
-                              "Install it with `pip install my_package[redis]`.")
+                              "Install it with `pip install caiengine[redis]`.")
         super().__init__()
         self.redis = redis.Redis.from_url(redis_url, decode_responses=True)
         self.key_prefix = key_prefix
@@ -154,4 +154,3 @@ class RedisContextProvider(BaseContextProvider):
             self.publish_context(context)
         except Exception as e:
             logger.error("Failed to push context %s: %s", context_id, e)
-

@@ -32,7 +32,7 @@ class KafkaContextProvider(BaseContextProvider):
         if KafkaConsumer is None:
             raise ImportError(
                 "kafka-python package is required for KafkaContextProvider. "
-                "Install it with `pip install ai_context[kafka]`."
+                "Install it with `pip install caiengine[kafka]`."
             )
         super().__init__()
         self.topic = topic
@@ -52,7 +52,7 @@ class KafkaContextProvider(BaseContextProvider):
             if KafkaProducer is None:
                 raise ImportError(
                     "kafka-python package is required for KafkaContextProvider. "
-                    "Install it with `pip install ai_context[kafka]`."
+                    "Install it with `pip install caiengine[kafka]`."
                 )
             self.producer = KafkaProducer(bootstrap_servers=bootstrap_servers)
         self.cache = CacheManager()
