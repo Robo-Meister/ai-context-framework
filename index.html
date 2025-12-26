@@ -96,28 +96,38 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h1>
-<p>This project ships developer guides and design notes as static HTML and Markdown
-files. You can browse them directly from the repository or render them through
-MkDocs.</p>
+<p>This project ships developer guides, design notes, and getting-started material
+as static HTML and Markdown. You can browse them directly from the repository
+or render them through MkDocs.</p>
+<h2 id="whats-inside">What's inside<a class="headerlink" href="#whats-inside" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Open <code>dev/index.html</code> for developer-focused documentation.</li>
-<li>Open <code>theory/index.html</code> for theoretical background and architecture notes.</li>
-<li>See <code>event-context-standard.md</code> for the event/context data model.</li>
-<li>Follow <code>getting_started/quickstart.md</code> for PyPI installation and pipeline
-  examples.</li>
+<li><code>dev/index.html</code>: developer-focused documentation.</li>
+<li><code>theory/index.html</code>: theoretical background and architecture notes.</li>
+<li><code>event-context-standard.md</code>: event/context data model reference.</li>
+<li><code>getting_started/quickstart.md</code>: PyPI installation and pipeline examples.</li>
+<li><code>examples/</code>: additional usage walkthroughs and experiments.</li>
+<li><code>status/</code>: current project status notes.</li>
 </ul>
-<p>To serve the documentation locally, install the docs extra and run MkDocs:</p>
+<h2 id="serve-the-docs-locally">Serve the docs locally<a class="headerlink" href="#serve-the-docs-locally" title="Permanent link">&para;</a></h2>
+<p>Install the docs extra and run MkDocs:</p>
 <pre><code class="language-bash">pip install caiengine[docs]
 mkdocs serve
 </code></pre>
 <p>The site will be available at http://127.0.0.1:8000/ using the navigation from
 <code>mkdocs.yml</code>.</p>
-<h2 id="mass-testing">Mass Testing<a class="headerlink" href="#mass-testing" title="Permanent link">&para;</a></h2>
-<p>Before going live, stress test the goal feedback loop and learning pipeline with synthetic data:</p>
+<h2 id="build-the-static-site">Build the static site<a class="headerlink" href="#build-the-static-site" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">pip install caiengine[docs]
+mkdocs build --clean
+</code></pre>
+<p>The generated site will be written to the <code>site/</code> directory by default.</p>
+<h2 id="mass-testing">Mass testing<a class="headerlink" href="#mass-testing" title="Permanent link">&para;</a></h2>
+<p>Before going live, stress test the goal feedback loop and learning pipeline
+with synthetic data:</p>
 <pre><code class="language-bash">pytest tests/test_goal_feedback_loop.py::test_goal_feedback_loop_randomized_batch \
        tests/test_feedback_pipeline.py::TestFeedbackPipeline::test_feedback_pipeline_randomized_batch
 </code></pre>
-<p>These tests generate many fake context maps to ensure the system behaves correctly under load. Extend them as needed for your own scenarios.</p>
+<p>These tests generate many fake context maps to ensure the system behaves
+correctly under load. Extend them as needed for your own scenarios.</p>
               
             </div>
           </div><footer>
@@ -161,5 +171,5 @@ mkdocs serve
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2025-10-25 09:26:25.693341+00:00
+Build Date UTC : 2025-12-26 14:21:23.564336+00:00
 -->
