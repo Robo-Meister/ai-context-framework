@@ -19,19 +19,29 @@ class FileContextProvider:
             f"{self.__class__.__module__}.{self.__class__.__name__}"
         )
         # Ensure the storage file exists
+        storage_dir = os.path.dirname(self.file_path)
+        if storage_dir:
+            os.makedirs(storage_dir, exist_ok=True)
         if not os.path.exists(self.file_path):
-            with open(self.file_path, "w", encoding="utf-8") as f:
-                json.dump([], f)
-            self.logger.warning(
-                "Created missing context storage file",
-                extra={"file_path": self.file_path},
-            )
+            try:
+                with open(self.file_path, "w", encoding="utf-8") as f:
+                    json.dump([], f)
+                self.logger.warning(
+                    "Created missing context storage file",
+                    extra={"file_path": self.file_path},
+                )
+            except OSError:
+                self.logger.exception(
+                    "Failed to create context storage file",
+                    extra={"file_path": self.file_path},
+                )
+                raise
 
     def _load_entries(self) -> List[dict]:
         try:
             with open(self.file_path, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
+        except (FileNotFoundError, json.JSONDecodeError, OSError):
             self.logger.exception(
                 "Failed to load context entries from file",
                 extra={"file_path": self.file_path},
@@ -39,12 +49,19 @@ class FileContextProvider:
             return []
 
     def _save_entries(self, entries: List[dict]):
-        with open(self.file_path, "w", encoding="utf-8") as f:
-            json.dump(entries, f, indent=2)
-        self.logger.debug(
-            "Persisted context entries to file",
-            extra={"file_path": self.file_path, "entry_count": len(entries)},
-        )
+        try:
+            with open(self.file_path, "w", encoding="utf-8") as f:
+                json.dump(entries, f, indent=2)
+            self.logger.debug(
+                "Persisted context entries to file",
+                extra={"file_path": self.file_path, "entry_count": len(entries)},
+            )
+        except OSError:
+            self.logger.exception(
+                "Failed to persist context entries to file",
+                extra={"file_path": self.file_path, "entry_count": len(entries)},
+            )
+            raise
 
     def ingest_context(
         self,
@@ -95,7 +112,14 @@ class FileContextProvider:
         entries = self._load_entries()
         results = []
         for entry in entries:
-            ts = datetime.fromisoformat(entry["timestamp"])
+            try:
+                ts = datetime.fromisoformat(entry["timestamp"])
+            except (KeyError, TypeError, ValueError):
+                self.logger.exception(
+                    "Skipped invalid context entry timestamp",
+                    extra={"file_path": self.file_path, "entry_id": entry.get("id")},
+                )
+                continue
             if query_params.time_range[0] <= ts <= query_params.time_range[1]:
                 metadata = entry.get("metadata", {})
                 results.append(
