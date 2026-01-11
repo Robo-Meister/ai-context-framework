@@ -65,6 +65,8 @@
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#add-a-context-entry">Add a context entry</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#retention-and-ttl-guidance">Retention and TTL guidance</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#query-recent-context">Query recent context</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#provider-configuration-keys">Provider configuration keys</a>
@@ -179,6 +181,7 @@ common settings are shown below.</p>
 provider = RedisContextProvider(
     redis_url=&quot;redis://localhost:6379/0&quot;,
     key_prefix=&quot;context:&quot;,
+    max_entries=10000,
 )
 </code></pre>
 <p>The provider connects to the configured Redis instance, subscribes to the
@@ -279,6 +282,26 @@ metadata or timestamps with the matching flags defined in <code>caiengine.cli</c
 <li><code>--confidence</code>: Confidence score (string accepted by the parser, default <code>1.0</code>).</li>
 <li><code>--ttl</code>: Cache retention in seconds for providers that support expirations.</li>
 </ul>
+<h3 id="retention-and-ttl-guidance">Retention and TTL guidance<a class="headerlink" href="#retention-and-ttl-guidance" title="Permanent link">&para;</a></h3>
+<p>Context providers accept an optional TTL to bound retention. The CLI flag
+<code>--ttl</code> and the HTTP <code>POST /context</code> payload field <code>ttl</code> both forward the TTL
+value (seconds) into the backing provider.</p>
+<p>For in-memory storage, set a maximum entry count to avoid unbounded growth:</p>
+<pre><code class="language-python">from caiengine.providers.memory_context_provider import MemoryContextProvider
+
+provider = MemoryContextProvider(max_entries=5000)
+</code></pre>
+<p>Redis can enforce size-based retention as well by enabling <code>max_entries</code>, which
+removes the oldest records when the limit is exceeded (TTL expiration still
+applies per key):</p>
+<pre><code class="language-python">from caiengine.providers.redis_context_provider import RedisContextProvider
+
+provider = RedisContextProvider(
+    redis_url=&quot;redis://localhost:6379/0&quot;,
+    key_prefix=&quot;context:&quot;,
+    max_entries=10000,
+)
+</code></pre>
 <h3 id="query-recent-context">Query recent context<a class="headerlink" href="#query-recent-context" title="Permanent link">&para;</a></h3>
 <p>Retrieve context entries from the same provider by specifying an ISO timestamp
 range and optional filters:</p>
