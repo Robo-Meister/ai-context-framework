@@ -72,6 +72,7 @@ class TestConfigurablePipeline(unittest.TestCase):
             }
             pipeline = ConfigurablePipeline.from_dict(cfg)
             self.assertIsInstance(pipeline.provider, SQLiteContextProvider)
+            self.assertEqual(pipeline.provider._db_path, str(db_path))
 
             now = datetime.utcnow()
             data_batch = [

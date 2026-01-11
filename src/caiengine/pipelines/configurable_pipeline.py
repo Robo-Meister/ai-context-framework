@@ -31,22 +31,26 @@ from caiengine.parser.log_parser import LogParser
 from caiengine.common import AuditLogger
 
 
-_PROVIDER_MAP = {
-    "json": FileContextProvider,
-    "file": FileContextProvider,
-    "xml": XMLContextProvider,
+_DURABLE_PROVIDER_MAP = {
+    "http": HTTPContextProvider,
+    "redis": RedisContextProvider,
+    "kafka": KafkaContextProvider,
     "sqlite": SQLiteContextProvider,
     "mysql": MySQLContextProvider,
     "postgres": PostgresContextProvider,
     "postgresql": PostgresContextProvider,
+}
+
+_PROVIDER_MAP = {
+    "json": FileContextProvider,
+    "file": FileContextProvider,
+    "xml": XMLContextProvider,
     "memory": MemoryContextProvider,
-    "redis": RedisContextProvider,
-    "kafka": KafkaContextProvider,
-    "http": HTTPContextProvider,
     "csv": CSVContextProvider,
     "ocr": OCRContextProvider,
     "mock": MockContextProvider,
     "simple": SimpleContextProvider,
+    **_DURABLE_PROVIDER_MAP,
 }
 
 
