@@ -133,6 +133,7 @@ class RedisContextProvider(BaseContextProvider):
     def fetch_context(self, query_params: ContextQuery) -> List[ContextData]:
         if self.max_entries and self.max_entries > 0:
             self._prune_missing_index_entries()
+            self._backfill_index_if_empty()
             uuids = list(self.redis.zrange(self.index_key, 0, -1))
         else:
             keys = self.redis.keys(f"{self.key_prefix}*")
@@ -204,6 +205,32 @@ class RedisContextProvider(BaseContextProvider):
         for context_id, exists in zip(members, exists_results):
             if not exists:
                 self.redis.zrem(self.index_key, context_id)
+
+    def _backfill_index_if_empty(self) -> None:
+        if not self.max_entries or self.max_entries <= 0:
+            return
+        if self.redis.zcard(self.index_key) > 0:
+            return
+        timestamp_keys = self.redis.keys(f"{self.key_prefix}*:timestamp")
+        if not timestamp_keys:
+            return
+        pipeline = self.redis.pipeline()
+        for key in timestamp_keys:
+            pipeline.get(key)
+        timestamps = pipeline.execute()
+        additions = {}
+        for key, ts in zip(timestamp_keys, timestamps):
+            if not ts:
+                continue
+            try:
+                timestamp = datetime.fromisoformat(ts)
+            except ValueError:
+                continue
+            context_id = key[len(self.key_prefix):].split(":", 1)[0]
+            additions[context_id] = timestamp.timestamp()
+        if additions:
+            self.redis.zadd(self.index_key, additions)
+            self._prune_max_entries()
 
     def push_context(self, context_id: str):
         """Manually push context by ID to all subscribers"""
