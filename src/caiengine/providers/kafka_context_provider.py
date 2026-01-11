@@ -141,24 +141,30 @@ class KafkaContextProvider(BaseContextProvider):
         source_id: str = "kafka",
         confidence: float = 1.0,
         ttl: Union[int, None] = None,
-        context_id: Union[str, None] = None,
+        context_id: Optional[str] = None,
     ) -> str:
-        context_id = context_id or str(uuid.uuid4())
+        resolved_context_id = context_id or str(uuid.uuid4())
+
+        md = metadata or {}
         cd = ContextData(
             payload=payload,
             timestamp=timestamp or datetime.utcnow(),
             source_id=source_id,
             confidence=confidence,
-            metadata=metadata or {},
-            roles=(metadata or {}).get("roles", []),
-            situations=(metadata or {}).get("situations", []),
-            content=(metadata or {}).get("content", ""),
+            metadata=md,
+            roles=md.get("roles", []),
+            situations=md.get("situations", []),
+            content=md.get("content", ""),
         )
-        self.cache.set(context_id, cd, ttl)
+
+        self.cache.set(resolved_context_id, cd, ttl)
         super().publish_context(cd)
+
         if self.publish_topic and self.producer:
             try:
-                event_payload = create_context_event(cd, context_id=context_id).to_dict()
+                event_payload = create_context_event(
+                    cd, context_id=resolved_context_id
+                ).to_dict()
                 msg = json.dumps(event_payload).encode()
                 self.producer.send(self.publish_topic, msg)
             except Exception:
@@ -166,7 +172,9 @@ class KafkaContextProvider(BaseContextProvider):
                     "Failed to publish context to Kafka topic",
                     extra={"publish_topic": self.publish_topic},
                 )
-        return context_id
+
+        return resolved_context_id
+
 
     def fetch_context(self, query_params: ContextQuery) -> List[ContextData]:
         results = []
