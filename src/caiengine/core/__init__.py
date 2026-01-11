@@ -38,7 +38,13 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
     from .trust_module import TrustModule
     from .time_decay_scorer import TimeDecayScorer
     from .ann_index import ANNIndex
-    from .goal_feedback_loop import GoalDrivenFeedbackLoop
+    from .goal_feedback_loop import (
+        GoalDrivenFeedbackLoop,
+        InMemoryGoalFeedbackPersistence,
+        RedisGoalFeedbackPersistence,
+        SQLiteGoalFeedbackPersistence,
+        create_goal_feedback_persistence,
+    )
     from .goal_strategies import (
         SimpleGoalFeedbackStrategy,
         PersonalityGoalFeedbackStrategy,
@@ -81,6 +87,10 @@ if not os.environ.get("CAIENGINE_LIGHT_IMPORT"):
         "TimeDecayScorer",
         "ANNIndex",
         "GoalDrivenFeedbackLoop",
+        "InMemoryGoalFeedbackPersistence",
+        "SQLiteGoalFeedbackPersistence",
+        "RedisGoalFeedbackPersistence",
+        "create_goal_feedback_persistence",
         "SimpleGoalFeedbackStrategy",
         "PersonalityGoalFeedbackStrategy",
         "GoalFeedbackWorker",
