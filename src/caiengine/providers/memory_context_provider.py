@@ -12,9 +12,9 @@ from .base_context_provider import BaseContextProvider
 class MemoryContextProvider(BaseContextProvider):
     """In-memory context provider using :class:`CacheManager`."""
 
-    def __init__(self):
+    def __init__(self, max_entries: Optional[int] = None):
         super().__init__()
-        self.cache = CacheManager()
+        self.cache = CacheManager(max_entries=max_entries)
 
     def ingest_context(
             self,
@@ -40,6 +40,7 @@ class MemoryContextProvider(BaseContextProvider):
             ocr_metadata=ocr_metadata,
         )
         self.cache.set(context_id, cd, ttl)
+        self.cache.prune()
         super().publish_context(cd)
         self.logger.info(
             "Stored context in memory",
@@ -48,6 +49,7 @@ class MemoryContextProvider(BaseContextProvider):
         return context_id
 
     def fetch_context(self, query_params: ContextQuery) -> List[ContextData]:
+        self.cache.prune()
         results = []
         for key in list(self.cache.cache.keys()):
             cd = self.cache.get(key)
@@ -60,6 +62,10 @@ class MemoryContextProvider(BaseContextProvider):
             extra={"result_count": len(results)},
         )
         return results
+
+    def prune_cache(self):
+        """Manually prune expired or excess entries."""
+        self.cache.prune()
 
     def get_context(self, query: ContextQuery) -> List[dict]:
         raw = self.fetch_context(query)

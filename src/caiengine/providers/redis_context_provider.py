@@ -18,13 +18,20 @@ from .base_context_provider import BaseContextProvider
 # Assuming ContextQuery and ContextData are already defined as in previous message
 
 class RedisContextProvider(BaseContextProvider):
-    def __init__(self, redis_url: str, key_prefix: str = "context:"):
+    def __init__(
+        self,
+        redis_url: str,
+        key_prefix: str = "context:",
+        max_entries: Optional[int] = None,
+    ):
         if redis is None:
             raise ImportError("Redis package is required for RedisContextProvider. "
                               "Install it with `pip install caiengine[redis]`.")
         super().__init__()
         self.redis = redis.Redis.from_url(redis_url, decode_responses=True)
         self.key_prefix = key_prefix
+        self.max_entries = max_entries
+        self.index_key = f"{self.key_prefix}index"
         # Start pub/sub listener thread
         self.pubsub = self.redis.pubsub()
         self.pubsub.subscribe("context:new")
@@ -65,6 +72,11 @@ class RedisContextProvider(BaseContextProvider):
             else:
                 self.redis.set(key, value)
 
+        if self.max_entries and self.max_entries > 0:
+            self._add_to_index(context_id, ts)
+            self._prune_missing_index_entries()
+            self._prune_max_entries()
+
         context = ContextData(
             payload=payload,
             timestamp=ts,
@@ -83,9 +95,48 @@ class RedisContextProvider(BaseContextProvider):
             extra={"context_id": context_id, "source_id": source_id},
         )
         return context_id
+
+    def _context_keys(self, context_id: str) -> List[str]:
+        base = f"{self.key_prefix}{context_id}"
+        return [
+            f"{base}:payload",
+            f"{base}:timestamp",
+            f"{base}:metadata",
+            f"{base}:source_id",
+            f"{base}:confidence",
+        ]
+
+    def _add_to_index(self, context_id: str, timestamp: datetime) -> None:
+        self.redis.zadd(self.index_key, {context_id: timestamp.timestamp()})
+
+    def _prune_max_entries(self) -> None:
+        if not self.max_entries or self.max_entries <= 0:
+            return
+        excess = self.redis.zcard(self.index_key) - self.max_entries
+        if excess <= 0:
+            return
+        removed = self.redis.zpopmin(self.index_key, excess)
+        if not removed:
+            return
+        pipeline = self.redis.pipeline()
+        for context_id, _score in removed:
+            pipeline.delete(*self._context_keys(context_id))
+        pipeline.execute()
+
+    def prune_cache(self) -> None:
+        """Enforce max-entry limits and remove index drift."""
+        if not self.max_entries or self.max_entries <= 0:
+            return
+        self._prune_missing_index_entries()
+        self._prune_max_entries()
+
     def fetch_context(self, query_params: ContextQuery) -> List[ContextData]:
-        keys = self.redis.keys(f"{self.key_prefix}*")
-        uuids = set(":".join(k.split(":")[1:2]) for k in keys)
+        if self.max_entries and self.max_entries > 0:
+            self._prune_missing_index_entries()
+            uuids = list(self.redis.zrange(self.index_key, 0, -1))
+        else:
+            keys = self.redis.keys(f"{self.key_prefix}*")
+            uuids = list(set(":".join(k.split(":")[1:2]) for k in keys))
 
         context_list = []
         for context_id in uuids:
@@ -96,6 +147,9 @@ class RedisContextProvider(BaseContextProvider):
                 metadata = json.loads(self.redis.get(f"{base}:metadata") or "{}")
                 source_id = self.redis.get(f"{base}:source_id") or "redis"
                 confidence = float(self.redis.get(f"{base}:confidence") or 1.0)
+
+                if payload is None or timestamp is None:
+                    raise ValueError("Missing context fields")
 
                 # Filter by time
                 if query_params.time_range[0] <= timestamp <= query_params.time_range[1]:
@@ -111,6 +165,8 @@ class RedisContextProvider(BaseContextProvider):
                     ))
             except Exception as e:
                 logger.error("Error parsing context %s: %s", context_id, e)
+                if self.max_entries and self.max_entries > 0:
+                    self.redis.zrem(self.index_key, context_id)
         return context_list
 
     def get_context(self, query: ContextQuery = None) -> List[dict]:
@@ -127,12 +183,27 @@ class RedisContextProvider(BaseContextProvider):
             "context": cd.payload,
             "confidence": cd.confidence,
         }
+
     def _listen_to_pubsub(self):
         for message in self.pubsub.listen():
             if message["type"] == "message":
                 context_id = message["data"]
                 if isinstance(context_id, str):
                     self.push_context(context_id)
+
+    def _prune_missing_index_entries(self) -> None:
+        if not self.max_entries or self.max_entries <= 0:
+            return
+        members = self.redis.zrange(self.index_key, 0, -1)
+        if not members:
+            return
+        pipeline = self.redis.pipeline()
+        for context_id in members:
+            pipeline.exists(self._context_keys(context_id)[0])
+        exists_results = pipeline.execute()
+        for context_id, exists in zip(members, exists_results):
+            if not exists:
+                self.redis.zrem(self.index_key, context_id)
 
     def push_context(self, context_id: str):
         """Manually push context by ID to all subscribers"""
