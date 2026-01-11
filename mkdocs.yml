@@ -11,6 +11,7 @@ nav:
       - Quickstart: getting_started/quickstart.md
   - Developer Guides:
       - Extending CAIEngine: dev/extending.md
+      - HTTP API: http_api.md
       - API Reference: dev/api_reference.md
       - Architecture: dev/architecture.html
       - Network Guide: dev/network.html

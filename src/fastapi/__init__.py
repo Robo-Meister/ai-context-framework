@@ -25,6 +25,8 @@ from dataclasses import asdict, dataclass, is_dataclass
 from datetime import datetime
 from typing import Any, Callable, Dict, Mapping, MutableMapping, Sequence, get_args, get_origin, get_type_hints
 
+from pydantic import BaseModel, ValidationError
+
 __all__ = [
     "FastAPI",
     "HTTPException",
@@ -91,6 +93,10 @@ class Request:
 
 
 def _serialise(content: Any) -> Any:
+    if isinstance(content, BaseModel):
+        if hasattr(content, "model_dump"):
+            return content.model_dump()
+        return content.dict()
     if is_dataclass(content):
         return asdict(content)
     if isinstance(content, Mapping):
@@ -192,7 +198,7 @@ def _construct_body_argument(annotation: Any, payload: Any) -> Any:
         if hasattr(annotation, "model_validate"):
             return annotation.model_validate(payload)  # pragma: no cover - compatibility path
         return payload
-    except (TypeError, ValueError) as exc:
+    except (TypeError, ValueError, ValidationError) as exc:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(exc),
