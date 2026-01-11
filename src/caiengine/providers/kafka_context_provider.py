@@ -125,6 +125,7 @@ class KafkaContextProvider(BaseContextProvider):
                 metadata=cd.metadata,
                 source_id=cd.source_id,
                 confidence=cd.confidence,
+                context_id=data.get("context_id"),
             )
             return
         payload = data.get("payload", data)
@@ -140,8 +141,9 @@ class KafkaContextProvider(BaseContextProvider):
         source_id: str = "kafka",
         confidence: float = 1.0,
         ttl: Union[int, None] = None,
+        context_id: Union[str, None] = None,
     ) -> str:
-        context_id = str(uuid.uuid4())
+        context_id = context_id or str(uuid.uuid4())
         cd = ContextData(
             payload=payload,
             timestamp=timestamp or datetime.utcnow(),
