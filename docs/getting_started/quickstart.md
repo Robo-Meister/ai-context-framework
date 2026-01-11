@@ -49,6 +49,7 @@ from caiengine.providers.redis_context_provider import RedisContextProvider
 provider = RedisContextProvider(
     redis_url="redis://localhost:6379/0",
     key_prefix="context:",
+    max_entries=10000,
 )
 ```
 
@@ -173,6 +174,34 @@ Key options:
 - `--source-id`: Identifier for the producer, default `cli`.
 - `--confidence`: Confidence score (string accepted by the parser, default `1.0`).
 - `--ttl`: Cache retention in seconds for providers that support expirations.
+
+### Retention and TTL guidance
+
+Context providers accept an optional TTL to bound retention. The CLI flag
+`--ttl` and the HTTP `POST /context` payload field `ttl` both forward the TTL
+value (seconds) into the backing provider.
+
+For in-memory storage, set a maximum entry count to avoid unbounded growth:
+
+```python
+from caiengine.providers.memory_context_provider import MemoryContextProvider
+
+provider = MemoryContextProvider(max_entries=5000)
+```
+
+Redis can enforce size-based retention as well by enabling `max_entries`, which
+removes the oldest records when the limit is exceeded (TTL expiration still
+applies per key):
+
+```python
+from caiengine.providers.redis_context_provider import RedisContextProvider
+
+provider = RedisContextProvider(
+    redis_url="redis://localhost:6379/0",
+    key_prefix="context:",
+    max_entries=10000,
+)
+```
 
 ### Query recent context
 
