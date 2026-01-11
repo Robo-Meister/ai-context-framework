@@ -24,7 +24,10 @@ from caiengine.interfaces.context_provider import ContextProvider
 from caiengine.inference.dummy_engine import DummyAIInferenceEngine
 from caiengine.inference.token_usage_tracker import TokenUsageTracker
 from caiengine.core.trust_module import TrustModule
-from caiengine.core.goal_feedback_loop import GoalDrivenFeedbackLoop
+from caiengine.core.goal_feedback_loop import (
+    GoalDrivenFeedbackLoop,
+    create_goal_feedback_persistence,
+)
 from caiengine.core.goal_strategies.simple_goal_strategy import SimpleGoalFeedbackStrategy
 from caiengine.policies.simple_policy import SimplePolicyEvaluator
 from caiengine.parser.log_parser import LogParser
@@ -157,8 +160,13 @@ class ConfigurablePipeline:
             strategy = SimpleGoalFeedbackStrategy(
                 feedback_cfg.get("one_direction_layers", [])
             )
+            persistence = create_goal_feedback_persistence(
+                feedback_cfg.get("persistence")
+            )
             feedback_loop = GoalDrivenFeedbackLoop(
-                strategy, goal_state=feedback_cfg.get("goal_state", {})
+                strategy,
+                goal_state=feedback_cfg.get("goal_state", {}),
+                persistence=persistence,
             )
         else:
             raise ValueError(f"Unsupported feedback type: {feedback_cfg.get('type')}")

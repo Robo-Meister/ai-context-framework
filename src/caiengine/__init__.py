@@ -45,6 +45,10 @@ _EXPORT_ORDER = [
     "KafkaPubSubChannel",
     "NetworkInterface",
     "GoalDrivenFeedbackLoop",
+    "InMemoryGoalFeedbackPersistence",
+    "SQLiteGoalFeedbackPersistence",
+    "RedisGoalFeedbackPersistence",
+    "create_goal_feedback_persistence",
     "SimpleGoalFeedbackStrategy",
     "PersonalityGoalFeedbackStrategy",
     "GoalFeedbackWorker",
@@ -105,6 +109,23 @@ _EXPORT_SPECS: Dict[str, _ExportSpec] = {
     "GoalDrivenFeedbackLoop": _ExportSpec(
         "caiengine.core.goal_feedback_loop",
         "GoalDrivenFeedbackLoop",
+    ),
+    "InMemoryGoalFeedbackPersistence": _ExportSpec(
+        "caiengine.core.goal_feedback_loop",
+        "InMemoryGoalFeedbackPersistence",
+    ),
+    "SQLiteGoalFeedbackPersistence": _ExportSpec(
+        "caiengine.core.goal_feedback_loop",
+        "SQLiteGoalFeedbackPersistence",
+    ),
+    "RedisGoalFeedbackPersistence": _ExportSpec(
+        "caiengine.core.goal_feedback_loop",
+        "RedisGoalFeedbackPersistence",
+        "redis",
+    ),
+    "create_goal_feedback_persistence": _ExportSpec(
+        "caiengine.core.goal_feedback_loop",
+        "create_goal_feedback_persistence",
     ),
     "SimpleGoalFeedbackStrategy": _ExportSpec(
         "caiengine.core.goal_strategies",

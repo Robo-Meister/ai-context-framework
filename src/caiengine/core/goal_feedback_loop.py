@@ -7,6 +7,16 @@ from typing import Any, Dict, Iterable, List, Optional, Protocol, Tuple
 import json
 import sqlite3
 
+try:
+    import redis as _redis
+except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    _redis = None
+
+try:
+    from redis import Redis  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    Redis = None  # type: ignore[misc,assignment]
+
 from caiengine.interfaces.goal_feedback_strategy import GoalFeedbackStrategy
 
 
@@ -31,17 +41,37 @@ class GoalMetric:
             "progress_ratio": self.progress_ratio,
         }
 
+    @classmethod
+    def from_dict(cls, payload: Dict[str, Any]) -> "GoalMetric":
+        return cls(
+            goal=float(payload["goal"]),
+            current=float(payload["current"]),
+            gap=float(payload["gap"]),
+            baseline=payload.get("baseline"),
+            trend=str(payload["trend"]),
+            progress_ratio=payload.get("progress_ratio"),
+        )
+
 
 class GoalFeedbackPersistence(Protocol):
     """Persistence backend for goal feedback loop state."""
 
-    def load_state(self) -> Tuple[List[Dict[str, Any]], Dict[str, float]]:
-        """Return previously stored history and baselines."""
+    def load_state(
+        self,
+    ) -> Tuple[
+        List[Dict[str, Any]],
+        Dict[str, float],
+        Dict[str, Dict[str, Any]],
+    ]:
+        """Return previously stored history, baselines, and analytics."""
 
     def save_state(
-        self, history: Iterable[Dict[str, Any]], baselines: Dict[str, float]
+        self,
+        history: Iterable[Dict[str, Any]],
+        baselines: Dict[str, float],
+        last_analysis: Dict[str, Dict[str, Any]],
     ) -> None:
-        """Persist the provided history and baselines."""
+        """Persist the provided history, baselines, and analytics."""
 
 
 class InMemoryGoalFeedbackPersistence:
@@ -50,15 +80,26 @@ class InMemoryGoalFeedbackPersistence:
     def __init__(self) -> None:
         self._history: List[Dict[str, Any]] = []
         self._baselines: Dict[str, float] = {}
+        self._analysis: Dict[str, Dict[str, Any]] = {}
 
-    def load_state(self) -> Tuple[List[Dict[str, Any]], Dict[str, float]]:
-        return [dict(item) for item in self._history], dict(self._baselines)
+    def load_state(
+        self,
+    ) -> Tuple[List[Dict[str, Any]], Dict[str, float], Dict[str, Dict[str, Any]]]:
+        return (
+            [dict(item) for item in self._history],
+            dict(self._baselines),
+            {key: dict(value) for key, value in self._analysis.items()},
+        )
 
     def save_state(
-        self, history: Iterable[Dict[str, Any]], baselines: Dict[str, float]
+        self,
+        history: Iterable[Dict[str, Any]],
+        baselines: Dict[str, float],
+        last_analysis: Dict[str, Dict[str, Any]],
     ) -> None:
         self._history = [dict(item) for item in history]
         self._baselines = dict(baselines)
+        self._analysis = {key: dict(value) for key, value in last_analysis.items()}
 
 
 class SQLiteGoalFeedbackPersistence:
@@ -89,24 +130,43 @@ class SQLiteGoalFeedbackPersistence:
                 )
                 """
             )
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS analysis (
+                    id INTEGER PRIMARY KEY CHECK (id = 1),
+                    payload TEXT NOT NULL
+                )
+                """
+            )
 
-    def load_state(self) -> Tuple[List[Dict[str, Any]], Dict[str, float]]:
+    def load_state(
+        self,
+    ) -> Tuple[List[Dict[str, Any]], Dict[str, float], Dict[str, Dict[str, Any]]]:
         history: List[Dict[str, Any]] = []
         baselines: Dict[str, float] = {}
+        analysis: Dict[str, Dict[str, Any]] = {}
         with self._connect() as conn:
             cursor = conn.execute("SELECT payload FROM history ORDER BY id ASC")
             history = [json.loads(row[0]) for row in cursor]
             cursor = conn.execute("SELECT metric, value FROM baselines")
             baselines = {str(row[0]): float(row[1]) for row in cursor}
-        return history, baselines
+            cursor = conn.execute("SELECT payload FROM analysis WHERE id = 1")
+            row = cursor.fetchone()
+            if row:
+                analysis = json.loads(row[0])
+        return history, baselines, analysis
 
     def save_state(
-        self, history: Iterable[Dict[str, Any]], baselines: Dict[str, float]
+        self,
+        history: Iterable[Dict[str, Any]],
+        baselines: Dict[str, float],
+        last_analysis: Dict[str, Dict[str, Any]],
     ) -> None:
         serialised_history = [json.dumps(item) for item in history]
         with self._connect() as conn:
             conn.execute("DELETE FROM history")
             conn.execute("DELETE FROM baselines")
+            conn.execute("DELETE FROM analysis")
             if serialised_history:
                 conn.executemany(
                     "INSERT INTO history (payload) VALUES (?)",
@@ -117,6 +177,87 @@ class SQLiteGoalFeedbackPersistence:
                     "INSERT INTO baselines (metric, value) VALUES (?, ?)",
                     [(metric, float(value)) for metric, value in baselines.items()],
                 )
+            if last_analysis:
+                conn.execute(
+                    "INSERT INTO analysis (id, payload) VALUES (1, ?)",
+                    (json.dumps(last_analysis),),
+                )
+
+
+class RedisGoalFeedbackPersistence:
+    """Persist goal feedback loop state inside Redis."""
+
+    def __init__(
+        self,
+        *,
+        client: "Redis" | None = None,
+        url: str | None = None,
+        key_prefix: str = "goal_feedback",
+    ) -> None:
+        if client is None:
+            if url is None:
+                raise ValueError(
+                    "RedisGoalFeedbackPersistence requires a client or connection URL"
+                )
+            if _redis is None:  # pragma: no cover - optional dependency enforcement
+                raise ImportError(
+                    "Redis support requires the 'redis' extra: pip install caiengine[redis]"
+                )
+            client = _redis.Redis.from_url(url, decode_responses=True)
+        self._client = client
+        self._key_prefix = key_prefix
+
+    def _key(self, suffix: str) -> str:
+        return f"{self._key_prefix}:{suffix}"
+
+    def _read_json(self, key: str, default: Any) -> Any:
+        raw = self._client.get(key)
+        if raw is None:
+            return default
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return default
+
+    def load_state(
+        self,
+    ) -> Tuple[List[Dict[str, Any]], Dict[str, float], Dict[str, Dict[str, Any]]]:
+        history = self._read_json(self._key("history"), [])
+        baselines = self._read_json(self._key("baselines"), {})
+        analysis = self._read_json(self._key("analysis"), {})
+        return list(history), dict(baselines), dict(analysis)
+
+    def save_state(
+        self,
+        history: Iterable[Dict[str, Any]],
+        baselines: Dict[str, float],
+        last_analysis: Dict[str, Dict[str, Any]],
+    ) -> None:
+        self._client.set(self._key("history"), json.dumps(list(history)))
+        self._client.set(self._key("baselines"), json.dumps(dict(baselines)))
+        self._client.set(self._key("analysis"), json.dumps(dict(last_analysis)))
+
+
+def create_goal_feedback_persistence(
+    config: Dict[str, Any] | None,
+) -> GoalFeedbackPersistence | None:
+    """Build a goal feedback persistence backend from configuration."""
+
+    if not config:
+        return None
+    backend_type = str(config.get("type", "memory")).lower()
+    if backend_type in {"memory", "in_memory", "in-memory"}:
+        return InMemoryGoalFeedbackPersistence()
+    if backend_type == "sqlite":
+        path = config.get("path", "goal_feedback.db")
+        return SQLiteGoalFeedbackPersistence(str(path))
+    if backend_type == "redis":
+        return RedisGoalFeedbackPersistence(
+            client=config.get("client"),
+            url=config.get("url"),
+            key_prefix=config.get("key_prefix", "goal_feedback"),
+        )
+    raise ValueError(f"Unsupported goal feedback persistence type: {backend_type}")
 
 
 class GoalDrivenFeedbackLoop:
@@ -172,6 +313,7 @@ class GoalDrivenFeedbackLoop:
 
         self._history.clear()
         self._baselines.clear()
+        self._last_analysis.clear()
         self._persist_state()
 
     def extend_history(self, entries: Iterable[Dict[str, Any]]) -> None:
@@ -230,17 +372,22 @@ class GoalDrivenFeedbackLoop:
         return [dict(item) for item in self._history]
 
     def _load_persisted_state(self) -> None:
-        history, baselines = self._persistence.load_state()
+        history, baselines, analysis = self._persistence.load_state()
         if history:
             self._history = [dict(item) for item in history]
         if baselines:
             self._baselines = dict(baselines)
+        if analysis:
+            self._last_analysis = self._hydrate_analysis(analysis)
         if self._history and self._enforce_retention():
             self._rebuild_baselines()
             self._persist_state()
 
     def _persist_state(self) -> None:
-        self._persistence.save_state(self._history, self._baselines)
+        analysis_payload = {
+            metric: data.to_dict() for metric, data in self._last_analysis.items()
+        }
+        self._persistence.save_state(self._history, self._baselines, analysis_payload)
 
     def _enforce_retention(self) -> bool:
         changed = False
@@ -340,6 +487,20 @@ class GoalDrivenFeedbackLoop:
         return analysis
 
     @staticmethod
+    def _hydrate_analysis(
+        payload: Dict[str, Dict[str, Any]]
+    ) -> Dict[str, GoalMetric]:
+        hydrated: Dict[str, GoalMetric] = {}
+        for key, value in payload.items():
+            if not isinstance(value, dict):
+                continue
+            try:
+                hydrated[key] = GoalMetric.from_dict(value)
+            except (KeyError, TypeError, ValueError):
+                continue
+        return hydrated
+
+    @staticmethod
     def _coerce_numeric(value: Any) -> Optional[float]:
         if isinstance(value, (int, float)):
             return float(value)
@@ -387,4 +548,3 @@ class GoalDrivenFeedbackLoop:
         else:
             ratio = (baseline - current) / (baseline - target)
         return max(0.0, min(ratio, 1.0))
-

@@ -117,6 +117,11 @@ CONFIG = {
         "type": "goal",
         "goal_state": {"response_time": "<5m", "customer_tone": "supportive"},
         "one_direction_layers": ["response_time"],
+        "persistence": {
+            "type": "redis",
+            "url": "redis://localhost:6379/0",
+            "key_prefix": "cai:goal_feedback",
+        },
     },
 }
 
@@ -138,8 +143,10 @@ for item in results:
 ```
 
 Running the script prints the categorised entry enriched with trust scores and
-`goal_suggestion` feedback. Replace the in-memory provider configuration with
-Redis, Kafka, or SQL options as your deployment requires.
+`goal_suggestion` feedback. The feedback loop persistence configuration stores
+history, baselines, and the most recent analytics snapshot so restarts resume
+from the last computed goal analysis. Use `type: "sqlite"` with a `path` to
+store the same data in a local SQLite file instead of Redis.
 
 ## Interact from the CLI
 
