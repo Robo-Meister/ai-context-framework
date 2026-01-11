@@ -55,6 +55,8 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#kafka">Kafka</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#subscribe-to-context-events">Subscribe to context events</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#sql-storage">SQL storage</a>
     </li>
         </ul>
@@ -200,6 +202,26 @@ provider = KafkaContextProvider(
 <p>The Kafka provider consumes JSON payloads from <code>topic</code>, caches them in-memory,
 and (optionally) mirrors the processed context back to <code>publish_topic</code> or a
 separate <code>feedback_topic</code> for downstream workers.</p>
+<h3 id="subscribe-to-context-events">Subscribe to context events<a class="headerlink" href="#subscribe-to-context-events" title="Permanent link">&para;</a></h3>
+<p>Each provider emits a structured event payload when new context arrives. You can
+register a listener to receive status updates (for example, when new context is
+published).</p>
+<pre><code class="language-python">from caiengine.providers.memory_context_provider import MemoryContextProvider
+
+provider = MemoryContextProvider()
+
+def on_event(event: dict) -&gt; None:
+    context = event[&quot;context&quot;]
+    print(f&quot;Context {event['context_id']} -&gt; {event['status']}&quot;)
+    print(&quot;Payload:&quot;, context[&quot;payload&quot;])
+    print(&quot;Goal metrics:&quot;, event[&quot;goal_metrics&quot;])
+
+provider.subscribe_context(on_event)
+provider.ingest_context(
+    {&quot;ticket&quot;: &quot;INC-42&quot;},
+    metadata={&quot;id&quot;: &quot;ctx-42&quot;, &quot;roles&quot;: [&quot;support&quot;], &quot;content&quot;: &quot;Status update&quot;},
+)
+</code></pre>
 <h3 id="sql-storage">SQL storage<a class="headerlink" href="#sql-storage" title="Permanent link">&para;</a></h3>
 <p>Install the <code>storage</code> extra to use the relational providers:</p>
 <pre><code class="language-bash">pip install caiengine[storage]
