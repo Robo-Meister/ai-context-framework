@@ -218,7 +218,7 @@ translates it to the underlying class from `caiengine.providers`.
 | `kafka`        | `KafkaContextProvider`                       | Consumes and republishes context via Kafka topics. |
 | `sqlite`       | `SQLiteContextProvider`                      | Local file-based SQL storage (uses SQLite). |
 | `mysql`        | `MySQLContextProvider`                       | Connects to external MySQL-compatible databases. |
-| `postgres`     | `PostgresContextProvider`                    | PostgreSQL connector (alias: `postgresql`). |
+| `postgres` / `postgresql` | `PostgresContextProvider`          | PostgreSQL connector with both key aliases supported. |
 
 All providers accept keyword arguments under `provider.args` that match their
 constructor signatures. Durable backends (Redis, Kafka, and the SQL options)
