@@ -10,6 +10,7 @@ except ImportError:  # pragma: no cover - optional dependency
     psycopg2 = None
 
 from caiengine.objects.context_data import ContextData, SubscriptionHandle
+from caiengine.objects.context_event import create_context_event
 from caiengine.objects.context_query import ContextQuery
 
 
@@ -40,7 +41,7 @@ class PostgresContextProvider:
                 )
                 """
         )
-        self.subscribers: dict[SubscriptionHandle, Callable[[ContextData], None]] = {}
+        self.subscribers: dict[SubscriptionHandle, Callable[[dict], None]] = {}
         self.logger.debug(
             "PostgresContextProvider initialised",
             extra={"dsn": dsn.split("@")[0] if "@" in dsn else "redacted"},
@@ -81,9 +82,10 @@ class PostgresContextProvider:
                     expiry_ts,
                 ),
             )
+        event_payload = create_context_event(cd, context_id=context_id).to_dict()
         for handle, cb in list(self.subscribers.items()):
             try:
-                cb(cd)
+                cb(event_payload)
             except Exception:
                 self.logger.exception(
                     "Subscriber callback failed during Postgres ingest",
@@ -142,7 +144,7 @@ class PostgresContextProvider:
         raw = self.fetch_context(query)
         return [self._to_dict(cd) for cd in raw]
 
-    def subscribe_context(self, callback: Callable[[ContextData], None]) -> SubscriptionHandle:
+    def subscribe_context(self, callback: Callable[[dict], None]) -> SubscriptionHandle:
         handle = uuid.uuid4()
         self.subscribers[handle] = callback
         self.logger.debug(

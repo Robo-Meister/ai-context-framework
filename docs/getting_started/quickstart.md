@@ -74,6 +74,30 @@ The Kafka provider consumes JSON payloads from `topic`, caches them in-memory,
 and (optionally) mirrors the processed context back to `publish_topic` or a
 separate `feedback_topic` for downstream workers.
 
+### Subscribe to context events
+
+Each provider emits a structured event payload when new context arrives. You can
+register a listener to receive status updates (for example, when new context is
+published).
+
+```python
+from caiengine.providers.memory_context_provider import MemoryContextProvider
+
+provider = MemoryContextProvider()
+
+def on_event(event: dict) -> None:
+    context = event["context"]
+    print(f"Context {event['context_id']} -> {event['status']}")
+    print("Payload:", context["payload"])
+    print("Goal metrics:", event["goal_metrics"])
+
+provider.subscribe_context(on_event)
+provider.ingest_context(
+    {"ticket": "INC-42"},
+    metadata={"id": "ctx-42", "roles": ["support"], "content": "Status update"},
+)
+```
+
 ### SQL storage
 
 Install the `storage` extra to use the relational providers:

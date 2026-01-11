@@ -13,12 +13,12 @@ class TestProviderBroadcast(unittest.TestCase):
         p1.add_peer(p2)
 
         received = []
-        p2.subscribe_context(lambda d: received.append(d))
+        p2.subscribe_context(lambda event: received.append(event))
 
         now = datetime.utcnow()
         p1.ingest_context({"msg": "hi"}, timestamp=now)
         self.assertEqual(len(received), 1)
-        self.assertEqual(received[0].payload, {"msg": "hi"})
+        self.assertEqual(received[0]["context"]["payload"], {"msg": "hi"})
 
 
 if __name__ == "__main__":

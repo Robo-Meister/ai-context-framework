@@ -119,9 +119,14 @@ def test_ingest_context_notifies_subscribers(fake_redis_provider):
     provider, fake = fake_redis_provider
     received = []
 
-    provider.subscribe_context(lambda ctx: received.append(ctx))
+    provider.subscribe_context(lambda event: received.append(event))
     context_id = provider.ingest_context({"hello": "world"})
 
     assert len(received) == 1
-    assert received[0].payload == {"hello": "world"}
-    assert fake.published == [("context:new", context_id)]
+    assert received[0]["context"]["payload"] == {"hello": "world"}
+    assert len(fake.published) == 1
+    channel, payload = fake.published[0]
+    assert channel == "context:new"
+    published_event = json.loads(payload)
+    assert published_event["context_id"] == context_id
+    assert published_event["context"]["payload"] == {"hello": "world"}
