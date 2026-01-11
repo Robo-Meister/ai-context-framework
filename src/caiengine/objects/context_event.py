@@ -50,6 +50,18 @@ def context_data_from_payload(payload: Dict[str, Any]) -> ContextData:
     ocr_metadata = payload.get("ocr_metadata")
     if ocr_metadata and isinstance(ocr_metadata, OCRMetadata):
         resolved_ocr = ocr_metadata
+    elif ocr_metadata and isinstance(ocr_metadata, dict):
+        resolved_ocr = OCRMetadata(
+            raw_text=ocr_metadata.get("text")
+            or ocr_metadata.get("raw_text")
+            or ocr_metadata.get("display_text", ""),
+            document_type_hint=ocr_metadata.get("document_type_hint"),
+            display_text=ocr_metadata.get("display_text"),
+            spans=OCRMetadata.normalise_spans(ocr_metadata.get("spans")),
+            confidence_scores=ocr_metadata.get("confidence_scores", {}),
+            language=ocr_metadata.get("language"),
+            extras=ocr_metadata.get("extras", {}),
+        )
     else:
         resolved_ocr = None
     return ContextData(
