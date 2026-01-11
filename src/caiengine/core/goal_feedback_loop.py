@@ -381,6 +381,7 @@ class GoalDrivenFeedbackLoop:
             self._last_analysis = self._hydrate_analysis(analysis)
         if self._history and self._enforce_retention():
             self._rebuild_baselines()
+            self._last_analysis = self._analyse_history(self._history)
             self._persist_state()
 
     def _persist_state(self) -> None:
