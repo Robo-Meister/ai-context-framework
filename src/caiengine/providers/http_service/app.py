@@ -7,12 +7,12 @@ import inspect
 import logging
 import time
 from collections import defaultdict, deque
-from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Awaitable, Callable, Deque, Dict, Iterable, List
 
 from fastapi import FastAPI, HTTPException, Query, Request, Response, status
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from caiengine.common.token_usage import TokenCounter
 from caiengine.core.goal_feedback_loop import GoalDrivenFeedbackLoop
@@ -226,8 +226,7 @@ def _parse_datetime(value: Any) -> datetime | None:
         raise ValueError(f"Invalid datetime value: {value!r}") from exc
 
 
-@dataclass
-class ContextIngestionRequest:
+class ContextIngestionRequest(BaseModel):
     payload: Dict[str, Any]
     timestamp: datetime | None = None
     metadata: Dict[str, Any] | None = None
@@ -235,38 +234,31 @@ class ContextIngestionRequest:
     confidence: float = 1.0
     ttl: int | None = None
 
+    model_config = ConfigDict(extra="forbid")
+
+    @field_validator("payload")
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ContextIngestionRequest":
-        if "payload" not in data:
-            raise ValueError("payload is required")
-        payload = data.get("payload")
-        if not isinstance(payload, dict):
+    def _validate_payload(cls, value: Dict[str, Any]) -> Dict[str, Any]:
+        if not isinstance(value, dict):
             raise ValueError("payload must be a mapping")
-        return cls(
-            payload=dict(payload),
-            timestamp=_parse_datetime(data.get("timestamp")),
-            metadata=data.get("metadata"),
-            source_id=data.get("source_id", "http"),
-            confidence=float(data.get("confidence", 1.0)),
-            ttl=data.get("ttl"),
-        )
+        return value
 
 
-@dataclass
-class ContextIngestionResponse:
+class ContextIngestionResponse(BaseModel):
     id: str
 
 
-@dataclass
-class ContextRecord:
+class ContextRecord(BaseModel):
     id: str | None = None
-    timestamp: datetime = field(default_factory=datetime.utcnow)
-    context: Dict[str, Any] = field(default_factory=dict)
-    roles: List[str] = field(default_factory=list)
-    situations: List[str] = field(default_factory=list)
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    context: Dict[str, Any] = Field(default_factory=dict)
+    roles: List[str] = Field(default_factory=list)
+    situations: List[str] = Field(default_factory=list)
     content: Any | None = None
     confidence: float = 1.0
     ocr_metadata: Dict[str, Any] | None = None
+
+    model_config = ConfigDict(extra="allow")
 
     @classmethod
     def from_mapping(cls, data: Any) -> "ContextRecord":
@@ -284,36 +276,86 @@ class ContextRecord:
         )
 
 
-@dataclass
-class ContextQueryResponse:
+class ContextQueryResponse(BaseModel):
     items: List[ContextRecord]
 
 
-@dataclass
-class GoalSuggestionRequest:
-    history: List[Dict[str, Any]] = field(default_factory=list)
-    current_actions: List[Dict[str, Any]] = field(default_factory=list)
+class GoalSuggestionRequest(BaseModel):
+    history: List[Dict[str, Any]] = Field(default_factory=list)
+    current_actions: List[Dict[str, Any]] = Field(default_factory=list)
     goal_state: Dict[str, Any] | None = None
 
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "GoalSuggestionRequest":
-        return cls(
-            history=list(data.get("history", [])),
-            current_actions=list(data.get("current_actions", [])),
-            goal_state=data.get("goal_state"),
-        )
+    model_config = ConfigDict(extra="forbid")
 
 
-@dataclass
-class GoalSuggestionResponse:
+class GoalSuggestionResponse(BaseModel):
     suggestions: List[Dict[str, Any]]
 
 
-@dataclass
-class TokenUsageResponse:
+class TokenUsageResponse(BaseModel):
     prompt_tokens: int
     completion_tokens: int
     total_tokens: int
+
+
+class ProviderStatus(BaseModel):
+    name: str
+    backend: str | None
+    ok: bool
+    cache_size: int | None = None
+
+
+class GoalAnalytics(BaseModel):
+    history_size: int
+    last_suggestions: List[Dict[str, Any]]
+    last_analysis: Dict[str, Any]
+
+
+class HealthResponse(BaseModel):
+    status: str
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    provider: ProviderStatus
+
+
+class StatusResponse(HealthResponse):
+    goal_analytics: GoalAnalytics | None = None
+
+
+def _get_cache_size(target: Any) -> int | None:
+    cache = getattr(target, "cache", None)
+    if cache is None:
+        return None
+    if hasattr(cache, "cache"):
+        cache_mapping = getattr(cache, "cache")
+        if isinstance(cache_mapping, dict):
+            return len(cache_mapping)
+    size_attr = getattr(cache, "size", None)
+    if isinstance(size_attr, int):
+        return size_attr
+    size_fn = getattr(cache, "size", None)
+    if callable(size_fn):
+        try:
+            size = size_fn()
+            return int(size)
+        except Exception:  # pragma: no cover - defensive
+            return None
+    return None
+
+
+def _describe_provider(provider: Any) -> ProviderStatus:
+    provider_name = f"{provider.__class__.__module__}.{provider.__class__.__name__}"
+    backend = getattr(provider, "backend", None)
+    backend_name = None
+    cache_size = None
+    if backend is not None:
+        backend_name = f"{backend.__class__.__module__}.{backend.__class__.__name__}"
+        cache_size = _get_cache_size(backend)
+    return ProviderStatus(
+        name=provider_name,
+        backend=backend_name,
+        ok=True,
+        cache_size=cache_size,
+    )
 
 
 def create_http_service_app(
@@ -387,6 +429,25 @@ def create_http_service_app(
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc))
         items = [ContextRecord.from_mapping(record) for record in raw_records]
         return ContextQueryResponse(items=items)
+
+    @app.get("/health", response_model=HealthResponse)
+    async def health() -> HealthResponse:
+        return HealthResponse(status="ok", provider=_describe_provider(provider))
+
+    @app.get("/status", response_model=StatusResponse)
+    async def status_endpoint() -> StatusResponse:
+        analytics: GoalAnalytics | None = None
+        if feedback_loop is not None:
+            analytics = GoalAnalytics(
+                history_size=len(feedback_loop.history),
+                last_suggestions=feedback_loop.last_suggestions,
+                last_analysis=feedback_loop.last_analysis,
+            )
+        return StatusResponse(
+            status="ok",
+            provider=_describe_provider(provider),
+            goal_analytics=analytics,
+        )
 
     if include_goal_routes:
         if feedback_loop is None:
