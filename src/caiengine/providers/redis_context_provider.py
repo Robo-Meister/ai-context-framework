@@ -132,8 +132,8 @@ class RedisContextProvider(BaseContextProvider):
 
     def fetch_context(self, query_params: ContextQuery) -> List[ContextData]:
         if self.max_entries and self.max_entries > 0:
-            self._backfill_index_if_empty()
             self._prune_missing_index_entries()
+            self._backfill_index_if_empty()
             uuids = list(self.redis.zrange(self.index_key, 0, -1))
         else:
             keys = self.redis.keys(f"{self.key_prefix}*")
