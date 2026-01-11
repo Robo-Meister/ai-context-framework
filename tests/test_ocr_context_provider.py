@@ -28,12 +28,13 @@ def test_ingest_ocr_document_emits_context():
     )
 
     assert len(received) == 1
-    context = received[0]
-    assert context.payload["text"].startswith("Invoice INV-001")
-    assert context.payload["document_type_hint"] == "invoice"
-    assert context.ocr_metadata is not None
-    assert context.ocr_metadata.spans[0].field_name == "invoice_number"
-    assert context.ocr_metadata.confidence_scores["document"] == 0.87
+    event = received[0]
+    context = event["context"]
+    assert context["payload"]["text"].startswith("Invoice INV-001")
+    assert context["payload"]["document_type_hint"] == "invoice"
+    assert context["ocr_metadata"] is not None
+    assert context["ocr_metadata"]["spans"][0]["field_name"] == "invoice_number"
+    assert context["ocr_metadata"]["confidence_scores"]["document"] == 0.87
 
 
 def test_fetch_structured_context_includes_spans():

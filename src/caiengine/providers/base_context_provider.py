@@ -1,21 +1,22 @@
 import logging
 import uuid
-from typing import Callable, Dict, List
+from typing import Any, Callable, Dict, List
 
 from caiengine.objects.context_data import ContextData, SubscriptionHandle
+from caiengine.objects.context_event import create_context_event
 
 
 class BaseContextProvider:
     """Base class providing unified pub/sub and broadcasting."""
 
     def __init__(self):
-        self.subscribers: Dict[SubscriptionHandle, Callable[[ContextData], None]] = {}
+        self.subscribers: Dict[SubscriptionHandle, Callable[[Dict[str, Any]], None]] = {}
         self.peers: List["BaseContextProvider"] = []
         self.logger = logging.getLogger(
             f"{self.__class__.__module__}.{self.__class__.__name__}"
         )
 
-    def subscribe_context(self, callback: Callable[[ContextData], None]) -> SubscriptionHandle:
+    def subscribe_context(self, callback: Callable[[Dict[str, Any]], None]) -> SubscriptionHandle:
         handle = uuid.uuid4()
         self.subscribers[handle] = callback
         self.logger.debug(
@@ -33,9 +34,10 @@ class BaseContextProvider:
             )
 
     def publish_context(self, data: ContextData, broadcast: bool = True):
+        event_payload = create_context_event(data).to_dict()
         for handle, cb in list(self.subscribers.items()):
             try:
-                cb(data)
+                cb(event_payload)
             except Exception:
                 self.logger.exception(
                     "Failed to deliver context update to subscriber",

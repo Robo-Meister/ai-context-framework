@@ -7,6 +7,7 @@ from typing import List, Optional, Union
 
 from caiengine.core.cache_manager import CacheManager
 from caiengine.objects.context_data import ContextData
+from caiengine.objects.context_event import create_context_event, context_data_from_payload
 from caiengine.objects.context_query import ContextQuery
 from caiengine.providers.base_context_provider import BaseContextProvider
 
@@ -115,6 +116,17 @@ class KafkaContextProvider(BaseContextProvider):
             if getattr(record, "timestamp", None) is not None
             else datetime.utcnow()
         )
+        if isinstance(data, dict) and "context" in data and "context_id" in data:
+            context_payload = data.get("context", {})
+            cd = context_data_from_payload(context_payload)
+            self.ingest_context(
+                cd.payload,
+                timestamp=cd.timestamp,
+                metadata=cd.metadata,
+                source_id=cd.source_id,
+                confidence=cd.confidence,
+            )
+            return
         payload = data.get("payload", data)
         metadata = data.get("metadata") if isinstance(data, dict) else None
         self.ingest_context(payload, timestamp=timestamp, metadata=metadata)
@@ -144,7 +156,8 @@ class KafkaContextProvider(BaseContextProvider):
         super().publish_context(cd)
         if self.publish_topic and self.producer:
             try:
-                msg = json.dumps({"payload": payload, "metadata": metadata or {}}).encode()
+                event_payload = create_context_event(cd, context_id=context_id).to_dict()
+                msg = json.dumps(event_payload).encode()
                 self.producer.send(self.publish_topic, msg)
             except Exception:
                 self.logger.exception(

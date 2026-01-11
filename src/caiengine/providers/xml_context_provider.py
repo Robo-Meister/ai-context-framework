@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Callable, List, Union
 
 from caiengine.objects.context_data import ContextData, SubscriptionHandle
+from caiengine.objects.context_event import create_context_event
 from caiengine.objects.context_query import ContextQuery
 
 
@@ -14,7 +15,7 @@ class XMLContextProvider:
 
     def __init__(self, file_path: str):
         self.file_path = file_path
-        self.subscribers: dict[SubscriptionHandle, Callable[[ContextData], None]] = {}
+        self.subscribers: dict[SubscriptionHandle, Callable[[dict], None]] = {}
         if not os.path.exists(self.file_path):
             root = ET.Element("contexts")
             tree = ET.ElementTree(root)
@@ -55,8 +56,9 @@ class XMLContextProvider:
         ET.SubElement(entry, "metadata").text = json.dumps(cd.metadata)
         ET.SubElement(entry, "data").text = json.dumps(payload)
         self._save_root(root)
+        event_payload = create_context_event(cd, context_id=context_id).to_dict()
         for cb in self.subscribers.values():
-            cb(cd)
+            cb(event_payload)
         return context_id
 
     def fetch_context(self, query_params: ContextQuery) -> List[ContextData]:
@@ -84,7 +86,7 @@ class XMLContextProvider:
         raw = self.fetch_context(query)
         return [self._to_dict(cd) for cd in raw]
 
-    def subscribe_context(self, callback: Callable[[ContextData], None]) -> SubscriptionHandle:
+    def subscribe_context(self, callback: Callable[[dict], None]) -> SubscriptionHandle:
         handle = uuid.uuid4()
         self.subscribers[handle] = callback
         return handle

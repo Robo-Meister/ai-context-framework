@@ -10,6 +10,7 @@ import json
 from typing import List, Optional
 from datetime import datetime
 from caiengine.objects.context_data import ContextData
+from caiengine.objects.context_event import create_context_event
 from caiengine.objects.context_query import ContextQuery
 
 logger = logging.getLogger(__name__)
@@ -77,7 +78,8 @@ class RedisContextProvider(BaseContextProvider):
         )
 
         super().publish_context(context)
-        self.redis.publish("context:new", context_id)
+        event_payload = create_context_event(context, context_id=context_id).to_dict()
+        self.redis.publish("context:new", json.dumps(event_payload))
         logger.info(
             "Stored context in Redis",
             extra={"context_id": context_id, "source_id": source_id},
@@ -132,7 +134,14 @@ class RedisContextProvider(BaseContextProvider):
             if message["type"] == "message":
                 context_id = message["data"]
                 if isinstance(context_id, str):
-                    self.push_context(context_id)
+                    try:
+                        payload = json.loads(context_id)
+                    except json.JSONDecodeError:
+                        payload = None
+                    if isinstance(payload, dict) and payload.get("context_id"):
+                        self.push_context(payload["context_id"])
+                    else:
+                        self.push_context(context_id)
 
     def push_context(self, context_id: str):
         """Manually push context by ID to all subscribers"""
