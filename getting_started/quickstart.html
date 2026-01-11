@@ -257,6 +257,11 @@ CONFIG = {
         &quot;type&quot;: &quot;goal&quot;,
         &quot;goal_state&quot;: {&quot;response_time&quot;: &quot;&lt;5m&quot;, &quot;customer_tone&quot;: &quot;supportive&quot;},
         &quot;one_direction_layers&quot;: [&quot;response_time&quot;],
+        &quot;persistence&quot;: {
+            &quot;type&quot;: &quot;redis&quot;,
+            &quot;url&quot;: &quot;redis://localhost:6379/0&quot;,
+            &quot;key_prefix&quot;: &quot;cai:goal_feedback&quot;,
+        },
     },
 }
 
@@ -277,8 +282,10 @@ for item in results:
     print(item)
 </code></pre>
 <p>Running the script prints the categorised entry enriched with trust scores and
-<code>goal_suggestion</code> feedback. Replace the in-memory provider configuration with
-Redis, Kafka, or SQL options as your deployment requires.</p>
+<code>goal_suggestion</code> feedback. The feedback loop persistence configuration stores
+history, baselines, and the most recent analytics snapshot so restarts resume
+from the last computed goal analysis. Use <code>type: "sqlite"</code> with a <code>path</code> to
+store the same data in a local SQLite file instead of Redis.</p>
 <h2 id="interact-from-the-cli">Interact from the CLI<a class="headerlink" href="#interact-from-the-cli" title="Permanent link">&para;</a></h2>
 <p>The <code>context</code> command-line tool ships with CAIEngine and mirrors the provider
 APIs. It exposes subcommands for ingesting (<code>context add</code>) and retrieving
