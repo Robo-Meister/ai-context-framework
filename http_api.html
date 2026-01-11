@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://robo-meister.github.io/ai-context-framework/http_api.html" />
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <title>HTTP API - CAIEngine Docs</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "HTTP API";
+        var mkdocs_page_input_path = "http_api.md";
+        var mkdocs_page_url = "/ai-context-framework/http_api.html";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="." class="icon icon-home"> CAIEngine Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="dev/index.html">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="getting_started/quickstart.html">Quickstart</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Developer Guides</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="dev/extending.html">Extending CAIEngine</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">HTTP API</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#base-url">Base URL</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#authentication">Authentication</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#rate-limits">Rate limits</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#routes">Routes</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#post-context">POST /context</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-context">GET /context</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#post-suggest">POST /suggest</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-usage">GET /usage</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-health">GET /health</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-status">GET /status</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="dev/api_reference.html">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="dev/architecture.html">Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="dev/network.html">Network Guide</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="theory/index.html">Theory</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Examples</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="goal-driven-feedback-loop.html">Goal-driven Feedback Loop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="event-context-standard.html">Event Context Standard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="svg_layered_generation.html">SVG Layered Generation</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href=".">CAIEngine Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Developer Guides</li>
+      <li class="breadcrumb-item active">HTTP API</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="http-api">HTTP API<a class="headerlink" href="#http-api" title="Permanent link">&para;</a></h1>
+<p>CAIEngine exposes a FastAPI-backed HTTP surface for ingesting context, querying recent context, and interacting with goal feedback loops. This document describes the expected routes, authentication hooks, and rate limiting behavior.</p>
+<h2 id="base-url">Base URL<a class="headerlink" href="#base-url" title="Permanent link">&para;</a></h2>
+<p>All endpoints are served from the host and port configured for <code>CAIService</code> or <code>HTTPContextProvider</code> (for example, <code>http://localhost:8080</code>).</p>
+<h2 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">&para;</a></h2>
+<p>Authentication is handled by an optional <code>AuthHook</code> configured on the service. When supplied, every request is evaluated by the hook before routing. If the hook rejects the request, the service responds with <code>401 Unauthorized</code>.</p>
+<h2 id="rate-limits">Rate limits<a class="headerlink" href="#rate-limits" title="Permanent link">&para;</a></h2>
+<p>The service can enforce a simple per-identifier rate limit (requests per minute). Configure this via <code>rate_limit_per_minute</code> and <code>rate_limit_window_seconds</code> in <code>CAIService</code> or when constructing the HTTP app. When the rate limit is exceeded, the service responds with <code>429 Too Many Requests</code> and a JSON payload of <code>{ "detail": "Rate limit exceeded" }</code>.</p>
+<h2 id="routes">Routes<a class="headerlink" href="#routes" title="Permanent link">&para;</a></h2>
+<h3 id="post-context"><code>POST /context</code><a class="headerlink" href="#post-context" title="Permanent link">&para;</a></h3>
+<p>Ingest a new context payload.</p>
+<p><strong>Request body</strong></p>
+<pre><code class="language-json">{
+  &quot;payload&quot;: {&quot;key&quot;: &quot;value&quot;},
+  &quot;timestamp&quot;: &quot;2024-01-01T00:00:00Z&quot;,
+  &quot;metadata&quot;: {&quot;roles&quot;: [&quot;system&quot;]},
+  &quot;source_id&quot;: &quot;http&quot;,
+  &quot;confidence&quot;: 1.0,
+  &quot;ttl&quot;: 3600
+}
+</code></pre>
+<p><strong>Response</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;context-id&quot;
+}
+</code></pre>
+<h3 id="get-context"><code>GET /context</code><a class="headerlink" href="#get-context" title="Permanent link">&para;</a></h3>
+<p>Query recent context within an optional time window.</p>
+<p><strong>Query parameters</strong></p>
+<ul>
+<li><code>start</code>: ISO 8601 timestamp (optional)</li>
+<li><code>end</code>: ISO 8601 timestamp (optional)</li>
+<li><code>scope</code>: context scope filter (optional)</li>
+<li><code>data_type</code>: context data type filter (optional)</li>
+</ul>
+<p><strong>Response</strong></p>
+<pre><code class="language-json">{
+  &quot;items&quot;: [
+    {
+      &quot;id&quot;: null,
+      &quot;timestamp&quot;: &quot;2024-01-01T00:00:00Z&quot;,
+      &quot;context&quot;: {&quot;key&quot;: &quot;value&quot;},
+      &quot;roles&quot;: [],
+      &quot;situations&quot;: [],
+      &quot;content&quot;: null,
+      &quot;confidence&quot;: 1.0,
+      &quot;ocr_metadata&quot;: null
+    }
+  ]
+}
+</code></pre>
+<h3 id="post-suggest"><code>POST /suggest</code><a class="headerlink" href="#post-suggest" title="Permanent link">&para;</a></h3>
+<p>Request goal-aware suggestions. Available only when the goal feedback loop is enabled.</p>
+<p><strong>Request body</strong></p>
+<pre><code class="language-json">{
+  &quot;history&quot;: [],
+  &quot;current_actions&quot;: [],
+  &quot;goal_state&quot;: {&quot;metric&quot;: 0.8}
+}
+</code></pre>
+<p><strong>Response</strong></p>
+<pre><code class="language-json">{
+  &quot;suggestions&quot;: [
+    {
+      &quot;action&quot;: &quot;...&quot;,
+      &quot;goal_feedback&quot;: {
+        &quot;analysis&quot;: {
+          &quot;metric&quot;: {
+            &quot;goal&quot;: 0.8,
+            &quot;current&quot;: 0.6,
+            &quot;gap&quot;: 0.2,
+            &quot;baseline&quot;: 0.5,
+            &quot;trend&quot;: &quot;up&quot;,
+            &quot;progress_ratio&quot;: 0.75
+          }
+        }
+      }
+    }
+  ]
+}
+</code></pre>
+<h3 id="get-usage"><code>GET /usage</code><a class="headerlink" href="#get-usage" title="Permanent link">&para;</a></h3>
+<p>Return token usage metrics gathered from goal feedback loop suggestions.</p>
+<p><strong>Response</strong></p>
+<pre><code class="language-json">{
+  &quot;prompt_tokens&quot;: 1200,
+  &quot;completion_tokens&quot;: 250,
+  &quot;total_tokens&quot;: 1450
+}
+</code></pre>
+<h3 id="get-health"><code>GET /health</code><a class="headerlink" href="#get-health" title="Permanent link">&para;</a></h3>
+<p>Simple health check with provider details.</p>
+<p><strong>Response</strong></p>
+<pre><code class="language-json">{
+  &quot;status&quot;: &quot;ok&quot;,
+  &quot;timestamp&quot;: &quot;2024-01-01T00:00:00Z&quot;,
+  &quot;provider&quot;: {
+    &quot;name&quot;: &quot;caiengine.providers.http_context_provider.HTTPContextProvider&quot;,
+    &quot;backend&quot;: &quot;caiengine.providers.memory_context_provider.MemoryContextProvider&quot;,
+    &quot;ok&quot;: true,
+    &quot;cache_size&quot;: 4
+  }
+}
+</code></pre>
+<h3 id="get-status"><code>GET /status</code><a class="headerlink" href="#get-status" title="Permanent link">&para;</a></h3>
+<p>Extended status endpoint exposing provider status, cache size, and goal analytics.</p>
+<p><strong>Response</strong></p>
+<pre><code class="language-json">{
+  &quot;status&quot;: &quot;ok&quot;,
+  &quot;timestamp&quot;: &quot;2024-01-01T00:00:00Z&quot;,
+  &quot;provider&quot;: {
+    &quot;name&quot;: &quot;caiengine.providers.http_context_provider.HTTPContextProvider&quot;,
+    &quot;backend&quot;: &quot;caiengine.providers.memory_context_provider.MemoryContextProvider&quot;,
+    &quot;ok&quot;: true,
+    &quot;cache_size&quot;: 4
+  },
+  &quot;goal_analytics&quot;: {
+    &quot;history_size&quot;: 3,
+    &quot;last_suggestions&quot;: [],
+    &quot;last_analysis&quot;: {}
+  }
+}
+</code></pre>
+<p>If the goal feedback loop is not enabled, <code>goal_analytics</code> is <code>null</code>.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="dev/extending.html" class="btn btn-neutral float-left" title="Extending CAIEngine"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="dev/api_reference.html" class="btn btn-neutral float-right" title="API Reference">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="dev/extending.html" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="dev/api_reference.html" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = ".";</script>
+    <script src="js/theme_extra.js"></script>
+    <script src="js/theme.js"></script>
+      <script src="search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
