@@ -14,6 +14,7 @@ from .capability_registry import CapabilityRegistry, CapabilityRecord
 from .driver_resolver import DriverResolver, DriverResolution
 from .dispatcher import MeshDispatcher, DispatchOutcome
 from .observability import DispatchEvent, DispatchMonitor
+from .pubsub_network import PubSubNetwork
 from .heartbeats import HeartbeatStore
 from .node_tasks import NodeTask, NodeTaskQueue, RedisNodeTaskQueue
 from .node_agent import NodeAgent
@@ -40,6 +41,7 @@ __all__ = [
     "DispatchOutcome",
     "DispatchMonitor",
     "DispatchEvent",
+    "PubSubNetwork",
     "HeartbeatStore",
     "NodeTask",
     "NodeTaskQueue",

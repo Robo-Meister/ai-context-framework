@@ -39,6 +39,7 @@ _EXPORT_ORDER = [
     "NetworkManager",
     "SimpleNetworkMock",
     "ContextBus",
+    "PubSubNetwork",
     "NodeRegistry",
     "ModelRegistry",
     "RedisPubSubChannel",
@@ -93,6 +94,7 @@ _EXPORT_SPECS: Dict[str, _ExportSpec] = {
     "NetworkManager": _ExportSpec("caiengine.network.network_manager", "NetworkManager"),
     "SimpleNetworkMock": _ExportSpec("caiengine.network.simple_network", "SimpleNetworkMock"),
     "ContextBus": _ExportSpec("caiengine.network.context_bus", "ContextBus"),
+    "PubSubNetwork": _ExportSpec("caiengine.network.pubsub_network", "PubSubNetwork"),
     "NodeRegistry": _ExportSpec("caiengine.network.node_registry", "NodeRegistry"),
     "ModelRegistry": _ExportSpec("caiengine.network.model_registry", "ModelRegistry"),
     "RedisPubSubChannel": _ExportSpec(
