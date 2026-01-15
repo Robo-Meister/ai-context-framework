@@ -107,11 +107,49 @@ manager.update_context("task", {"status": "in_progress"})
   The agent mesh does not by itself move messages between processes. For actual
   inter-agent communication you need a <code>NetworkInterface</code>
   implementation—such as <code>SimpleNetworkMock</code> for tests or
-  <code>PubSubNetwork</code> backed by a real <code>CommunicationChannel</code>
-  (Redis, Kafka, etc.). Today only the in-memory mock is bundled. To enable a
-  production mesh you must provide a concrete channel adapter that implements
-  publish/subscribe semantics and wire it into <code>NetworkManager</code> or
-  <code>DistributedContextManager</code> so that updates flow across nodes.
+  <code>PubSubNetwork</code> backed by a real <code>CommunicationChannel</code>.
+  This repository now ships ready-made pub/sub channel adapters for Redis and
+  Kafka, but you still need to install the matching dependency and wire the
+  channel into <code>PubSubNetwork</code>, then into <code>NetworkManager</code>
+  or <code>DistributedContextManager</code> so updates flow across nodes.
+</p>
+
+<h3>Production wiring example (Redis)</h3>
+<pre><code>from caiengine.core.context_manager import ContextManager
+from caiengine.core.distributed_context_manager import DistributedContextManager
+from caiengine.network import NetworkManager, PubSubNetwork, RedisPubSubChannel
+
+cache = ContextManager()
+channel = RedisPubSubChannel(host="localhost", port=6379)
+network = PubSubNetwork(channel, node_id="node-1")
+manager = DistributedContextManager(cache, NetworkManager(network))
+
+manager.update_context("task", {"status": "queued"})</code></pre>
+
+<h3>Production wiring example (Kafka)</h3>
+<pre><code>from caiengine.core.context_manager import ContextManager
+from caiengine.core.distributed_context_manager import DistributedContextManager
+from caiengine.network import NetworkManager, PubSubNetwork, KafkaPubSubChannel
+
+cache = ContextManager()
+channel = KafkaPubSubChannel(bootstrap_servers="localhost:9092", group_id="mesh")
+network = PubSubNetwork(channel, node_id="node-1")
+manager = DistributedContextManager(cache, NetworkManager(network))
+
+manager.update_context("task", {"status": "queued"})</code></pre>
+
+<h3>Production transport adapters</h3>
+<p>
+  The production transport adapters are optional to keep the core install light.
+  Install the extra dependencies before using them:
+</p>
+<ul>
+  <li><code>pip install caiengine[redis]</code> for <code>RedisPubSubChannel</code></li>
+  <li><code>pip install caiengine[kafka]</code> for <code>KafkaPubSubChannel</code></li>
+</ul>
+<p>
+  Once installed, use <code>PubSubNetwork</code> with the adapter to connect the
+  transport to <code>NetworkManager</code> or <code>DistributedContextManager</code>.
 </p>
 
 <h2>Network-Aware Hooks</h2>
