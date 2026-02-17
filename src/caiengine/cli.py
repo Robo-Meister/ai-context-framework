@@ -1,16 +1,19 @@
 import argparse
-import json
 import importlib
+import json
 import logging
 from datetime import datetime
-from caiengine.objects.context_query import ContextQuery
-from caiengine.core import model_manager
+from pathlib import Path
+from typing import Any
 
-DEFAULT_PROVIDER = (
-    "caiengine.providers.memory_context_provider.MemoryContextProvider"
-)
+from caiengine.core import model_bundle, model_manager
+from caiengine.objects.context_query import ContextQuery
+from caiengine.objects.model_manifest import ModelManifest
+
+DEFAULT_PROVIDER = "caiengine.providers.memory_context_provider.MemoryContextProvider"
 
 logger = logging.getLogger(__name__)
+
 
 def parse_provider_options(raw_options: str | None) -> dict | None:
     if raw_options is None:
@@ -55,6 +58,7 @@ def load_provider(path: str, provider_options: str | None = None):
         return cls()
     return cls(**options)
 
+
 def cmd_add(args):
     provider = load_provider(args.provider, args.provider_options)
     payload = json.loads(args.payload)
@@ -70,25 +74,91 @@ def cmd_add(args):
     )
     logger.info(ctx_id)
 
+
 def cmd_query(args):
     provider = load_provider(args.provider, args.provider_options)
     start = datetime.fromisoformat(args.start)
     end = datetime.fromisoformat(args.end)
     roles = args.roles.split(",") if args.roles else []
-    query = ContextQuery(roles=roles, time_range=(start, end), scope=args.scope or "", data_type=args.data_type or "")
+    query = ContextQuery(
+        roles=roles,
+        time_range=(start, end),
+        scope=args.scope or "",
+        data_type=args.data_type or "",
+    )
     result = provider.get_context(query)
     logger.info(json.dumps(result, default=str, indent=2))
+
 
 def cmd_model_load(args):
     model_manager.transport_model(args.source, args.dest)
     if args.version and not model_manager.check_version(args.dest, args.version):
         raise RuntimeError("Model version mismatch")
 
+
 def cmd_model_migrate(args):
     model_manager.upgrade_schema(args.path, args.target_version)
 
+
 def cmd_model_export(args):
     model_manager.transport_model(args.path, args.dest)
+
+
+def cmd_model_bundle_fetch(args):
+    model_manager.transport_bundle(args.source, args.dest)
+
+
+def cmd_model_bundle_validate(args):
+    errors = model_bundle.validate_model_bundle_zip(args.path)
+    if errors:
+        raise RuntimeError("Bundle validation failed: " + "; ".join(errors))
+
+
+def cmd_model_bundle_export(args):
+    if not args.from_torch:
+        raise ValueError("bundle-export requires --from-torch module:function")
+
+    factory = _load_callable(args.from_torch)
+    model, example_input = factory()
+    manifest = _load_manifest_for_bundle_export(args.manifest, args.from_torch)
+    model_bundle.export_model_bundle_zip(model, example_input, manifest, args.dest)
+
+
+def _load_callable(path: str):
+    try:
+        module_name, func_name = path.split(":", 1)
+    except ValueError as exc:
+        raise ValueError("--from-torch must use module:function format") from exc
+
+    module = importlib.import_module(module_name)
+    fn = getattr(module, func_name)
+    if not callable(fn):
+        raise ValueError(f"Callable not found for --from-torch: {path}")
+    return fn
+
+
+def _load_manifest_for_bundle_export(manifest_path: str | None, from_torch: str) -> ModelManifest:
+    if manifest_path is None:
+        return ModelManifest(model_name=from_torch, version="1.0")
+
+    path = Path(manifest_path)
+    with open(path, "r", encoding="utf-8") as fh:
+        raw_text = fh.read()
+
+    data: dict[str, Any] | None = None
+    if path.suffix.lower() == ".json":
+        data = json.loads(raw_text)
+    else:
+        try:
+            import yaml  # type: ignore
+        except ModuleNotFoundError:
+            raise RuntimeError("YAML manifest requires PyYAML to be installed")
+        data = yaml.safe_load(raw_text)
+
+    if not isinstance(data, dict):
+        raise ValueError("Manifest must deserialize to a JSON/YAML mapping")
+    return ModelManifest(**data)
+
 
 def main(argv=None):
     logging.basicConfig(level=logging.INFO)
@@ -140,6 +210,22 @@ def main(argv=None):
     export_p.add_argument("--path", required=True, help="Model file path")
     export_p.add_argument("--dest", required=True, help="Destination path")
 
+    bundle_export_p = model_sub.add_parser("bundle-export", help="Export model bundle zip")
+    bundle_export_p.add_argument("--dest", required=True, help="Destination bundle zip path")
+    bundle_export_p.add_argument("--manifest", default=None, help="Manifest JSON/YAML path")
+    bundle_export_p.add_argument(
+        "--from-torch",
+        default=None,
+        help="Factory callable as module:function returning (model, example_input)",
+    )
+
+    bundle_validate_p = model_sub.add_parser("bundle-validate", help="Validate model bundle zip")
+    bundle_validate_p.add_argument("--path", required=True, help="Bundle zip path")
+
+    bundle_fetch_p = model_sub.add_parser("bundle-fetch", help="Fetch model bundle zip")
+    bundle_fetch_p.add_argument("--source", required=True, help="Bundle source URL/path")
+    bundle_fetch_p.add_argument("--dest", required=True, help="Destination bundle zip path")
+
     args = parser.parse_args(argv)
 
     try:
@@ -158,10 +244,17 @@ def main(argv=None):
             cmd_model_migrate(args)
         elif args.model_command == "export":
             cmd_model_export(args)
+        elif args.model_command == "bundle-export":
+            cmd_model_bundle_export(args)
+        elif args.model_command == "bundle-validate":
+            cmd_model_bundle_validate(args)
+        elif args.model_command == "bundle-fetch":
+            cmd_model_bundle_fetch(args)
         else:
             model_p.print_help()
     else:
         parser.print_help()
+
 
 if __name__ == "__main__":
     main()

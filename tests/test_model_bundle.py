@@ -2,6 +2,7 @@ import importlib.util
 import pathlib
 import sys
 import types
+import zipfile
 
 import pytest
 
@@ -44,7 +45,10 @@ spec_bundle = importlib.util.spec_from_file_location(
 bundle_module = importlib.util.module_from_spec(spec_bundle)
 spec_bundle.loader.exec_module(bundle_module)
 export_onnx_bundle = bundle_module.export_onnx_bundle
+export_model_bundle_zip = bundle_module.export_model_bundle_zip
+load_model_bundle_zip = bundle_module.load_model_bundle_zip
 load_model_manifest = bundle_module.load_model_manifest
+validate_model_bundle_zip = bundle_module.validate_model_bundle_zip
 
 
 class SimpleModel(nn.Module):
@@ -56,9 +60,22 @@ class SimpleModel(nn.Module):
         return self.linear(x)
 
 
+def _build_manifest() -> ModelManifest:
+    return ModelManifest(
+        model_name="simple",
+        version="1.0",
+        engine_version="0.2.1",
+        task="regression",
+        tags=["tiny", "test"],
+        input_schema={"shape": [1, 2], "dtype": "float32"},
+        output_schema={"shape": [1, 1], "dtype": "float32"},
+        created_at="2026-01-01T00:00:00Z",
+    )
+
+
 def test_export_and_load_manifest(tmp_path):
     model = SimpleModel()
-    manifest = ModelManifest(model_name="simple", version="1.0")
+    manifest = _build_manifest()
     dummy_input = torch.randn(1, 2)
 
     export_onnx_bundle(model, dummy_input, manifest, tmp_path)
@@ -67,3 +84,35 @@ def test_export_and_load_manifest(tmp_path):
     loaded = load_model_manifest(tmp_path)
     assert loaded.model_name == manifest.model_name
     assert loaded.version == manifest.version
+    assert loaded.schema_version == manifest.schema_version
+
+
+def test_export_and_load_model_bundle_zip_round_trip(tmp_path):
+    model = SimpleModel()
+    manifest = _build_manifest()
+    zip_path = tmp_path / "bundle.zip"
+
+    export_model_bundle_zip(model, torch.randn(1, 2), manifest, zip_path)
+
+    with zipfile.ZipFile(zip_path, "r") as archive:
+        names = set(archive.namelist())
+    assert {"model.onnx", "manifest.yaml", "checksums.json"}.issubset(names)
+
+    extracted_model_path, loaded_manifest = load_model_bundle_zip(
+        zip_path, extract_dir=tmp_path / "loaded"
+    )
+    assert extracted_model_path.exists()
+    assert loaded_manifest.model_name == manifest.model_name
+    assert loaded_manifest.tags == manifest.tags
+    assert loaded_manifest.input_schema == manifest.input_schema
+
+    assert validate_model_bundle_zip(zip_path) == []
+
+
+def test_validate_model_bundle_zip_catches_missing_required_file(tmp_path):
+    zip_path = tmp_path / "invalid.zip"
+    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr("manifest.yaml", "model_name: bad\nversion: '1.0'\n")
+
+    errors = validate_model_bundle_zip(zip_path)
+    assert any("Missing required file: model.onnx" in err for err in errors)
