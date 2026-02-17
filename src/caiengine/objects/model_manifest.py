@@ -8,6 +8,11 @@ class ModelManifest:
 
     model_name: str
     version: str
+    training_context: Optional[str] = None
+    preprocessing: List[str] = field(default_factory=list)
+    postprocessing: List[str] = field(default_factory=list)
+    dependencies: Dict[str, str] = field(default_factory=dict)
+    license: Optional[str] = None
     schema_version: str = "1.0"
     engine_version: Optional[str] = None
     task: Optional[str] = None
@@ -15,8 +20,3 @@ class ModelManifest:
     input_schema: Dict[str, Any] = field(default_factory=dict)
     output_schema: Dict[str, Any] = field(default_factory=dict)
     created_at: Optional[str] = None
-    training_context: Optional[str] = None
-    preprocessing: List[str] = field(default_factory=list)
-    postprocessing: List[str] = field(default_factory=list)
-    dependencies: Dict[str, str] = field(default_factory=dict)
-    license: Optional[str] = None

@@ -116,3 +116,18 @@ def test_validate_model_bundle_zip_catches_missing_required_file(tmp_path):
 
     errors = validate_model_bundle_zip(zip_path)
     assert any("Missing required file: model.onnx" in err for err in errors)
+
+def test_load_model_bundle_zip_rejects_missing_model_after_reuse(tmp_path):
+    zip_path = tmp_path / "missing-model.zip"
+    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr("manifest.yaml", "model_name: bad\nversion: '1.0'\n")
+
+    extract_dir = tmp_path / "loaded"
+    extract_dir.mkdir(parents=True, exist_ok=True)
+    stale_model = extract_dir / "model.onnx"
+    stale_model.write_text("stale")
+
+    with pytest.raises(FileNotFoundError, match="missing required file: model.onnx"):
+        load_model_bundle_zip(zip_path, extract_dir=extract_dir)
+
+    assert not stale_model.exists()

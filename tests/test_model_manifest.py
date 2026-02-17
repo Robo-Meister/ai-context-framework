@@ -29,3 +29,9 @@ def test_model_manifest_supports_extended_fields():
     assert manifest.schema_version == "2.1"
     assert manifest.task == "classification"
     assert manifest.tags == ["nlp", "fast"]
+
+def test_model_manifest_preserves_legacy_positional_training_context():
+    manifest = ModelManifest("legacy", "0.1", "ctx")
+
+    assert manifest.training_context == "ctx"
+    assert manifest.schema_version == "1.0"

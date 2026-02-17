@@ -93,10 +93,22 @@ def load_model_bundle_zip(
     target_dir.mkdir(parents=True, exist_ok=True)
 
     with zipfile.ZipFile(zip_file, "r") as zf:
+        # Remove files from prior extractions so we never return stale artifacts
+        # when a subsequent archive is malformed or missing required entries.
+        for filename in (MODEL_ONNX_FILENAME, MANIFEST_FILENAME, CHECKSUM_FILENAME):
+            candidate = target_dir / filename
+            if candidate.exists():
+                candidate.unlink()
         zf.extractall(target_dir)
 
+    model_path = target_dir / MODEL_ONNX_FILENAME
+    if not model_path.exists():
+        raise FileNotFoundError(
+            f"Extracted bundle is missing required file: {MODEL_ONNX_FILENAME}"
+        )
+
     manifest = _read_manifest(target_dir / MANIFEST_FILENAME)
-    return target_dir / MODEL_ONNX_FILENAME, manifest
+    return model_path, manifest
 
 
 def validate_model_bundle_zip(zip_path: str | Path) -> list[str]:
