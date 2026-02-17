@@ -1,0 +1,73 @@
+name: "🚀 Feature request"
+description: Propose an idea to improve AI Context Framework.
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Pre-flight checklist
+      options:
+        - label: I searched existing issues to avoid duplicates.
+          required: true
+        - label: This request is scoped and actionable.
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem are you trying to solve?
+      placeholder: "Today it is hard to ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behavior, API shape, or UX you'd like.
+      placeholder: "Add support for ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches or workarounds.
+
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact area
+      multiple: true
+      options:
+        - Documentation
+        - Core runtime
+        - Integrations
+        - Developer tooling
+        - Tests/CI
+
+  - type: dropdown
+    id: extras
+    attributes:
+      label: Optional extras affected
+      description: Select any optional extras this feature touches.
+      multiple: true
+      options:
+        - redis
+        - kafka
+        - storage
+        - none
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Links, references, mockups, or examples.
