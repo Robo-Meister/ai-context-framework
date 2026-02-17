@@ -1,6 +1,7 @@
 """Orchestration expert interfaces and registry."""
 
 from .aggregators import Aggregator, SimpleConfidenceAggregator
+from .bandit_policy import EpsilonGreedyRoutingPolicy
 from .context_packet import ContextPacket, ContextPacketCompiler
 from .dummy_expert import DummyExpert
 from .goal_graph import Edge, GoalGraph, Node, NodeType
@@ -25,5 +26,6 @@ __all__ = [
     "RuleBasedRoutingPolicy",
     "Aggregator",
     "SimpleConfidenceAggregator",
+    "EpsilonGreedyRoutingPolicy",
     "ExpertRouter",
 ]
