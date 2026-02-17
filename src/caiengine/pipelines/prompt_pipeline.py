@@ -7,7 +7,7 @@ from caiengine.core.vector_normalizer.context_encoder import ContextEncoder
 from caiengine.core.vector_normalizer.vector_comparer import VectorComparer
 from caiengine.core.fuser import Fuser
 from caiengine.interfaces.context_provider import ContextProvider
-from caiengine.interfaces.inference_engine import AIInferenceEngine
+from caiengine.interfaces.inference_engine import InferenceEngineInterface
 from caiengine.objects.context_query import ContextQuery
 from caiengine.core.goal_feedback_loop import GoalDrivenFeedbackLoop
 from caiengine.common import AuditLogger
@@ -26,7 +26,7 @@ class PromptPipeline:
     def __init__(
         self,
         context_provider: ContextProvider,
-        inference_engine: AIInferenceEngine,
+        inference_engine: InferenceEngineInterface,
         feedback_loop: Optional[GoalDrivenFeedbackLoop] = None,
         top_k: int = 3,
         audit_logger: AuditLogger | None = None,

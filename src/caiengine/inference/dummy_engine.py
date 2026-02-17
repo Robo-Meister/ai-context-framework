@@ -1,8 +1,8 @@
 # inference/dummy_engine.py
 
-from caiengine.interfaces.inference_engine import AIInferenceEngine
+from caiengine.interfaces.inference_engine import InferenceEngineInterface
 
-class DummyAIInferenceEngine(AIInferenceEngine):
+class DummyAIInferenceEngine(InferenceEngineInterface):
     def infer(self, input_data: dict) -> dict:
         return {
             "result": "ok",

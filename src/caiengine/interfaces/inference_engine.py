@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Dict
 
 
-class AIInferenceEngine(ABC):
+class InferenceEngineInterface(ABC):
 
     def infer(self, input_data: Dict) -> Dict:
         """
@@ -40,3 +40,7 @@ class AIInferenceEngine(ABC):
     def load_model(self, path: str):
         """Optional: Load model weights from ``path``."""
         raise NotImplementedError("load_model not implemented for this engine")
+
+
+# Deprecated alias kept for backward compatibility with older imports.
+AIInferenceEngine = InferenceEngineInterface

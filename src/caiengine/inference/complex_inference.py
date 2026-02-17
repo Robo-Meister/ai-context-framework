@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from math import exp
 from typing import Dict, Iterable, List
 
-from caiengine.interfaces.inference_engine import AIInferenceEngine
+from caiengine.interfaces.inference_engine import InferenceEngineInterface
 
 
 def _sigmoid(value: float) -> float:
@@ -25,7 +25,7 @@ class _LogisticModel:
         self.bias = float(bias_values[0]) if bias_values else self.bias
 
 
-class ComplexAIInferenceEngine(AIInferenceEngine):
+class ComplexAIInferenceEngine(InferenceEngineInterface):
     """Gradient-descent based learner that mimics the torch implementation."""
 
     def __init__(self, input_size: int, hidden_size: int = 16, output_size: int = 1, lr: float = 0.2):

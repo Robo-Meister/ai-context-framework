@@ -3,11 +3,11 @@ from datetime import datetime, timedelta
 
 from caiengine.pipelines.question_pipeline import QuestionPipeline
 from caiengine.providers.memory_context_provider import MemoryContextProvider
-from caiengine.interfaces.inference_engine import AIInferenceEngine
+from caiengine.interfaces.inference_engine import InferenceEngineInterface
 from caiengine.objects.context_query import ContextQuery
 
 
-class Engine(AIInferenceEngine):
+class Engine(InferenceEngineInterface):
     def predict(self, input_data):
         return {"echo": input_data}
 
