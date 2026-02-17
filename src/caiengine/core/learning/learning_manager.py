@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from math import exp
-from typing import Dict, List
+from typing import Any
 
 from caiengine.core.trust_module import TrustModule
 from caiengine.interfaces.learning_interface import LearningInterface
@@ -21,17 +21,17 @@ class LearningManager(LearningInterface):
         self.learning_rate = lr
         self.weights = [0.0 for _ in range(input_size)]
         self.bias = 0.0
-        self.history: List[float] = []
+        self.history: list[Any] = []
         self.trust_module = TrustModule(
             weights={"trust": 1.0, "role": 1.0, "time": 1.0, "frequency": 1.0},
             parser=parser,
         )
 
-    def _forward(self, features: List[float]) -> float:
+    def _forward(self, features: list[float]) -> float:
         total = sum(w * f for w, f in zip(self.weights, features)) + self.bias
         return _sigmoid(total)
 
-    def train_step(self, features: List[float], target: float) -> float:
+    def train_step(self, features: list[float], target: float) -> float:
         prediction = self._forward(features)
         error = prediction - float(target)
         for i, value in enumerate(features):
@@ -41,16 +41,16 @@ class LearningManager(LearningInterface):
         self.history.append(loss)
         return loss
 
-    def train(self, input_data: Dict, target: float) -> float:
+    def train(self, input_data: dict[str, Any], target: float) -> float:
         features = self.trust_module.extract_numeric_features(input_data)
         return self.train_step(features, target)
 
-    def predict(self, input_data: Dict) -> Dict:
+    def predict(self, input_data: dict[str, Any]) -> dict[str, Any]:
         features = self.trust_module.extract_numeric_features(input_data)
         score = self.predict_from_vector(features)
         return {"score": score}
 
-    def predict_from_vector(self, features: List[float]) -> float:
+    def predict_from_vector(self, features: list[float]) -> float:
         return self._forward(features)
 
     def predict_from_context(self, input_data: dict) -> dict:
@@ -79,7 +79,13 @@ class LearningManager(LearningInterface):
             self.trace(features, y_pred, y_true, meta={"log": log_line})
         return y_pred
 
-    def trace(self, features: List[float], y_pred: float, y_true: float | None = None, meta: dict | None = None):
+    def trace(
+        self,
+        features: list[float],
+        y_pred: float,
+        y_true: float | None = None,
+        meta: dict[str, Any] | None = None,
+    ) -> None:
         self.history.append(
             {
                 "input": list(features),
@@ -90,8 +96,10 @@ class LearningManager(LearningInterface):
             }
         )
 
-    def infer(self, input_data: dict) -> dict:
+    def infer(self, input_data: dict[str, Any]) -> dict[str, Any]:
         log_line = input_data.get("log_line")
+        if not isinstance(log_line, str):
+            raise ValueError("input_data must include a string 'log_line'")
         y_true = input_data.get("label")
         y_pred = self.predict_from_log(log_line, trace=True, y_true=y_true)
         return {
@@ -103,4 +111,3 @@ class LearningManager(LearningInterface):
 
     def learn_from_feedback(self, log_line: str, corrected_label: float) -> float:
         return self.learn_from_log(log_line, corrected_label)
-
