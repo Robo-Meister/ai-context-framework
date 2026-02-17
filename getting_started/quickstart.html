@@ -294,12 +294,13 @@ in the <code>ConfigurablePipeline</code> config. This mode uses the built-in
 <p>The <code>context</code> command-line tool ships with CAIEngine and mirrors the provider
 APIs. It exposes subcommands for ingesting (<code>context add</code>) and retrieving
 (<code>context query</code>) context records. Use <code>--provider</code> to select the backing
-provider class; it defaults to the in-memory
+provider class, and <code>--provider-options</code> to pass constructor kwargs as JSON; it defaults to the in-memory
 <code>providers.memory_context_provider.MemoryContextProvider</code>.</p>
 <h3 id="add-a-context-entry">Add a context entry<a class="headerlink" href="#add-a-context-entry" title="Permanent link">&para;</a></h3>
 <p>Compose a JSON payload that matches your provider schema and pass optional
 metadata or timestamps with the matching flags defined in <code>caiengine.cli</code>:</p>
-<pre><code class="language-bash">context --provider providers.redis_context_provider.RedisContextProvider \
+<pre><code class="language-bash">context --provider providers.sqlite_context_provider.SQLiteContextProvider \
+  --provider-options '{&quot;db_path&quot;: &quot;./context.db&quot;}' \
   add \
   --payload '{&quot;id&quot;: &quot;ticket-123&quot;, &quot;content&quot;: &quot;Customer reported payment failure&quot;}' \
   --metadata '{&quot;channel&quot;: &quot;email&quot;, &quot;attempts&quot;: 2}' \
@@ -311,6 +312,7 @@ metadata or timestamps with the matching flags defined in <code>caiengine.cli</c
 <p>Key options:</p>
 <ul>
 <li><code>--payload</code> (required): Raw JSON payload that will be ingested.</li>
+<li><code>--provider-options</code>: JSON object passed to the provider constructor (for example, SQLite <code>db_path</code>).</li>
 <li><code>--metadata</code>: Additional JSON metadata, default <code>{}</code>.</li>
 <li><code>--timestamp</code>: ISO 8601 timestamp; falls back to <code>datetime.utcnow()</code>.</li>
 <li><code>--source-id</code>: Identifier for the producer, default <code>cli</code>.</li>
@@ -340,7 +342,8 @@ provider = RedisContextProvider(
 <h3 id="query-recent-context">Query recent context<a class="headerlink" href="#query-recent-context" title="Permanent link">&para;</a></h3>
 <p>Retrieve context entries from the same provider by specifying an ISO timestamp
 range and optional filters:</p>
-<pre><code class="language-bash">context --provider providers.redis_context_provider.RedisContextProvider \
+<pre><code class="language-bash">context --provider providers.sqlite_context_provider.SQLiteContextProvider \
+  --provider-options '{&quot;db_path&quot;: &quot;./context.db&quot;}' \
   query \
   --start &quot;2024-05-01T00:00:00&quot; \
   --end &quot;2024-05-02T00:00:00&quot; \
