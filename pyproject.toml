@@ -7,12 +7,15 @@ name = "caiengine"
 version = "0.2.1"
 description = "A Context-Aware AI Engine for decision automation, workflow reasoning, and dynamic task orchestration"
 readme = "README.md"
-requires-python = ">=3.6"
+requires-python = ">=3.10"
 authors = [{name = "Paweł Nowak", email = "pawel.nowak@robo-meister.com"}]
 license = "MIT"
 keywords = ["ai", "context", "framework"]
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Operating System :: OS Independent",
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
@@ -61,5 +64,4 @@ include-package-data = true
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["caiengine*", "sitecustomize"]
-
 
