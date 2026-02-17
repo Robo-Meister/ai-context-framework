@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import pathlib
 import tempfile
 import unittest
@@ -34,10 +35,75 @@ class TestModelRegistry(unittest.TestCase):
 
             fetched = registry.fetch("test-model", "2")
             self.assertIsNotNone(fetched)
-            self.assertEqual(fetched["data"], {"value": 2})
+            self.assertEqual(fetched["manifest"], {"value": 2})
 
             fetched_old = registry.fetch("test-model", "1")
-            self.assertEqual(fetched_old["data"], {"value": 1})
+            self.assertEqual(fetched_old["manifest"], {"value": 1})
+
+    def test_find_with_metadata_criteria(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backend = FileModelRegistry(tmp)
+            registry = ModelRegistry(backend)
+
+            registry.register(
+                "menu-classifier",
+                "1.0",
+                {
+                    "artifact_path": "artifacts/menu-classifier-v1.bin",
+                    "manifest": {
+                        "task": "categorization",
+                        "engine_version": "0.2.1",
+                        "tags": ["pl", "meals"],
+                    },
+                },
+            )
+            registry.register(
+                "sentiment-analyzer",
+                "1.0",
+                {
+                    "artifact_path": "artifacts/sentiment-v1.bin",
+                    "manifest": {
+                        "task": "classification",
+                        "engine_version": "0.3.0",
+                        "tags": ["en", "reviews"],
+                    },
+                },
+            )
+
+            category_models = registry.find({"task": "categorization"})
+            self.assertEqual([m["id"] for m in category_models], ["menu-classifier"])
+
+            wildcard_engine = registry.find({"engine_version": "0.2.*"})
+            self.assertEqual([m["id"] for m in wildcard_engine], ["menu-classifier"])
+
+            tagged_models = registry.find({"tags": ["pl", "meals"]})
+            self.assertEqual([m["id"] for m in tagged_models], ["menu-classifier"])
+
+            no_match = registry.find({"tags": ["pl", "reviews"]})
+            self.assertEqual(no_match, [])
+
+    def test_find_normalizes_legacy_disk_records(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backend = FileModelRegistry(tmp)
+
+            legacy_record = {
+                "id": "legacy-model",
+                "version": "1.0",
+                "data": {
+                    "artifact_path": "artifacts/legacy-model.bin",
+                    "task": "categorization",
+                    "engine_version": "0.4.0",
+                    "tags": ["legacy", "pl"],
+                },
+            }
+            with open(pathlib.Path(tmp) / "legacy-model-1.0.json", "w", encoding="utf-8") as f:
+                json.dump(legacy_record, f)
+
+            task_models = backend.find({"task": "categorization"})
+            self.assertEqual([m["id"] for m in task_models], ["legacy-model"])
+
+            tagged_models = backend.find({"tags": ["legacy", "pl"]})
+            self.assertEqual([m["id"] for m in tagged_models], ["legacy-model"])
 
 
 if __name__ == "__main__":

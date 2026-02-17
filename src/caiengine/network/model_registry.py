@@ -23,3 +23,16 @@ class ModelRegistry:
     def fetch(self, model_id: str, version: str) -> Optional[Dict[str, Any]]:
         """Retrieve a model by identifier and version."""
         return self.backend.fetch(model_id, version)
+
+    def find(self, criteria: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Find models matching the provided criteria.
+
+        The backend may provide a dedicated ``find`` implementation. When it
+        does not, this method falls back to in-memory filtering over ``list``.
+        """
+        backend_find = getattr(self.backend, "find", None)
+        if callable(backend_find):
+            return backend_find(criteria)
+
+        models = self.list()
+        return [m for m in models if all(m.get(k) == v for k, v in criteria.items())]
