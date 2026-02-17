@@ -1,0 +1,92 @@
+name: "🐛 Bug report"
+description: Report a reproducible bug in AI Context Framework.
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug report. Please provide enough detail for us to reproduce the issue.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Pre-flight checklist
+      options:
+        - label: I searched existing issues to avoid duplicates.
+          required: true
+        - label: I can reproduce this on the latest main branch (or latest release).
+          required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Bug summary
+      description: A short description of what is broken.
+      placeholder: "When I run ..., the app ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Exact steps, commands, or API calls.
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: "I expected ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      placeholder: "Instead, ..."
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Framework version/commit hash where issue occurs.
+      placeholder: "e.g. v0.6.0 or abc1234"
+
+  - type: dropdown
+    id: extras
+    attributes:
+      label: Optional extras in use
+      description: Select any extras enabled in your environment.
+      multiple: true
+      options:
+        - redis
+        - kafka
+        - storage
+        - none
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment details
+      description: OS, Python version, runtime/container info.
+      placeholder: |
+        - OS:
+        - Python:
+        - Installation method:
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and stack traces
+      description: Paste relevant output. Use fenced code blocks.
+      render: shell
