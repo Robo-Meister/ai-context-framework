@@ -3,6 +3,7 @@
 from .aggregators import Aggregator, SimpleConfidenceAggregator
 from .context_packet import ContextPacket, ContextPacketCompiler
 from .dummy_expert import DummyExpert
+from .goal_graph import Edge, GoalGraph, Node, NodeType
 from .expert_registry import ExpertRegistry, RegisteredExpert
 from .expert_types import Expert, ExpertResult
 from .policies import RoutingPolicy, RuleBasedRoutingPolicy
@@ -16,6 +17,10 @@ __all__ = [
     "ContextPacket",
     "ContextPacketCompiler",
     "DummyExpert",
+    "NodeType",
+    "Node",
+    "Edge",
+    "GoalGraph",
     "RoutingPolicy",
     "RuleBasedRoutingPolicy",
     "Aggregator",

@@ -1,0 +1,71 @@
+{
+  "nodes": [
+    {
+      "id": "goal_meal_prep",
+      "type": "GOAL",
+      "label": "Prepare Wednesday dinner",
+      "metadata": {
+        "day": "Wednesday",
+        "servings": 4
+      }
+    },
+    {
+      "id": "decision_menu",
+      "type": "DECISION",
+      "label": "Choose menu",
+      "metadata": {
+        "options": ["pasta", "stir-fry", "salad"]
+      }
+    },
+    {
+      "id": "tool_recipe_search",
+      "type": "TOOL",
+      "label": "Recipe search API",
+      "metadata": {
+        "provider": "internal"
+      }
+    },
+    {
+      "id": "expert_nutrition",
+      "type": "EXPERT",
+      "label": "Nutrition expert",
+      "metadata": {
+        "priority": "high"
+      }
+    },
+    {
+      "id": "context_pantry",
+      "type": "CONTEXT_LAYER",
+      "label": "Pantry inventory",
+      "metadata": {
+        "source": "kitchen_db"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "goal_meal_prep",
+      "target": "decision_menu",
+      "label": "requires",
+      "metadata": {}
+    },
+    {
+      "source": "decision_menu",
+      "target": "tool_recipe_search",
+      "label": "queries",
+      "metadata": {}
+    },
+    {
+      "source": "decision_menu",
+      "target": "expert_nutrition",
+      "label": "consults",
+      "metadata": {}
+    },
+    {
+      "source": "decision_menu",
+      "target": "context_pantry",
+      "label": "checks",
+      "metadata": {}
+    }
+  ]
+}
