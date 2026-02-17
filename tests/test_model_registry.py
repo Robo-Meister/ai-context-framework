@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import pathlib
 import tempfile
 import unittest
@@ -80,6 +81,29 @@ class TestModelRegistry(unittest.TestCase):
 
             no_match = registry.find({"tags": ["pl", "reviews"]})
             self.assertEqual(no_match, [])
+
+    def test_find_normalizes_legacy_disk_records(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backend = FileModelRegistry(tmp)
+
+            legacy_record = {
+                "id": "legacy-model",
+                "version": "1.0",
+                "data": {
+                    "artifact_path": "artifacts/legacy-model.bin",
+                    "task": "categorization",
+                    "engine_version": "0.4.0",
+                    "tags": ["legacy", "pl"],
+                },
+            }
+            with open(pathlib.Path(tmp) / "legacy-model-1.0.json", "w", encoding="utf-8") as f:
+                json.dump(legacy_record, f)
+
+            task_models = backend.find({"task": "categorization"})
+            self.assertEqual([m["id"] for m in task_models], ["legacy-model"])
+
+            tagged_models = backend.find({"tags": ["legacy", "pl"]})
+            self.assertEqual([m["id"] for m in tagged_models], ["legacy-model"])
 
 
 if __name__ == "__main__":

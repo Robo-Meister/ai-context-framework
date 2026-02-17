@@ -22,9 +22,32 @@ class FileModelRegistry:
         filename = f"{safe_id}-{safe_version}.json"
         return os.path.join(self.folder_path, filename)
 
+    def _infer_identity_from_path(self, path: str) -> Dict[str, str]:
+        filename = os.path.basename(path)
+        stem = filename[:-5] if filename.endswith(".json") else filename
+        model_id, version = stem.rsplit("-", 1) if "-" in stem else (stem, "")
+        return {"id": model_id, "version": version}
+
     def _read_record(self, path: str) -> Dict[str, Any]:
         with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
+            record = json.load(f)
+
+        if isinstance(record, dict) and isinstance(record.get("manifest"), dict):
+            return record
+
+        identity = self._infer_identity_from_path(path)
+        model_id = record.get("id") if isinstance(record, dict) else None
+        version = record.get("version") if isinstance(record, dict) else None
+        data = record.get("data") if isinstance(record, dict) and isinstance(record.get("data"), dict) else record
+
+        normalized = self._normalize_record(
+            model_id or identity["id"],
+            version or identity["version"],
+            data if isinstance(data, dict) else {},
+        )
+        if isinstance(record, dict) and record.get("created_at") and not normalized.get("created_at"):
+            normalized["created_at"] = record["created_at"]
+        return normalized
 
     def _normalize_record(self, model_id: str, version: str, data: Dict[str, Any]) -> Dict[str, Any]:
         manifest = data.get("manifest") if isinstance(data.get("manifest"), dict) else data
