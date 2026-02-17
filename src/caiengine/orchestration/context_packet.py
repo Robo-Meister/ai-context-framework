@@ -110,7 +110,7 @@ class ContextPacketCompiler:
 
         explicit = budget.get("weights")
         if isinstance(explicit, dict):
-            for key, value in explicit.items():
+            for key, value in self._flatten_weights(explicit).items():
                 weights[key] = float(value)
 
         return weights

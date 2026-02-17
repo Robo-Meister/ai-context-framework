@@ -32,7 +32,7 @@ class RuleBasedRoutingPolicy:
     ) -> list[str]:
         request_category = request.get("category") or goal_context.get("category")
         request_scope = request.get("scope") or goal_context.get("scope")
-        request_tags = set(request.get("tags", []))
+        request_tags = set(request.get("tags") or [])
         available_layers = set(context_layers)
 
         selected: list[str] = []
@@ -47,11 +47,11 @@ class RuleBasedRoutingPolicy:
             if scope is not None and request_scope is not None and scope != request_scope:
                 continue
 
-            tags = set(capabilities.get("tags", []))
+            tags = set(capabilities.get("tags") or [])
             if request_tags and not request_tags.issubset(tags):
                 continue
 
-            required_layers = set(capabilities.get("layers", []))
+            required_layers = set(capabilities.get("layers") or [])
             if required_layers and not required_layers.issubset(available_layers):
                 continue
 

@@ -70,3 +70,25 @@ def test_dot_notation_and_context_provider_weights_work() -> None:
     # provider weights prefer network (0.5) over environment.temperature (0.1)
     assert "network" in packet.selected_layers
     assert "environment.temperature" in packet.omitted_layers
+
+
+def test_nested_explicit_budget_weights_are_flattened() -> None:
+    compiler = ContextPacketCompiler()
+    context = {
+        "environment": {"camera": {"fps": 30}},
+        "network": {"latency_ms": 12},
+    }
+
+    packet = compiler.compile(
+        context=context,
+        required=[],
+        optional=["network", "environment.camera"],
+        budget={
+            "max_layers": 1,
+            "max_chars": 1_000,
+            "weights": {"environment": {"camera": 0.9}, "network": 0.2},
+        },
+    )
+
+    assert list(packet.selected_layers) == ["environment.camera"]
+    assert "network" in packet.omitted_layers

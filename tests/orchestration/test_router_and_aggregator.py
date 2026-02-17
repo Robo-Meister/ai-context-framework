@@ -121,3 +121,26 @@ def test_simple_confidence_aggregator_is_stable_for_equal_confidence() -> None:
 
     assert result["output"] == {"expert": "first"}
     assert [item["debug"]["index"] for item in result["debug"]["all_results"]] == [0, 1]
+
+
+def test_rule_based_policy_treats_null_tags_as_empty() -> None:
+    registry = ExpertRegistry()
+    registry.register(
+        TaggedExpert("expert_text", 0.9),
+        capabilities={
+            "category": "analysis",
+            "scope": "global",
+            "tags": ["text"],
+            "layers": ["semantic"],
+        },
+    )
+
+    policy = RuleBasedRoutingPolicy()
+    selected = policy.select(
+        experts=registry.list_experts(),
+        request={"category": "analysis", "scope": "global", "tags": None},
+        goal_context={},
+        context_layers=["semantic"],
+    )
+
+    assert selected == ["expert_text"]

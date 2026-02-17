@@ -46,3 +46,16 @@ def test_match_filters_by_task_tags_and_layers() -> None:
 
     assert len(matches) == 1
     assert matches[0].expert_id == "SampleExpert"
+
+
+def test_match_handles_null_tags_and_layers_criteria() -> None:
+    registry = ExpertRegistry()
+    registry.register(
+        SampleExpert(),
+        capabilities={"task": "classify", "tags": ["nlp"], "layers": ["l1"]},
+    )
+
+    matches = registry.match({"task": "classify", "tags": None, "layers": None})
+
+    assert len(matches) == 1
+    assert matches[0].expert_id == "SampleExpert"

@@ -51,8 +51,8 @@ class ExpertRegistry:
     def match(self, criteria: dict[str, Any]) -> list[RegisteredExpert]:
         """Return experts whose capabilities satisfy task/tag/layer criteria."""
         required_task = criteria.get("task")
-        required_tags = set(criteria.get("tags", []))
-        required_layers = set(criteria.get("layers", []))
+        required_tags = set(criteria.get("tags") or [])
+        required_layers = set(criteria.get("layers") or [])
 
         matches: list[RegisteredExpert] = []
         for entry in self._entries.values():
@@ -60,11 +60,11 @@ class ExpertRegistry:
             if required_task is not None and capabilities.get("task") != required_task:
                 continue
 
-            cap_tags = set(capabilities.get("tags", []))
+            cap_tags = set(capabilities.get("tags") or [])
             if required_tags and not required_tags.issubset(cap_tags):
                 continue
 
-            cap_layers = set(capabilities.get("layers", []))
+            cap_layers = set(capabilities.get("layers") or [])
             if required_layers and not required_layers.issubset(cap_layers):
                 continue
 
