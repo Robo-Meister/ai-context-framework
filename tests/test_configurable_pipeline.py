@@ -37,6 +37,77 @@ class TestConfigurablePipeline(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertIn("goal_suggestion", result[0])
 
+    def test_build_and_run_complex_nn(self):
+        cfg = {
+            "provider": {"type": "memory"},
+            "candidates": [
+                {"category": "foo", "context": {"foo": "bar"}, "base_weight": 1.0}
+            ],
+            "feedback": {"type": "complex_nn"},
+        }
+
+        pipeline = ConfigurablePipeline.from_dict(cfg)
+        now = datetime.utcnow()
+        data_batch = [
+            {
+                "timestamp": now,
+                "context": {"foo": "bar"},
+                "roles": [],
+                "situations": [],
+                "role": "user",
+                "content": "text",
+                "confidence": 1.0,
+            }
+        ]
+
+        results = pipeline.run(data_batch)
+
+        self.assertIsInstance(results, list)
+        self.assertEqual(len(results), 1)
+        self.assertIn("prediction", results[0])
+        self.assertIn("usage", results[0]["prediction"])
+
+    def test_complex_nn_pipeline_logs_token_usage_events(self):
+        audit_logger = AuditLogger()
+        cfg = {
+            "provider": {"type": "memory"},
+            "candidates": [
+                {
+                    "category": "support",
+                    "context": {"channel": "email"},
+                    "base_weight": 1.0,
+                }
+            ],
+            "feedback": {"type": "complex_nn"},
+        }
+
+        pipeline = ConfigurablePipeline.from_dict(cfg, audit_logger=audit_logger)
+
+        now = datetime.utcnow()
+        data_batch = [
+            {
+                "timestamp": now,
+                "context": {"channel": "email"},
+                "roles": [],
+                "situations": [],
+                "role": "user",
+                "content": "Ticket update",
+                "confidence": 1.0,
+            }
+        ]
+
+        pipeline.run(data_batch)
+
+        records = audit_logger.get_records()
+        usage_records = [
+            record for record in records if record["step"] == "token_usage"
+        ]
+        self.assertTrue(usage_records, "token usage events should be audited")
+        detail = usage_records[0]["detail"]
+        self.assertEqual(detail["provider"], "memory")
+        self.assertIn("usage", detail)
+        self.assertGreater(detail["usage"]["total_tokens"], 0)
+
     def test_registered_provider_keys(self):
         expected_keys = {
             "memory",
