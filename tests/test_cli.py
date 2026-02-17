@@ -39,6 +39,7 @@ def test_cmd_add_ingests_context_with_expected_arguments(monkeypatch):
 
     args = SimpleNamespace(
         provider=provider_path,
+        provider_options=None,
         payload=json.dumps(payload),
         metadata=json.dumps(metadata),
         timestamp=timestamp,
@@ -72,6 +73,7 @@ def test_cmd_query_fetches_expected_context(monkeypatch):
 
     args = SimpleNamespace(
         provider=provider_path,
+        provider_options=None,
         start=start.isoformat(),
         end=end.isoformat(),
         roles="alpha,beta",
@@ -196,3 +198,65 @@ def test_main_dispatches_model_export(monkeypatch):
 
     assert received_args["args"].path == "model.bin"
     assert received_args["args"].dest == "out.bin"
+
+
+def test_load_provider_applies_provider_options(monkeypatch):
+    captured = {}
+
+    class ConfigurableProvider:
+        def __init__(self, **kwargs):
+            captured["kwargs"] = kwargs
+
+    provider_path = _register_provider(monkeypatch, "test_cli_options", ConfigurableProvider)
+
+    cli.load_provider(provider_path, '{"db_path": "/tmp/context.sqlite"}')
+
+    assert captured["kwargs"] == {"db_path": "/tmp/context.sqlite"}
+
+
+def test_load_provider_without_options_preserves_no_arg_instantiation(monkeypatch):
+    captured = {}
+
+    class LegacyProvider:
+        def __init__(self):
+            captured["constructed"] = True
+
+    provider_path = _register_provider(monkeypatch, "test_cli_legacy", LegacyProvider)
+
+    cli.load_provider(provider_path)
+
+    assert captured["constructed"] is True
+
+
+def test_load_provider_supports_sqlite_provider_options(monkeypatch, tmp_path):
+    db_file = tmp_path / "context.db"
+    captured = {}
+
+    class SQLiteContextProvider:
+        def __init__(self, db_path=":memory:"):
+            captured["db_path"] = db_path
+
+    provider_path = _register_provider(
+        monkeypatch,
+        "test_sqlite_provider_options",
+        SQLiteContextProvider,
+    )
+
+    cli.load_provider(provider_path, json.dumps({"db_path": str(db_file)}))
+
+    assert captured["db_path"] == str(db_file)
+
+
+def test_main_reports_user_friendly_provider_options_json_error(capsys):
+    with pytest.raises(SystemExit) as exc_info:
+        cli.main([
+            "--provider-options",
+            "{not-valid-json}",
+            "add",
+            "--payload",
+            "{}",
+        ])
+
+    assert exc_info.value.code == 2
+    stderr = capsys.readouterr().err
+    assert "Invalid JSON for --provider-options" in stderr
