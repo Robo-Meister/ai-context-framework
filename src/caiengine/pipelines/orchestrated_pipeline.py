@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 from datetime import datetime
 from typing import Any
 
@@ -37,7 +38,7 @@ class OrchestratedPipeline:
             self.audit_logger.log("OrchestratedPipeline", "run_start", {"request_keys": sorted(request.keys())})
 
         query = self._build_query(request=request, goal_context=goal_context)
-        retrieved_context = self.provider.get_context(query)
+        retrieved_context = self._get_context(query)
 
         raw_context = {
             "retrieved": {"items": retrieved_context, "count": len(retrieved_context)},
@@ -101,7 +102,7 @@ class OrchestratedPipeline:
         data_type = str(request.get("data_type") or goal_context.get("data_type") or "")
 
         time_range = request.get("time_range") or goal_context.get("time_range")
-        if isinstance(time_range, tuple) and len(time_range) == 2:
+        if isinstance(time_range, (tuple, list)) and len(time_range) == 2:
             start, end = time_range
         else:
             start, end = datetime.min, datetime.max
@@ -113,3 +114,21 @@ class OrchestratedPipeline:
             data_type=data_type,
             predicate=request.get("predicate") or goal_context.get("predicate"),
         )
+
+    def _get_context(self, query: ContextQuery) -> list[dict[str, Any]]:
+        get_context = self.provider.get_context
+        signature = inspect.signature(get_context)
+
+        if self._accepts_query(signature):
+            return get_context(query)
+
+        return get_context()
+
+    @staticmethod
+    def _accepts_query(signature: inspect.Signature) -> bool:
+        for parameter in signature.parameters.values():
+            if parameter.kind == inspect.Parameter.VAR_POSITIONAL:
+                return True
+            if parameter.kind in (inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD):
+                return True
+        return False

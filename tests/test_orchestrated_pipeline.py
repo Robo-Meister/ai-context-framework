@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from caiengine.objects.context_query import ContextQuery
 from caiengine.orchestration import ExpertRegistry, ExpertResult
 from caiengine.pipelines.orchestrated_pipeline import OrchestratedPipeline
 from caiengine.providers.memory_context_provider import MemoryContextProvider
@@ -84,3 +85,56 @@ def test_orchestrated_pipeline_is_deterministic_for_equal_confidence() -> None:
     assert first["response"]["output"]["expert"] == "expert_first"
     assert second["response"]["output"]["expert"] == "expert_first"
     assert first["telemetry"] == second["telemetry"]
+
+
+class QueryAwareProvider:
+    def __init__(self) -> None:
+        self.calls = 0
+        self.last_query = None
+
+    def get_context(self, query: ContextQuery):
+        self.calls += 1
+        self.last_query = query
+        return []
+
+
+class ZeroArgProvider:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def get_context(self):
+        self.calls += 1
+        return []
+
+
+def test_get_context_supports_provider_with_query_argument() -> None:
+    provider = QueryAwareProvider()
+    pipeline = OrchestratedPipeline(context_provider=provider, registry=ExpertRegistry())
+
+    query = ContextQuery(time_range=(datetime(2025, 1, 1), datetime(2025, 1, 2)))
+    context = pipeline._get_context(query)
+
+    assert context == []
+    assert provider.calls == 1
+    assert provider.last_query is query
+
+
+def test_get_context_supports_provider_without_query_argument() -> None:
+    provider = ZeroArgProvider()
+    pipeline = OrchestratedPipeline(context_provider=provider, registry=ExpertRegistry())
+
+    query = ContextQuery(time_range=(datetime(2025, 1, 1), datetime(2025, 1, 2)))
+    context = pipeline._get_context(query)
+
+    assert context == []
+    assert provider.calls == 1
+
+
+def test_build_query_accepts_list_time_range() -> None:
+    pipeline = OrchestratedPipeline(context_provider=ZeroArgProvider(), registry=ExpertRegistry())
+
+    start = datetime(2025, 1, 1)
+    end = datetime(2025, 1, 2)
+    query = pipeline._build_query(request={"time_range": [start, end]}, goal_context={})
+
+    assert query.time_range == (start, end)
