@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import random
+import re
 import sqlite3
 import threading
 from collections import defaultdict
@@ -12,6 +13,30 @@ from typing import Any
 
 from .expert_registry import RegisteredExpert
 from .policies import RoutingPolicy
+
+
+_SQLITE_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+_SQLITE_RESERVED_KEYWORDS = {
+    "ABORT", "ACTION", "ADD", "AFTER", "ALL", "ALTER", "ANALYZE", "AND", "AS", "ASC",
+    "ATTACH", "AUTOINCREMENT", "BEFORE", "BEGIN", "BETWEEN", "BY", "CASCADE", "CASE", "CAST", "CHECK",
+    "COLLATE", "COLUMN", "COMMIT", "CONFLICT", "CONSTRAINT", "CREATE", "CROSS", "CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP",
+    "DATABASE", "DEFAULT", "DEFERRABLE", "DEFERRED", "DELETE", "DESC", "DETACH", "DISTINCT", "DROP", "EACH",
+    "ELSE", "END", "ESCAPE", "EXCEPT", "EXCLUSIVE", "EXISTS", "EXPLAIN", "FAIL", "FILTER", "FOR",
+    "FOREIGN", "FROM", "FULL", "GLOB", "GROUP", "HAVING", "IF", "IGNORE", "IMMEDIATE", "IN",
+    "INDEX", "INDEXED", "INITIALLY", "INNER", "INSERT", "INSTEAD", "INTERSECT", "INTO", "IS", "ISNULL",
+    "JOIN", "KEY", "LEFT", "LIKE", "LIMIT", "MATCH", "NATURAL", "NO", "NOT", "NOTNULL",
+    "NULL", "OF", "OFFSET", "ON", "OR", "ORDER", "OUTER", "PLAN", "PRAGMA", "PRIMARY",
+    "QUERY", "RAISE", "RECURSIVE", "REFERENCES", "REGEXP", "REINDEX", "RELEASE", "RENAME", "REPLACE", "RESTRICT",
+    "RIGHT", "ROLLBACK", "ROW", "SAVEPOINT", "SELECT", "SET", "TABLE", "TEMP", "TEMPORARY", "THEN",
+    "TO", "TRANSACTION", "TRIGGER", "UNION", "UNIQUE", "UPDATE", "USING", "VACUUM", "VALUES", "VIEW",
+    "VIRTUAL", "WHEN", "WHERE", "WINDOW", "WITH", "WITHOUT",
+}
+
+
+def _is_valid_sqlite_identifier(identifier: str) -> bool:
+    if not _SQLITE_IDENTIFIER_RE.fullmatch(identifier):
+        return False
+    return identifier.upper() not in _SQLITE_RESERVED_KEYWORDS
 
 
 @dataclass
@@ -27,12 +52,7 @@ class _RewardStats:
 
 
 class EpsilonGreedyRoutingPolicy(RoutingPolicy):
-    """Route to experts using an epsilon-greedy reward policy.
-
-    Rewards are tracked per ``(goal, task)`` context and expert id.
-    During selection, the policy explores with probability ``epsilon``;
-    otherwise it exploits the best-known expert by average reward.
-    """
+    """Route to experts using an epsilon-greedy reward policy."""
 
     def __init__(
         self,
@@ -44,8 +64,11 @@ class EpsilonGreedyRoutingPolicy(RoutingPolicy):
     ) -> None:
         if not 0.0 <= epsilon <= 1.0:
             raise ValueError("epsilon must be between 0.0 and 1.0")
-        if not table_name.replace("_", "").isalnum():
-            raise ValueError("table_name must be alphanumeric with optional underscores")
+        if not _is_valid_sqlite_identifier(table_name):
+            raise ValueError(
+                "table_name must be a valid SQLite identifier (letters/digits/underscores, "
+                "starting with a letter or underscore, and not a reserved keyword)"
+            )
 
         self._epsilon = float(epsilon)
         self._database = database
@@ -69,12 +92,20 @@ class EpsilonGreedyRoutingPolicy(RoutingPolicy):
         goal_context: dict[str, Any],
         context_layers: list[str],
     ) -> list[str]:
-        del context_layers
         if not experts:
             return []
 
+        filtered_experts = self._filter_by_capabilities(
+            experts=experts,
+            request=request,
+            goal_context=goal_context,
+            context_layers=context_layers,
+        )
+        if not filtered_experts:
+            return []
+
         context_key = self._resolve_context_key(request, goal_context)
-        available_ids = [expert.expert_id for expert in experts]
+        available_ids = [expert.expert_id for expert in filtered_experts]
 
         with self._lock:
             if self._rng.random() < self._epsilon:
@@ -89,6 +120,43 @@ class EpsilonGreedyRoutingPolicy(RoutingPolicy):
                     best_expert_id = expert_id
                     best_score = score
             return [best_expert_id]
+
+    def _filter_by_capabilities(
+        self,
+        *,
+        experts: list[RegisteredExpert],
+        request: dict[str, Any],
+        goal_context: dict[str, Any],
+        context_layers: list[str],
+    ) -> list[RegisteredExpert]:
+        request_category = request.get("category") or goal_context.get("category")
+        request_scope = request.get("scope") or goal_context.get("scope")
+        request_tags = set(request.get("tags") or [])
+        available_layers = set(context_layers)
+
+        selected: list[RegisteredExpert] = []
+        for entry in experts:
+            capabilities = entry.capabilities
+
+            category = capabilities.get("category")
+            if category is not None and request_category is not None and category != request_category:
+                continue
+
+            scope = capabilities.get("scope")
+            if scope is not None and request_scope is not None and scope != request_scope:
+                continue
+
+            tags = set(capabilities.get("tags") or [])
+            if request_tags and not request_tags.issubset(tags):
+                continue
+
+            required_layers = set(capabilities.get("layers") or [])
+            if required_layers and not required_layers.issubset(available_layers):
+                continue
+
+            selected.append(entry)
+
+        return selected
 
     def record_outcome(
         self,

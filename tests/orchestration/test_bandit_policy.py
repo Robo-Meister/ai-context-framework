@@ -57,3 +57,48 @@ def test_epsilon_greedy_persists_stats_in_sqlite(tmp_path) -> None:
     )
 
     assert selected == ["expert_b"]
+
+
+def test_epsilon_greedy_honors_capability_filters() -> None:
+    experts = [
+        RegisteredExpert(
+            expert_id="text_low",
+            expert=_NoopExpert(),
+            capabilities={"category": "text", "tags": ["safe"], "layers": ["base"]},
+        ),
+        RegisteredExpert(
+            expert_id="text_high",
+            expert=_NoopExpert(),
+            capabilities={"category": "text", "tags": ["safe"], "layers": ["base"]},
+        ),
+        RegisteredExpert(
+            expert_id="vision_best",
+            expert=_NoopExpert(),
+            capabilities={"category": "vision", "tags": ["safe"], "layers": ["base"]},
+        ),
+    ]
+    policy = EpsilonGreedyRoutingPolicy(epsilon=0.0, random_seed=11)
+
+    for _ in range(10):
+        policy.record_outcome("vision_best", reward=5.0, context_meta={"goal": "g3", "task": "t3"})
+        policy.record_outcome("text_low", reward=0.1, context_meta={"goal": "g3", "task": "t3"})
+        policy.record_outcome("text_high", reward=1.0, context_meta={"goal": "g3", "task": "t3"})
+
+    selected = policy.select(
+        experts=experts,
+        request={"goal": "g3", "task": "t3", "category": "text", "tags": ["safe"]},
+        goal_context={},
+        context_layers=["base"],
+    )
+
+    assert selected == ["text_high"]
+
+
+def test_invalid_table_name_raises_value_error() -> None:
+    for table_name in ("1stats", "select", "name-with-dash"):
+        try:
+            EpsilonGreedyRoutingPolicy(table_name=table_name)
+        except ValueError as exc:
+            assert "table_name" in str(exc)
+        else:  # pragma: no cover - explicit failure branch
+            raise AssertionError(f"expected ValueError for invalid table name {table_name!r}")
