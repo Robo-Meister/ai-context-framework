@@ -286,6 +286,10 @@ for item in results:
 history, baselines, and the most recent analytics snapshot so restarts resume
 from the last computed goal analysis. Use <code>type: "sqlite"</code> with a <code>path</code> to
 store the same data in a local SQLite file instead of Redis.</p>
+<p>For a learning-driven feedback path, set <code>"feedback": {"type": "complex_nn"}</code>
+in the <code>ConfigurablePipeline</code> config. This mode uses the built-in
+<code>LearningManager</code> for inference updates and remains compatible with
+<code>TokenUsageTracker</code> audit hooks when <code>audit_logger</code> is configured.</p>
 <h2 id="interact-from-the-cli">Interact from the CLI<a class="headerlink" href="#interact-from-the-cli" title="Permanent link">&para;</a></h2>
 <p>The <code>context</code> command-line tool ships with CAIEngine and mirrors the provider
 APIs. It exposes subcommands for ingesting (<code>context add</code>) and retrieving
