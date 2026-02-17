@@ -12,7 +12,25 @@ DEFAULT_PROVIDER = (
 
 logger = logging.getLogger(__name__)
 
-def load_provider(path: str):
+def parse_provider_options(raw_options: str | None) -> dict | None:
+    if raw_options is None:
+        return None
+
+    try:
+        options = json.loads(raw_options)
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            "Invalid JSON for --provider-options. Expected a JSON object, "
+            'for example: --provider-options \'{"db_path": "context.db"}\''
+        ) from exc
+
+    if not isinstance(options, dict):
+        raise ValueError("--provider-options must be a JSON object (key/value pairs).")
+
+    return options
+
+
+def load_provider(path: str, provider_options: str | None = None):
     try:
         module_name, class_name = path.rsplit(".", 1)
     except ValueError as exc:
@@ -32,10 +50,13 @@ def load_provider(path: str):
             f"Provider class '{class_name}' not found in module '{module_name}'."
         ) from exc
 
-    return cls()
+    options = parse_provider_options(provider_options)
+    if options is None:
+        return cls()
+    return cls(**options)
 
 def cmd_add(args):
-    provider = load_provider(args.provider)
+    provider = load_provider(args.provider, args.provider_options)
     payload = json.loads(args.payload)
     metadata = json.loads(args.metadata) if args.metadata else {}
     timestamp = datetime.fromisoformat(args.timestamp) if args.timestamp else datetime.utcnow()
@@ -50,7 +71,7 @@ def cmd_add(args):
     logger.info(ctx_id)
 
 def cmd_query(args):
-    provider = load_provider(args.provider)
+    provider = load_provider(args.provider, args.provider_options)
     start = datetime.fromisoformat(args.start)
     end = datetime.fromisoformat(args.end)
     roles = args.roles.split(",") if args.roles else []
@@ -73,9 +94,18 @@ def main(argv=None):
     logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser(prog="context")
     parser.add_argument("--provider", default=DEFAULT_PROVIDER, help="Provider class path")
+    parser.add_argument(
+        "--provider-options",
+        default=None,
+        help="JSON object of kwargs passed into the provider constructor",
+    )
     sub = parser.add_subparsers(dest="command")
 
-    add_p = sub.add_parser("add", help="Add context entry")
+    add_p = sub.add_parser(
+        "add",
+        help="Add context entry (supports constructor kwargs via --provider-options)",
+        description="Add context entry. Use global --provider-options JSON to pass provider constructor kwargs.",
+    )
     add_p.add_argument("--payload", required=True, help="JSON payload")
     add_p.add_argument("--metadata", default="{}", help="JSON metadata")
     add_p.add_argument("--timestamp", default=None, help="ISO timestamp")
@@ -83,7 +113,11 @@ def main(argv=None):
     add_p.add_argument("--confidence", default="1.0", help="Confidence score")
     add_p.add_argument("--ttl", type=int, default=None, help="TTL in seconds for cache retention")
 
-    query_p = sub.add_parser("query", help="Query context entries")
+    query_p = sub.add_parser(
+        "query",
+        help="Query context entries (supports constructor kwargs via --provider-options)",
+        description="Query context entries. Use global --provider-options JSON to pass provider constructor kwargs.",
+    )
     query_p.add_argument("--start", required=True, help="Start timestamp (ISO)")
     query_p.add_argument("--end", required=True, help="End timestamp (ISO)")
     query_p.add_argument("--roles", default="", help="Comma separated roles")
@@ -107,6 +141,11 @@ def main(argv=None):
     export_p.add_argument("--dest", required=True, help="Destination path")
 
     args = parser.parse_args(argv)
+
+    try:
+        parse_provider_options(args.provider_options)
+    except ValueError as exc:
+        parser.error(str(exc))
 
     if args.command == "add":
         cmd_add(args)

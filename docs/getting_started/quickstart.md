@@ -183,7 +183,7 @@ in the `ConfigurablePipeline` config. This mode uses the built-in
 The `context` command-line tool ships with CAIEngine and mirrors the provider
 APIs. It exposes subcommands for ingesting (`context add`) and retrieving
 (`context query`) context records. Use `--provider` to select the backing
-provider class; it defaults to the in-memory
+provider class, and `--provider-options` to pass constructor kwargs as JSON; it defaults to the in-memory
 `providers.memory_context_provider.MemoryContextProvider`.
 
 ### Add a context entry
@@ -192,7 +192,8 @@ Compose a JSON payload that matches your provider schema and pass optional
 metadata or timestamps with the matching flags defined in `caiengine.cli`:
 
 ```bash
-context --provider providers.redis_context_provider.RedisContextProvider \
+context --provider providers.sqlite_context_provider.SQLiteContextProvider \
+  --provider-options '{"db_path": "./context.db"}' \
   add \
   --payload '{"id": "ticket-123", "content": "Customer reported payment failure"}' \
   --metadata '{"channel": "email", "attempts": 2}' \
@@ -205,6 +206,7 @@ context --provider providers.redis_context_provider.RedisContextProvider \
 Key options:
 
 - `--payload` (required): Raw JSON payload that will be ingested.
+- `--provider-options`: JSON object passed to the provider constructor (for example, SQLite `db_path`).
 - `--metadata`: Additional JSON metadata, default `{}`.
 - `--timestamp`: ISO 8601 timestamp; falls back to `datetime.utcnow()`.
 - `--source-id`: Identifier for the producer, default `cli`.
@@ -245,7 +247,8 @@ Retrieve context entries from the same provider by specifying an ISO timestamp
 range and optional filters:
 
 ```bash
-context --provider providers.redis_context_provider.RedisContextProvider \
+context --provider providers.sqlite_context_provider.SQLiteContextProvider \
+  --provider-options '{"db_path": "./context.db"}' \
   query \
   --start "2024-05-01T00:00:00" \
   --end "2024-05-02T00:00:00" \

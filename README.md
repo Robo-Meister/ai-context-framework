@@ -223,6 +223,14 @@ python -m caiengine.service \
   --backend-options '{"db_path": "./context.db"}'
 ```
 
+The `context` CLI supports the same pattern through `--provider-options`:
+
+```bash
+context --provider caiengine.providers.sqlite_context_provider.SQLiteContextProvider \
+  --provider-options '{"db_path": "./context.db"}' \
+  add --payload '{"message": "hello"}'
+```
+
 ### Environment Variables
 
 Copy `.env.example` to `.env` and adjust the values as needed. The file includes
