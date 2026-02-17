@@ -260,3 +260,53 @@ def test_main_reports_user_friendly_provider_options_json_error(capsys):
     assert exc_info.value.code == 2
     stderr = capsys.readouterr().err
     assert "Invalid JSON for --provider-options" in stderr
+
+
+def test_cmd_model_bundle_validate_passes_when_no_errors(monkeypatch):
+    called = {}
+
+    def fake_validate(path):
+        called["path"] = path
+        return []
+
+    monkeypatch.setattr(cli.model_bundle, "validate_model_bundle_zip", fake_validate)
+
+    cli.cmd_model_bundle_validate(SimpleNamespace(path="bundle.zip"))
+
+    assert called["path"] == "bundle.zip"
+
+
+def test_cmd_model_bundle_validate_raises_on_errors(monkeypatch):
+    def fake_validate(_path):
+        return ["missing model.onnx"]
+
+    monkeypatch.setattr(cli.model_bundle, "validate_model_bundle_zip", fake_validate)
+
+    with pytest.raises(RuntimeError, match="Bundle validation failed"):
+        cli.cmd_model_bundle_validate(SimpleNamespace(path="bad.zip"))
+
+
+def test_cmd_model_bundle_fetch_invokes_transport_bundle(monkeypatch):
+    called = {}
+
+    def fake_transport(src, dest):
+        called["args"] = (src, dest)
+
+    monkeypatch.setattr(cli.model_manager, "transport_bundle", fake_transport)
+
+    cli.cmd_model_bundle_fetch(SimpleNamespace(source="s", dest="d.zip"))
+
+    assert called["args"] == ("s", "d.zip")
+
+
+def test_main_dispatches_model_bundle_validate(monkeypatch):
+    captured = {}
+
+    def fake_cmd(args):
+        captured["path"] = args.path
+
+    monkeypatch.setattr(cli, "cmd_model_bundle_validate", fake_cmd)
+
+    cli.main(["model", "bundle-validate", "--path", "bundle.zip"])
+
+    assert captured["path"] == "bundle.zip"

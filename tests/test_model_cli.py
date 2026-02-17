@@ -70,3 +70,14 @@ def test_model_cli_remote_load(tmp_path):
         with open(dest, 'r', encoding='utf-8') as f:
             data = json.load(f)
         assert data['version'] == '1.0'
+
+
+def test_model_cli_bundle_validate(tmp_path):
+    bundle = tmp_path / 'bundle.zip'
+    import zipfile
+
+    with zipfile.ZipFile(bundle, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr('model.onnx', b'dummy')
+        archive.writestr('manifest.yaml', "model_name: tiny\nversion: '1.0'\n")
+
+    run_cli(['model', 'bundle-validate', '--path', str(bundle)])
