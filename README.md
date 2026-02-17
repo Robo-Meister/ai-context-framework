@@ -146,14 +146,16 @@ navigation.
    git clone https://github.com/Robo-Meister/ai-context-framework.git
    cd ai-context-framework
    ```
-2. *(Optional)* Create and activate a virtual environment
+2. Use Python 3.10 or newer (the CI pipeline runs on Python 3.11).
+
+3. *(Optional)* Create and activate a virtual environment
 
    ```bash
    python -m venv venv
    source venv/bin/activate  # Linux/Mac
    venv\Scripts\activate     # Windows
    ```
-3. Install the package using the profile that matches your deployment needs:
+4. Install the package using the profile that matches your deployment needs:
 
    - **Core runtime (minimal dependencies)**
 
@@ -179,7 +181,7 @@ navigation.
    The helper script `./install_test_requirements.sh` mirrors the CI
    configuration and accepts either `core` or `ai` to install the appropriate
    extras (defaulting to `ai`).
-4. Run the unit tests to verify your setup
+5. Run the unit tests to verify your setup
 
    ```bash
    pytest
