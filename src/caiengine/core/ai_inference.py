@@ -9,7 +9,7 @@ except ModuleNotFoundError as exc:  # pragma: no cover - optional dependency gat
     ) from exc
 
 
-class AIInferenceEngine:
+class TorchInferenceEngine:
     """
     Base class for AI decision/prediction engines.
     Responsible for consuming fused context and producing AI inference results.
@@ -105,3 +105,7 @@ class AIInferenceEngine:
             raise RuntimeError("Model not initialized")
         state = torch.load(path, map_location=self.device)
         self.model.load_state_dict(state)
+
+
+# Deprecated alias kept for backward compatibility with older imports.
+AIInferenceEngine = TorchInferenceEngine

@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from caiengine.core.categorizer import Categorizer
 from caiengine.core.Deduplicars.fuzzy_deduplicator import FuzzyDeduplicator
-from caiengine.interfaces.inference_engine import AIInferenceEngine
+from caiengine.interfaces.inference_engine import InferenceEngineInterface
 from caiengine.common import AuditLogger
 try:  # optional dependency
     from caiengine.core.learning.learning_manager import LearningManager
@@ -18,7 +18,7 @@ class FeedbackPipeline:
     def __init__(
         self,
         context_provider,
-        inference_engine: AIInferenceEngine,
+        inference_engine: InferenceEngineInterface,
         learning_manager: Optional[LearningManager] = None,
         time_threshold_sec: int = 5,
         fuzzy_threshold: float = 0.8,

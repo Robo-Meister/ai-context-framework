@@ -2,16 +2,16 @@ import json
 from datetime import datetime
 from typing import Callable, Dict, Mapping, Sequence
 
-from caiengine.interfaces.inference_engine import AIInferenceEngine
+from caiengine.interfaces.inference_engine import InferenceEngineInterface
 from caiengine.common.token_usage import TokenCounter, TokenUsage
 
 
-class TokenUsageTracker(AIInferenceEngine):
-    """Wrap an :class:`AIInferenceEngine` and record token usage for calls."""
+class TokenUsageTracker(InferenceEngineInterface):
+    """Wrap an :class:`InferenceEngineInterface` and record token usage for calls."""
 
     def __init__(
         self,
-        engine: AIInferenceEngine,
+        engine: InferenceEngineInterface,
         counter: TokenCounter | None = None,
         *,
         provider: str | None = None,
@@ -72,7 +72,7 @@ class TokenUsageTracker(AIInferenceEngine):
             listener(dict(event))
 
     # ------------------------------------------------------------------
-    # AIInferenceEngine interface
+    # InferenceEngineInterface interface
     # ------------------------------------------------------------------
     def infer(self, input_data: Dict) -> Dict:
         result = self.engine.infer(input_data)

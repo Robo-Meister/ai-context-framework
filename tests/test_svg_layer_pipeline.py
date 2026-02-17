@@ -7,10 +7,10 @@ from caiengine.objects.context_query import ContextQuery
 from caiengine.pipelines.svg_layer_actions import SvgActionPlanner
 from caiengine.pipelines.svg_layer_pipeline import SvgLayerPipeline
 from caiengine.providers.memory_context_provider import MemoryContextProvider
-from caiengine.interfaces.inference_engine import AIInferenceEngine
+from caiengine.interfaces.inference_engine import InferenceEngineInterface
 
 
-class RecordingEngine(AIInferenceEngine):
+class RecordingEngine(InferenceEngineInterface):
     def __init__(self, plan):
         self.plan = plan
         self.last_input = None

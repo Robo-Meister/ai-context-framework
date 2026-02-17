@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from caiengine.common import AuditLogger
 from caiengine.interfaces.context_provider import ContextProvider
-from caiengine.interfaces.inference_engine import AIInferenceEngine
+from caiengine.interfaces.inference_engine import InferenceEngineInterface
 from caiengine.objects.context_query import ContextQuery
 
 
@@ -65,7 +65,7 @@ class SvgLayerPipeline:
     def __init__(
         self,
         asset_provider: ContextProvider,
-        inference_engine: AIInferenceEngine,
+        inference_engine: InferenceEngineInterface,
         *,
         audit_logger: AuditLogger | None = None,
     ) -> None:
