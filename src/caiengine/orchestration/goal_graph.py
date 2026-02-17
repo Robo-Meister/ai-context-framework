@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import deque
+from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
@@ -84,11 +85,26 @@ class GoalGraph:
 
         subgraph = GoalGraph()
         for node_id in reachable:
-            subgraph.add_node(self.nodes[node_id])
+            node = self.nodes[node_id]
+            subgraph.add_node(
+                Node(
+                    id=node.id,
+                    type=node.type,
+                    label=node.label,
+                    metadata=deepcopy(node.metadata),
+                )
+            )
 
         for edge in self.edges:
             if edge.source in reachable and edge.target in reachable:
-                subgraph.add_edge(edge)
+                subgraph.add_edge(
+                    Edge(
+                        source=edge.source,
+                        target=edge.target,
+                        label=edge.label,
+                        metadata=deepcopy(edge.metadata),
+                    )
+                )
 
         return subgraph
 
@@ -100,7 +116,7 @@ class GoalGraph:
                     "id": node.id,
                     "type": node.type.value,
                     "label": node.label,
-                    "metadata": node.metadata,
+                    "metadata": deepcopy(node.metadata),
                 }
                 for node in self.nodes.values()
             ],
@@ -109,7 +125,7 @@ class GoalGraph:
                     "source": edge.source,
                     "target": edge.target,
                     "label": edge.label,
-                    "metadata": edge.metadata,
+                    "metadata": deepcopy(edge.metadata),
                 }
                 for edge in self.edges
             ],

@@ -37,6 +37,71 @@ def test_goal_graph_neighbors_and_subgraph():
     assert len(subgraph.edges) == 3
 
 
+def test_goal_graph_to_dict_metadata_isolation():
+    graph = GoalGraph()
+    graph.add_node(
+        Node(
+            id="goal",
+            type=NodeType.GOAL,
+            label="Plan dinner",
+            metadata={"nested": {"priority": "high"}},
+        )
+    )
+    graph.add_node(Node(id="tool", type=NodeType.TOOL, label="Recipe finder"))
+    graph.add_edge(
+        Edge(
+            source="goal",
+            target="tool",
+            metadata={"details": {"confidence": 0.9}},
+        )
+    )
+
+    payload = graph.to_dict()
+    payload["nodes"][0]["metadata"]["nested"]["priority"] = "low"
+    payload["edges"][0]["metadata"]["details"]["confidence"] = 0.1
+
+    assert graph.nodes["goal"].metadata["nested"]["priority"] == "high"
+    assert graph.edges[0].metadata["details"]["confidence"] == 0.9
+
+
+def test_goal_graph_subgraph_isolation():
+    graph = GoalGraph()
+    graph.add_node(
+        Node(
+            id="goal",
+            type=NodeType.GOAL,
+            label="Plan dinner",
+            metadata={"nested": {"priority": "high"}},
+        )
+    )
+    graph.add_node(
+        Node(
+            id="decision",
+            type=NodeType.DECISION,
+            label="Choose recipe",
+            metadata={"options": ["A", "B"]},
+        )
+    )
+    graph.add_edge(
+        Edge(
+            source="goal",
+            target="decision",
+            label="requires",
+            metadata={"trace": {"step": 1}},
+        )
+    )
+
+    subgraph = graph.subgraph_for("goal")
+
+    subgraph.nodes["goal"].label = "Changed"
+    subgraph.nodes["goal"].metadata["nested"]["priority"] = "low"
+    subgraph.edges[0].metadata["trace"]["step"] = 2
+
+    assert graph.nodes["goal"].label == "Plan dinner"
+    assert graph.nodes["goal"].metadata["nested"]["priority"] == "high"
+    assert graph.edges[0].metadata["trace"]["step"] == 1
+
+
 def test_goal_graph_example_fixture_loads():
     fixture_path = Path("docs/examples/meal_prep_pl_wed.json")
     payload = json.loads(fixture_path.read_text())
