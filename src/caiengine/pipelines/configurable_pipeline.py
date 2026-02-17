@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from caiengine.pipelines.context_pipeline import ContextPipeline
 from caiengine.pipelines.feedback_pipeline import FeedbackPipeline
@@ -28,10 +28,13 @@ from caiengine.core.goal_feedback_loop import (
     GoalDrivenFeedbackLoop,
     create_goal_feedback_persistence,
 )
-from caiengine.core.goal_strategies.simple_goal_strategy import SimpleGoalFeedbackStrategy
+from caiengine.core.goal_strategies.simple_goal_strategy import (
+    SimpleGoalFeedbackStrategy,
+)
 from caiengine.policies.simple_policy import SimplePolicyEvaluator
 from caiengine.parser.log_parser import LogParser
 from caiengine.common import AuditLogger
+from caiengine.interfaces.inference_engine import AIInferenceEngine
 
 
 _DURABLE_PROVIDER_MAP = {
@@ -94,7 +97,9 @@ class ConfigurablePipeline:
     audit_logger: AuditLogger | None = None
 
     @classmethod
-    def from_dict(cls, cfg: Dict[str, Any], audit_logger: AuditLogger | None = None) -> "ConfigurablePipeline":
+    def from_dict(
+        cls, cfg: Dict[str, Any], audit_logger: AuditLogger | None = None
+    ) -> "ConfigurablePipeline":
         prov_cfg = cfg.get("provider", {})
         prov_type = prov_cfg.get("type", "memory")
         prov_args = prov_cfg.get("args", {})
@@ -134,6 +139,7 @@ class ConfigurablePipeline:
             pipeline = ContextPipeline(pipeline_provider, audit_logger=audit_logger)
         elif feedback_cfg.get("type") == "complex_nn":
             from caiengine.core.learning.learning_manager import LearningManager
+
             manager = LearningManager(
                 feedback_cfg.get("input_size", 4),
                 hidden_size=feedback_cfg.get("hidden_size", 16),
@@ -141,11 +147,10 @@ class ConfigurablePipeline:
                 parser=parser,
             )
             engine = TokenUsageTracker(
-                manager.inference_engine,
+                cast(AIInferenceEngine, manager),
                 provider=provider_label,
             )
             engine = _attach_usage_logging(engine)
-            manager.inference_engine = engine
             pipeline = FeedbackPipeline(
                 pipeline_provider,
                 engine,
@@ -194,12 +199,24 @@ class ConfigurablePipeline:
             processed.append(item)
 
         if self.audit_logger:
-            self.audit_logger.log("ConfigurablePipeline", "preprocessed", {"items": len(processed)})
+            self.audit_logger.log(
+                "ConfigurablePipeline", "preprocessed", {"items": len(processed)}
+            )
 
         results = self.pipeline.run(processed, self.candidates or [])
 
         if self.audit_logger:
-            self.audit_logger.log("ConfigurablePipeline", "pipeline_run", {"results": len(results) if isinstance(results, list) else len(results.keys())})
+            self.audit_logger.log(
+                "ConfigurablePipeline",
+                "pipeline_run",
+                {
+                    "results": (
+                        len(results)
+                        if isinstance(results, list)
+                        else len(results.keys())
+                    )
+                },
+            )
 
         if isinstance(results, dict):
             results = [dict(v, category=k) for k, v in results.items()]
@@ -219,7 +236,9 @@ class ConfigurablePipeline:
                     filtered.append(res)
             results = filtered
             if self.audit_logger:
-                self.audit_logger.log("ConfigurablePipeline", "policy_applied", {"results": len(results)})
+                self.audit_logger.log(
+                    "ConfigurablePipeline", "policy_applied", {"results": len(results)}
+                )
 
         if self.trust_module:
             for res in results:
