@@ -9,6 +9,7 @@ nav:
   - Home: dev/index.html
   - Getting Started:
       - Quickstart: getting_started/quickstart.md
+      - Use Case Scenarios: getting_started/use_case_scenarios.md
   - Developer Guides:
       - Extending CAIEngine: dev/extending.md
       - HTTP API: http_api.md
