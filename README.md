@@ -89,6 +89,8 @@ not installed, making it safe to use in lightweight deployments.
 
 - [Quickstart guide](docs/getting_started/quickstart.md) – install from PyPI,
   enable optional extras, and run a reference pipeline.
+- [Use case scenarios](docs/getting_started/use_case_scenarios.md) – copy-paste
+  examples for support, IoT, distributed services, analytics, and coaching apps.
 - [Developer hub](docs/dev/index.html) – HTML index that links to the existing
   architecture, API, and network deep dives.
 - [Extending CAIEngine](docs/dev/extending.md) – checklist for authoring new
