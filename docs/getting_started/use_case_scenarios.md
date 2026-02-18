@@ -17,8 +17,20 @@ pipeline = ConfigurablePipeline.from_dict(
         "provider": {"type": "memory", "args": {}},
         "policy": "simple",
         "candidates": [
-            {"id": "route:standard", "priority": 0.4},
-            {"id": "route:priority", "priority": 0.6},
+            {
+                "category": "route:standard",
+                "context": {"channel": "chat", "plan": "business"},
+                "base_weight": 0.4,
+            },
+            {
+                "category": "route:priority",
+                "context": {
+                    "channel": "chat",
+                    "plan": "business",
+                    "priority": "high",
+                },
+                "base_weight": 0.6,
+            },
         ],
         "feedback": {
             "type": "goal",
@@ -52,14 +64,33 @@ reasoning (for example `environment.camera` and `device.motion`).
 
 ```python
 from caiengine.core.fuser import Fuser
+from datetime import datetime
 
 fuser = Fuser()
 
 fused = fuser.fuse(
     {
-        "environment.camera": ["person detected near gate"],
-        "device.motion": ["movement intensity: 0.82"],
-        "location.zone": ["warehouse: east-wing"],
+        ("environment", "2025-01-01T09", "camera"): [
+            {
+                "timestamp": datetime.fromisoformat("2025-01-01T09:00:00"),
+                "content": "person detected near gate",
+                "confidence": 0.96,
+            }
+        ],
+        ("device", "2025-01-01T09", "motion"): [
+            {
+                "timestamp": datetime.fromisoformat("2025-01-01T09:00:03"),
+                "content": "movement intensity: 0.82",
+                "confidence": 0.89,
+            }
+        ],
+        ("location", "2025-01-01T09", "zone"): [
+            {
+                "timestamp": datetime.fromisoformat("2025-01-01T09:00:01"),
+                "content": "warehouse: east-wing",
+                "confidence": 1.0,
+            }
+        ],
     }
 )
 
@@ -111,18 +142,17 @@ Use personality-aware feedback when your app needs coaching behaviour with
 specific tone traits.
 
 ```python
-from caiengine.learning.goal_feedback_loop import GoalDrivenFeedbackLoop
-from caiengine.learning.personality_goal_strategy import PersonalityGoalFeedbackStrategy
+from caiengine.core.goal_feedback_loop import GoalDrivenFeedbackLoop
+from caiengine.core.goal_strategies.personality_goal_strategy import PersonalityGoalFeedbackStrategy
 
 loop = GoalDrivenFeedbackLoop(
-    strategy=PersonalityGoalFeedbackStrategy(
-        personality={"tone": "encouraging", "detail_level": "medium"}
-    )
+    strategy=PersonalityGoalFeedbackStrategy(personality="neutral"),
+    goal_state={"mastery": 0.9},
 )
 
-feedback = loop.get_feedback(
-    action={"type": "quiz_review", "quality": 0.7},
-    goal={"mastery": 0.9},
+feedback = loop.suggest(
+    history=[{"mastery": 0.5}],
+    current_actions=[{"type": "quiz_review", "mastery": 0.7}],
 )
 
 print(feedback)
