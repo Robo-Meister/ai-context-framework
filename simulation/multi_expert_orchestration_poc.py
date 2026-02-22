@@ -123,27 +123,35 @@ def criterion_1_metadata_changes_expert_selection() -> None:
 def criterion_2_budget_changes_context_packet_layers() -> None:
     print("\n=== Criterion 2: budget changes selected context layers ===")
 
-    pipeline = OrchestratedPipeline(context_provider=_build_provider(), registry=_build_registry())
+    class Criterion2Provider:
+        def get_context(self, _query: Any | None = None) -> dict[str, Any]:
+            return {
+                "pantry": ["rice", "eggs", "spinach"],
+                "calendar": {"weekday": "Wednesday", "available_minutes": 35},
+            }
+
+    pipeline = OrchestratedPipeline(context_provider=Criterion2Provider(), registry=_build_registry())
     request = {
         "category": "support",
         "scope": "customer",
         "tags": ["text", "urgent"],
         "required_layers": ["retrieved.items"],
-        "optional_layers": [
-            "goal.meal",
-            "goal.meal.constraints",
-            "retrieved.items.pantry",
-            "retrieved.items.calendar",
-            "request",
-        ],
     }
 
     tight_budget = {
+        "meal": {
+            "name": "quick_spinach_eggs",
+            "constraints": {"max_budget_pln": 40, "diet": "vegetarian"},
+        },
         "required_layers": ["retrieved.items"],
         "optional_layers": ["goal.meal"],
         "budget": {"max_layers": 2, "max_chars": 220},
     }
     roomy_budget = {
+        "meal": {
+            "name": "quick_spinach_eggs",
+            "constraints": {"max_budget_pln": 40, "diet": "vegetarian"},
+        },
         "required_layers": ["retrieved.items"],
         "optional_layers": [
             "goal.meal",
