@@ -21,6 +21,7 @@ nav:
       - Goal-driven Feedback Loop: goal-driven-feedback-loop.md
       - Event Context Standard: event-context-standard.md
       - SVG Layered Generation: svg_layered_generation.md
+      - Multi-Expert Orchestration PoC: multi-expert-orchestration-poc.md
 markdown_extensions:
   - toc:
       permalink: true

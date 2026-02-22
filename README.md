@@ -91,6 +91,9 @@ not installed, making it safe to use in lightweight deployments.
   enable optional extras, and run a reference pipeline.
 - [Use case scenarios](docs/getting_started/use_case_scenarios.md) – copy-paste
   examples for support, IoT, distributed services, analytics, and coaching apps.
+- [Multi-expert orchestration PoC](docs/multi-expert-orchestration-poc.md) –
+  run a local demo for budgeted context packets, expert routing, and adaptive
+  policy feedback.
 - [Developer hub](docs/dev/index.html) – HTML index that links to the existing
   architecture, API, and network deep dives.
 - [Extending CAIEngine](docs/dev/extending.md) – checklist for authoring new
