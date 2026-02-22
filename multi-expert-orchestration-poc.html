@@ -79,6 +79,12 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#run">Run</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#layer-naming-tip-abstraction-depth">Layer naming tip (abstraction depth)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#budget-tuning-behavior">Budget tuning behavior</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#portable-workflow-graph-payloads">Portable workflow graph payloads</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#what-this-demonstrates">What this demonstrates</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#what-is-still-missing-for-a-full-workflow-graph">What is still missing for a full workflow graph</a>
@@ -121,8 +127,34 @@ with budgeted context packets and optional adaptive routing.</p>
 <li>selected and omitted context layers,</li>
 <li>chosen experts,</li>
 <li>confidence scores,</li>
-<li>final output payload.</li>
+<li>final output payload,</li>
+<li>workflow graph JSON round-trip output.</li>
 </ul>
+<h2 id="layer-naming-tip-abstraction-depth">Layer naming tip (abstraction depth)<a class="headerlink" href="#layer-naming-tip-abstraction-depth" title="Permanent link">&para;</a></h2>
+<p>The PoC now uses layer names that encode specificity:</p>
+<ul>
+<li><code>goal.meal</code> (general intent),</li>
+<li><code>goal.meal.constraints</code> (deeper constraints),</li>
+<li><code>retrieved.items</code> (broad observations),</li>
+<li><code>retrieved.items.pantry</code> / <code>retrieved.items.calendar</code> (deeper observations).</li>
+</ul>
+<p>This makes it easy to tune how much detail reaches experts by only changing
+budget fields.</p>
+<h2 id="budget-tuning-behavior">Budget tuning behavior<a class="headerlink" href="#budget-tuning-behavior" title="Permanent link">&para;</a></h2>
+<p>Criterion 2 compares:</p>
+<ul>
+<li>a tight budget (small <code>max_layers</code> / <code>max_chars</code>) that tends to pass mostly
+  higher-level layers, and</li>
+<li>a roomy budget that can include deeper constraint and observation layers.</li>
+</ul>
+<p>Use this as a proxy for "reasoning depth" in prompt assembly before introducing
+a full GoalGraph executor.</p>
+<h2 id="portable-workflow-graph-payloads">Portable workflow graph payloads<a class="headerlink" href="#portable-workflow-graph-payloads" title="Permanent link">&para;</a></h2>
+<p>Criterion 4 demonstrates storing a workflow graph as JSON using
+<code>GoalGraph.to_dict()</code> / <code>GoalGraph.from_dict()</code>.</p>
+<p>That keeps graphs layered and portable in the same spirit as the event context
+standard, and prepares artifacts for later execution when a graph executor is
+added.</p>
 <h2 id="what-this-demonstrates">What this demonstrates<a class="headerlink" href="#what-this-demonstrates" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Request metadata can change expert selection.</li>

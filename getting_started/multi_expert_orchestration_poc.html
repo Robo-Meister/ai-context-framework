@@ -113,6 +113,8 @@ context packet and optional adaptive routing.</p>
    layers are included.</li>
 <li>With a simple reward signal, adaptive routing (<code>EpsilonGreedyRoutingPolicy</code>)
    improves expert selection over time.</li>
+<li>Workflow graphs can be stored as portable JSON payloads via
+   <code>GoalGraph.to_dict()</code> / <code>GoalGraph.from_dict()</code>.</li>
 </ol>
 <p>Non-goals:</p>
 <ul>
@@ -143,8 +145,17 @@ pip install -e .[dev]
   metadata.</li>
 <li>Criterion 2 should show fewer layers with the tight budget than with the
   roomy budget.</li>
+<li>In Criterion 2, layer naming communicates abstraction depth, for example:</li>
+<li><code>goal.meal</code> (general),</li>
+<li><code>goal.meal.constraints</code> (more specific),</li>
+<li><code>retrieved.items</code> (observations),</li>
+<li><code>retrieved.items.pantry</code> and <code>retrieved.items.calendar</code> (deeper sources).
+  Changing <code>budget.max_layers</code> / <code>budget.max_chars</code> should determine whether
+  only broad layers or deeper layers are passed onward.</li>
 <li>Criterion 3 should select a baseline expert before rewards and prefer the
   higher-reward expert after repeated outcomes are recorded.</li>
+<li>Criterion 4 should print serialized graph JSON and confirm round-trip
+  stability (<code>True</code>).</li>
 </ul>
               
             </div>
