@@ -3,18 +3,18 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://robo-meister.github.io/ai-context-framework/dev/releasing.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://robo-meister.github.io/ai-context-framework/getting_started/multi_expert_orchestration_poc.html" />
       <link rel="shortcut icon" href="../img/favicon.ico" />
-    <title>Releasing caiengine - CAIEngine Docs</title>
+    <title>Multi-Expert Orchestration PoC - CAIEngine Docs</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Releasing caiengine";
-        var mkdocs_page_input_path = "dev/releasing.md";
-        var mkdocs_page_url = "/ai-context-framework/dev/releasing.html";
+        var mkdocs_page_name = "Multi-Expert Orchestration PoC";
+        var mkdocs_page_input_path = "getting_started/multi_expert_orchestration_poc.md";
+        var mkdocs_page_url = "/ai-context-framework/getting_started/multi_expert_orchestration_poc.html";
       </script>
     
     <!--[if lt IE 9]>
@@ -40,27 +40,27 @@
 
       <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="index.html">Home</a>
+                <li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Home</a>
                 </li>
               </ul>
               <p class="caption"><span class="caption-text">Getting Started</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../getting_started/quickstart.html">Quickstart</a>
+                  <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../getting_started/use_case_scenarios.html">Use Case Scenarios</a>
+                  <li class="toctree-l1"><a class="reference internal" href="use_case_scenarios.html">Use Case Scenarios</a>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">Developer Guides</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="extending.html">Extending CAIEngine</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../dev/extending.html">Extending CAIEngine</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../http_api.html">HTTP API</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../dev/api_reference.html">API Reference</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../dev/architecture.html">Architecture</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="network.html">Network Guide</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../dev/network.html">Network Guide</a>
                   </li>
               </ul>
               <ul>
@@ -92,7 +92,7 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
-      <li class="breadcrumb-item active">Releasing caiengine</li>
+      <li class="breadcrumb-item active">Multi-Expert Orchestration PoC</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -101,38 +101,51 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="releasing-caiengine">Releasing caiengine<a class="headerlink" href="#releasing-caiengine" title="Permanent link">&para;</a></h1>
-<p>This checklist outlines the steps required to publish a new release of the caiengine package.</p>
-<h2 id="1-prepare-the-release">1. Prepare the Release<a class="headerlink" href="#1-prepare-the-release" title="Permanent link">&para;</a></h2>
+                <h1 id="multi-expert-orchestration-poc">Multi-Expert Orchestration PoC<a class="headerlink" href="#multi-expert-orchestration-poc" title="Permanent link">&para;</a></h1>
+<p>This PoC demonstrates how <code>OrchestratedPipeline</code> can route a request through
+multiple small experts instead of one large model, while using a budgeted
+context packet and optional adaptive routing.</p>
+<h2 id="what-this-poc-proves">What this PoC proves<a class="headerlink" href="#what-this-poc-proves" title="Permanent link">&para;</a></h2>
+<p>Success criteria covered by the PoC script:</p>
+<ol>
+<li>Changing request metadata changes which experts are selected.</li>
+<li>Context packet budgets (<code>max_layers</code> / <code>max_chars</code>) change which context
+   layers are included.</li>
+<li>With a simple reward signal, adaptive routing (<code>EpsilonGreedyRoutingPolicy</code>)
+   improves expert selection over time.</li>
+</ol>
+<p>Non-goals:</p>
 <ul>
-<li>[ ] Update the version in <code>pyproject.toml</code> and <code>setup.py</code>.</li>
-<li>[ ] Document the changes in <code>CHANGELOG.md</code> under a new version heading.</li>
-<li>[ ] Ensure documentation updates are committed, especially if the release introduces new developer workflows.</li>
+<li>This PoC does not execute multi-step GoalGraphs.</li>
+<li>This PoC does not require an external LLM provider.</li>
 </ul>
-<h2 id="2-verify-code-quality">2. Verify Code Quality<a class="headerlink" href="#2-verify-code-quality" title="Permanent link">&para;</a></h2>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -e .[dev]
+</code></pre>
+<h2 id="run-the-poc">Run the PoC<a class="headerlink" href="#run-the-poc" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">python simulation/multi_expert_orchestration_poc.py
+</code></pre>
+<p>The script prints three sections, one for each criterion.</p>
+<h2 id="how-it-is-wired">How it is wired<a class="headerlink" href="#how-it-is-wired" title="Permanent link">&para;</a></h2>
 <ul>
-<li>[ ] Run the unit test suite (<code>pytest</code>) and linting tools used by the project.</li>
-<li>[ ] Regenerate any artifacts or documentation that depend on the code, if applicable.</li>
+<li><code>OrchestratedPipeline</code> compiles a context packet and emits telemetry.</li>
+<li><code>ContextPacketCompiler</code> applies required + optional layer selection under
+  <code>max_layers</code> and <code>max_chars</code> budgets.</li>
+<li><code>ExpertRouter</code> uses either:</li>
+<li><code>RuleBasedRoutingPolicy</code> for deterministic capability matching, or</li>
+<li><code>EpsilonGreedyRoutingPolicy</code> for adaptive selection based on rewards.</li>
 </ul>
-<h2 id="3-build-artifacts">3. Build Artifacts<a class="headerlink" href="#3-build-artifacts" title="Permanent link">&para;</a></h2>
+<h2 id="expected-output-cues">Expected output cues<a class="headerlink" href="#expected-output-cues" title="Permanent link">&para;</a></h2>
 <ul>
-<li>[ ] Clean the <code>dist/</code> directory and run <code>python -m build</code> from the project root.</li>
-<li>[ ] Inspect the resulting source distribution and wheel to confirm provider modules, docs, and the CLI entry point are present.</li>
+<li>Criterion 1 should print different expert lists for support vs finance
+  metadata.</li>
+<li>Criterion 2 should show fewer layers with the tight budget than with the
+  roomy budget.</li>
+<li>Criterion 3 should select a baseline expert before rewards and prefer the
+  higher-reward expert after repeated outcomes are recorded.</li>
 </ul>
-<h2 id="4-smoke-test-the-wheel">4. Smoke-Test the Wheel<a class="headerlink" href="#4-smoke-test-the-wheel" title="Permanent link">&para;</a></h2>
-<ul>
-<li>[ ] Create a fresh virtual environment.</li>
-<li>[ ] Install the newly built wheel with <code>pip install dist/*.whl</code>.</li>
-<li>[ ] If the CLI relies on optional providers (e.g., torch-backed storage), install the extras with <code>pip install 'dist/*.whl[ai]'</code>.</li>
-<li>[ ] Run <code>context --help</code> to confirm the CLI entry point works once dependencies are satisfied.</li>
-</ul>
-<h2 id="5-publish">5. Publish<a class="headerlink" href="#5-publish" title="Permanent link">&para;</a></h2>
-<ul>
-<li>[ ] Upload artifacts with <code>twine upload dist/*</code> (or the organization-specific publishing command).</li>
-<li>[ ] Tag the release in version control and push the tag.</li>
-<li>[ ] Announce the release through the appropriate communication channels.</li>
-</ul>
-<p>Keeping a log of each release run helps future maintainers debug issues quickly.</p>
               
             </div>
           </div><footer>

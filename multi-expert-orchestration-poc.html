@@ -3,18 +3,18 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://robo-meister.github.io/ai-context-framework/event-context-standard.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://robo-meister.github.io/ai-context-framework/multi-expert-orchestration-poc.html" />
       <link rel="shortcut icon" href="img/favicon.ico" />
-    <title>Event Context Standard - CAIEngine Docs</title>
+    <title>Multi-Expert Orchestration PoC - CAIEngine Docs</title>
     <link rel="stylesheet" href="css/theme.css" />
     <link rel="stylesheet" href="css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Event Context Standard";
-        var mkdocs_page_input_path = "event-context-standard.md";
-        var mkdocs_page_url = "/ai-context-framework/event-context-standard.html";
+        var mkdocs_page_name = "Multi-Expert Orchestration PoC";
+        var mkdocs_page_input_path = "multi-expert-orchestration-poc.md";
+        var mkdocs_page_url = "/ai-context-framework/multi-expert-orchestration-poc.html";
       </script>
     
     <!--[if lt IE 9]>
@@ -71,19 +71,19 @@
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="goal-driven-feedback-loop.html">Goal-driven Feedback Loop</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Event Context Standard</a>
-    <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#data-model">Data model</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#distribution">Distribution</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#persistence-api">Persistence API</a>
-    </li>
-    </ul>
+                  <li class="toctree-l1"><a class="reference internal" href="event-context-standard.html">Event Context Standard</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="svg_layered_generation.html">SVG Layered Generation</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="multi-expert-orchestration-poc.html">Multi-Expert Orchestration PoC</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Multi-Expert Orchestration PoC</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#run">Run</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#what-this-demonstrates">What this demonstrates</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#what-is-still-missing-for-a-full-workflow-graph">What is still missing for a full workflow graph</a>
+    </li>
+    </ul>
                   </li>
               </ul>
       </div>
@@ -101,7 +101,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Examples</li>
-      <li class="breadcrumb-item active">Event Context Standard</li>
+      <li class="breadcrumb-item active">Multi-Expert Orchestration PoC</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -110,62 +110,37 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="event-context-standard">Event Context Standard<a class="headerlink" href="#event-context-standard" title="Permanent link">&para;</a></h1>
-<p>This document defines a standard structure for representing events with
-multi-layered context and trust metadata.</p>
-<h2 id="data-model">Data model<a class="headerlink" href="#data-model" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>Event</strong></li>
-<li><code>event_id</code>: unique identifier</li>
-<li><code>timestamp</code>: epoch seconds</li>
-<li><code>source</code>: origin system or actor</li>
-<li><code>payload</code>: raw message or data</li>
-<li><code>contexts</code>: mapping of context categories</li>
-<li><strong>ContextCategory</strong></li>
-<li><code>name</code>: category label such as <code>user</code>, <code>device</code>, or <code>environment</code></li>
-<li><code>layers</code>: ordered list of context layers</li>
-<li><strong>ContextLayer</strong></li>
-<li><code>layer_id</code>: identifier within the category</li>
-<li><code>data</code>: arbitrary JSON-compatible payload</li>
-<li><code>weight</code>: relevance weighting (0.0–1.0)</li>
-<li><code>trust</code>: confidence score (0.0–1.0)</li>
-<li><code>scope</code>: optional scope such as <code>global</code>, <code>session</code>, or <code>request</code></li>
-<li><code>parent</code>: optional parent layer identifier</li>
-</ul>
-<h2 id="distribution">Distribution<a class="headerlink" href="#distribution" title="Permanent link">&para;</a></h2>
-<p>Events and their context can be distributed as JSON documents. The
-structure is portable across languages and can be transported via message
-queues, HTTP APIs, or persisted to files. The default implementation
-uses JSON for ease of inspection and interoperability.</p>
-<h2 id="persistence-api">Persistence API<a class="headerlink" href="#persistence-api" title="Permanent link">&para;</a></h2>
-<p>The module <code>caiengine.common.context_model</code> provides classes for the data
-model and helper functions for persistence:</p>
-<pre><code class="language-python">from caiengine.common import Event, ContextCategory, ContextLayer
-
-layer = ContextLayer(layer_id=&quot;session&quot;, data={&quot;user&quot;: &quot;abc&quot;}, weight=0.8)
-category = ContextCategory(name=&quot;user&quot;, layers=[layer])
-
-event = Event(
-    event_id=&quot;evt-1&quot;,
-    timestamp=1710000000.0,
-    source=&quot;sensor-A&quot;,
-    payload={&quot;action&quot;: &quot;login&quot;},
-    contexts={&quot;user&quot;: category},
-)
-
-# Save and load
-path = &quot;event.json&quot;
-event.save(path)
-loaded = Event.load(path)
+                <h1 id="multi-expert-orchestration-poc">Multi-Expert Orchestration PoC<a class="headerlink" href="#multi-expert-orchestration-poc" title="Permanent link">&para;</a></h1>
+<p>This PoC shows how CAIEngine can route a request through multiple small experts
+with budgeted context packets and optional adaptive routing.</p>
+<h2 id="run">Run<a class="headerlink" href="#run" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">python simulation/poc_multi_expert.py
 </code></pre>
-<p>This API allows components to persist or transmit events with their
-associated context in a standardized format.</p>
+<p>The script prints:</p>
+<ul>
+<li>selected and omitted context layers,</li>
+<li>chosen experts,</li>
+<li>confidence scores,</li>
+<li>final output payload.</li>
+</ul>
+<h2 id="what-this-demonstrates">What this demonstrates<a class="headerlink" href="#what-this-demonstrates" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Request metadata can change expert selection.</li>
+<li>Context packet budgets (<code>max_layers</code>, <code>max_chars</code>) change selected layers.</li>
+<li>Reward feedback can improve routing when using <code>EpsilonGreedyRoutingPolicy</code>.</li>
+</ol>
+<h2 id="what-is-still-missing-for-a-full-workflow-graph">What is still missing for a full workflow graph<a class="headerlink" href="#what-is-still-missing-for-a-full-workflow-graph" title="Permanent link">&para;</a></h2>
+<ul>
+<li>GoalGraph executor for walking nodes, executing tools/experts, and persisting intermediates.</li>
+<li>Automatic layer selection derived from graph steps and expert requirements.</li>
+<li>Dynamic expert lifecycle support (load/swap from model bundles).</li>
+<li>Evaluation harness with domain scenarios, rewards, and regression checks.</li>
+</ul>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="goal-driven-feedback-loop.html" class="btn btn-neutral float-left" title="Goal-driven Feedback Loop"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="svg_layered_generation.html" class="btn btn-neutral float-right" title="SVG Layered Generation">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="svg_layered_generation.html" class="btn btn-neutral float-left" title="SVG Layered Generation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
     </div>
 
   <hr/>
@@ -188,10 +163,8 @@ associated context in a standardized format.</p>
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="goal-driven-feedback-loop.html" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="svg_layered_generation.html" style="color: #fcfcfc">&laquo; Previous</a></span>
     
-    
-      <span><a href="svg_layered_generation.html" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
