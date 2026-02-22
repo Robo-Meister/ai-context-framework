@@ -13,6 +13,8 @@ Success criteria covered by the PoC script:
    layers are included.
 3. With a simple reward signal, adaptive routing (`EpsilonGreedyRoutingPolicy`)
    improves expert selection over time.
+4. Workflow graphs can be stored as portable JSON payloads via
+   `GoalGraph.to_dict()` / `GoalGraph.from_dict()`.
 
 Non-goals:
 
@@ -50,5 +52,14 @@ The script prints three sections, one for each criterion.
   metadata.
 - Criterion 2 should show fewer layers with the tight budget than with the
   roomy budget.
+- In Criterion 2, layer naming communicates abstraction depth, for example:
+  - `goal.meal` (general),
+  - `goal.meal.constraints` (more specific),
+  - `retrieved.items` (observations),
+  - `retrieved.items.pantry` and `retrieved.items.calendar` (deeper sources).
+  Changing `budget.max_layers` / `budget.max_chars` should determine whether
+  only broad layers or deeper layers are passed onward.
 - Criterion 3 should select a baseline expert before rewards and prefer the
   higher-reward expert after repeated outcomes are recorded.
+- Criterion 4 should print serialized graph JSON and confirm round-trip
+  stability (`True`).

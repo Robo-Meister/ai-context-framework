@@ -14,7 +14,40 @@ The script prints:
 - selected and omitted context layers,
 - chosen experts,
 - confidence scores,
-- final output payload.
+- final output payload,
+- workflow graph JSON round-trip output.
+
+## Layer naming tip (abstraction depth)
+
+The PoC now uses layer names that encode specificity:
+
+- `goal.meal` (general intent),
+- `goal.meal.constraints` (deeper constraints),
+- `retrieved.items` (broad observations),
+- `retrieved.items.pantry` / `retrieved.items.calendar` (deeper observations).
+
+This makes it easy to tune how much detail reaches experts by only changing
+budget fields.
+
+## Budget tuning behavior
+
+Criterion 2 compares:
+
+- a tight budget (small `max_layers` / `max_chars`) that tends to pass mostly
+  higher-level layers, and
+- a roomy budget that can include deeper constraint and observation layers.
+
+Use this as a proxy for "reasoning depth" in prompt assembly before introducing
+a full GoalGraph executor.
+
+## Portable workflow graph payloads
+
+Criterion 4 demonstrates storing a workflow graph as JSON using
+`GoalGraph.to_dict()` / `GoalGraph.from_dict()`.
+
+That keeps graphs layered and portable in the same spirit as the event context
+standard, and prepares artifacts for later execution when a graph executor is
+added.
 
 ## What this demonstrates
 

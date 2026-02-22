@@ -6,10 +6,12 @@ Run with:
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from pprint import pprint
 from typing import Any
 
+from caiengine.orchestration.goal_graph import Edge, GoalGraph, Node, NodeType
 from caiengine.orchestration import EpsilonGreedyRoutingPolicy, ExpertRegistry, ExpertResult, ExpertRouter
 from caiengine.pipelines.orchestrated_pipeline import OrchestratedPipeline
 from caiengine.providers.memory_context_provider import MemoryContextProvider
@@ -43,12 +45,19 @@ class DemoExpert:
 def _build_provider() -> MemoryContextProvider:
     provider = MemoryContextProvider()
     provider.ingest_context(
-        payload={"ticket": "A-17", "summary": "customer asks for fast refund", "sentiment": "negative"},
-        metadata={"roles": ["support"], "content": "support case data"},
+        payload={
+            "ticket": "A-17",
+            "summary": "customer asks for fast refund",
+            "sentiment": "negative",
+            "pantry": ["rice", "eggs", "spinach"],
+            "country": "PL",
+            "weekday": "Wednesday",
+        },
+        metadata={"roles": ["support"], "content": "support case + pantry hints"},
     )
     provider.ingest_context(
-        payload={"account": "A-17", "amount": 1920, "currency": "USD"},
-        metadata={"roles": ["finance"], "content": "billing facts"},
+        payload={"account": "A-17", "amount": 1920, "currency": "USD", "calendar": "Wednesday"},
+        metadata={"roles": ["finance"], "content": "billing facts + calendar hint"},
     )
     return provider
 
@@ -114,23 +123,90 @@ def criterion_1_metadata_changes_expert_selection() -> None:
 def criterion_2_budget_changes_context_packet_layers() -> None:
     print("\n=== Criterion 2: budget changes selected context layers ===")
 
-    pipeline = OrchestratedPipeline(context_provider=_build_provider(), registry=_build_registry())
+    class Criterion2Provider:
+        def get_context(self, _query: Any | None = None) -> dict[str, Any]:
+            return {
+                "pantry": ["rice", "eggs", "spinach"],
+                "calendar": {"weekday": "Wednesday", "available_minutes": 35},
+            }
+
+    pipeline = OrchestratedPipeline(context_provider=Criterion2Provider(), registry=_build_registry())
     request = {
         "category": "support",
         "scope": "customer",
         "tags": ["text", "urgent"],
         "required_layers": ["retrieved.items"],
-        "optional_layers": ["goal", "request"],
     }
 
-    tight_budget = {"required_layers": ["retrieved.items"], "optional_layers": ["goal", "request"], "budget": {"max_layers": 1, "max_chars": 200}}
-    roomy_budget = {"required_layers": ["retrieved.items"], "optional_layers": ["goal", "request"], "budget": {"max_layers": 3, "max_chars": 5_000}}
+    tight_budget = {
+        "meal": {
+            "name": "quick_spinach_eggs",
+            "constraints": {"max_budget_pln": 40, "diet": "vegetarian"},
+        },
+        "required_layers": ["retrieved.items"],
+        "optional_layers": ["goal.meal"],
+        "budget": {"max_layers": 2, "max_chars": 220},
+    }
+    roomy_budget = {
+        "meal": {
+            "name": "quick_spinach_eggs",
+            "constraints": {"max_budget_pln": 40, "diet": "vegetarian"},
+        },
+        "required_layers": ["retrieved.items"],
+        "optional_layers": [
+            "goal.meal",
+            "goal.meal.constraints",
+            "retrieved.items.pantry",
+            "retrieved.items.calendar",
+            "request",
+        ],
+        "budget": {"max_layers": 6, "max_chars": 5_000},
+    }
 
     tight = pipeline.run(request=request, goal_context=tight_budget)
     roomy = pipeline.run(request=request, goal_context=roomy_budget)
 
     print("Tight budget layers:", tight["telemetry"]["selected_layers"])
     print("Roomy budget layers:", roomy["telemetry"]["selected_layers"])
+
+
+def criterion_4_goal_graph_json_round_trip() -> None:
+    print("\n=== Criterion 4: workflow graph can be serialized as JSON ===")
+
+    graph = GoalGraph()
+    graph.add_node(
+        Node(
+            id="goal.meal",
+            type=NodeType.GOAL,
+            label="Generate Wednesday meal idea",
+            metadata={"country": "PL"},
+        )
+    )
+    graph.add_node(
+        Node(
+            id="goal.meal.constraints",
+            type=NodeType.CONTEXT_LAYER,
+            label="Meal constraints",
+            metadata={"max_budget_pln": 40, "weekday": "Wednesday"},
+        )
+    )
+    graph.add_node(
+        Node(
+            id="expert.meal_planner",
+            type=NodeType.EXPERT,
+            label="Meal planner expert",
+            metadata={"uses_layers": ["goal.meal", "goal.meal.constraints", "retrieved.items"]},
+        )
+    )
+    graph.add_edge(Edge("goal.meal", "goal.meal.constraints", label="constrained_by"))
+    graph.add_edge(Edge("goal.meal.constraints", "expert.meal_planner", label="executed_by"))
+
+    payload = graph.to_dict()
+    rehydrated = GoalGraph.from_dict(payload)
+
+    print("Serialized graph JSON:")
+    print(json.dumps(payload, indent=2))
+    print("Round-trip stable:", rehydrated.to_dict() == payload)
 
 
 def criterion_3_adaptive_routing_improves_with_feedback() -> None:
@@ -175,3 +251,4 @@ if __name__ == "__main__":
     criterion_1_metadata_changes_expert_selection()
     criterion_2_budget_changes_context_packet_layers()
     criterion_3_adaptive_routing_improves_with_feedback()
+    criterion_4_goal_graph_json_round_trip()
