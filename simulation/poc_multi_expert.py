@@ -107,7 +107,6 @@ def run_rule_based_demo(provider: MemoryContextProvider, registry: ExpertRegistr
         "goal_id": "meal_pl_pl_wed",
         "roles": ["user"],
         "scope": "PL",
-        "budget": {"max_layers": 3, "max_chars": 10_000},
         "goal": {"meal_day": "Wednesday", "region": "PL"},
     }
 
