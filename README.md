@@ -365,6 +365,8 @@ Please fork the repo, create a feature branch, and open a pull request. Use issu
 
 For an outline of ongoing development plans and upcoming features, see [docs/dev/TECHNICAL_ROADMAP.md](docs/dev/TECHNICAL_ROADMAP.md).
 
+Contact: caiengigne@robo-meister.com
+
 ## License
 
 MIT License — see LICENSE file.
