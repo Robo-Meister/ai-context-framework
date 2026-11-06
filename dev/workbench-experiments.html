@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://robo-meister.github.io/ai-context-framework/dev/workbench-experiments.html" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>CAIEngine Workbench experiments (development only) - CAIEngine Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "CAIEngine Workbench experiments (development only)";
+        var mkdocs_page_input_path = "dev/workbench-experiments.md";
+        var mkdocs_page_url = "/ai-context-framework/dev/workbench-experiments.html";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> CAIEngine Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="index.html">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../getting_started/quickstart.html">Quickstart</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../getting_started/use_case_scenarios.html">Use Case Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Developer Guides</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="extending.html">Extending CAIEngine</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../http_api.html">HTTP API</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="network.html">Network Guide</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../theory/index.html">Theory</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Examples</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../goal-driven-feedback-loop.html">Goal-driven Feedback Loop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../event-context-standard.html">Event Context Standard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../svg_layered_generation.html">SVG Layered Generation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../multi-expert-orchestration-poc.html">Multi-Expert Orchestration PoC</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">CAIEngine Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">CAIEngine Workbench experiments (development only)</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="caiengine-workbench-experiments-development-only">CAIEngine Workbench experiments (development only)<a class="headerlink" href="#caiengine-workbench-experiments-development-only" title="Permanent link">&para;</a></h1>
+<p>The optional experimental HTTP surface exposes <strong>real CAIEngine primitives</strong>
+through bounded, synthetic, ephemeral previews. It is designed for the
+<code>context_engine_client</code> ContextWorkbench UI, not for live agent orchestration.</p>
+<h2 id="enable-locally">Enable locally<a class="headerlink" href="#enable-locally" title="Permanent link">&para;</a></h2>
+<p>Set both variables <strong>on the CAIEngine service only</strong>:</p>
+<pre><code class="language-sh">export CAI_EXPERIMENTS_ENABLED=true
+export CAI_EXPERIMENTS_TOKEN='generate-a-long-random-local-token'
+python -m caiengine.service --host 127.0.0.1 --port 8081 --rate-limit 30
+</code></pre>
+<p>Experimental routes are <strong>not registered</strong> if the flag is disabled or the
+token is missing. An enabled request requires the
+<code>X-Cai-Experiments-Token</code> HTTP header; do not put this token in a browser or
+a public URL. Configure a protected server-side ContextWorkbench proxy with
+the same token. Use localhost, network-level restrictions and authentication
+for that proxy. Do <strong>not</strong> publish these routes unauthenticated to the Internet.</p>
+<h2 id="available-routes">Available routes<a class="headerlink" href="#available-routes" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>GET /experimental/capabilities</code>: active, isolated features.</li>
+<li><code>POST /experimental/goal-loop/preview</code>: JSON
+  <code>{ "goal_state": {"progress": 1}, "history": [{"progress": 0.2}],
+  "current_actions": [{"progress": 0.3}] }</code>.
+  Uses a fresh <code>GoalDrivenFeedbackLoop(SimpleGoalFeedbackStrategy)</code> and returns
+  suggestions, analysis, history size and debug metadata.</li>
+<li><code>POST /experimental/goal-graph/preview</code>: JSON with
+  <code>nodes: [{id,type,label,metadata?}]</code>, <code>edges: [{source,target,label?}]</code>,
+  optional <code>root_goal</code>. Uses <code>GoalGraph.from_dict</code> and
+  <code>GoalGraph.subgraph_for</code>; returns serialized graph and reachable subset.
+  Valid node types: GOAL, DECISION, TOOL, EXPERT, CONTEXT_LAYER.</li>
+<li><code>POST /experimental/network/preview</code>: JSON with
+  <code>nodes: [{id,capabilities?,drivers?,apps?}]</code>,
+  <code>edges: [{source,target,weight?}]</code>, and
+  <code>requirements: {capabilities?,drivers?,apps?}</code>.
+  Uses <code>AgentNetwork</code>, <code>NodeRegistry</code>, <code>NodeManager</code>,
+  <code>CapabilityRegistry</code>, <code>MeshDispatcher</code>, and <code>SimpleNetworkMock</code> to
+  return match candidates, mock dispatch outcome, adjacency and telemetry.</li>
+</ul>
+<p>Payloads are limited to 32 KiB, goal graphs to 60 nodes/120 edges, agent
+networks to 30 nodes/80 edges, loop history to 30 entries and current
+actions to 20. Nothing is sent to real RoboID addresses and no context,
+registries, agents or workflow state is persisted. The demo does <strong>not</strong>
+call the existing stateful <code>/suggest</code> route.</p>
+<p>These endpoints are instrumentation of existing canonical implementations,
+<strong>not</strong> a new production AI graph engine or a claim that a local preview
+represents a full production dispatch. Debug payloads contain synthetic
+user-provided test data and should still be kept private.</p>
+<h2 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">&para;</a></h2>
+<p><code>pytest tests/test_workbench_previews.py tests/test_cai_service.py</code></p>
+<h2 id="canonical-platform-alignment">Canonical platform alignment<a class="headerlink" href="#canonical-platform-alignment" title="Permanent link">&para;</a></h2>
+<p>No new persisted state, resource entitlements, business events, workflow
+transitions, risk record, documents, communications or reporting sources.
+Canonical Context Engine consumers are unchanged. The experimental surface
+must stay behind deployment authorization and must not become an alternate
+production dispatcher. Existing auth hook and rate-limit middleware remain
+applicable. API output includes provenance/debug of which canonical classes
+were used. No migrations are necessary; opt-in defaults off.</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
