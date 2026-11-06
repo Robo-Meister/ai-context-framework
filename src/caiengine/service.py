@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import hmac
 import json
 import logging
+import os
 import threading
+
+from fastapi import HTTPException, Request
 from typing import Any, Iterable
 
 from caiengine.common.token_usage import TokenCounter
@@ -67,8 +71,75 @@ class CAIService:
             rate_limit_identifier=self.rate_limit_identifier,
             include_goal_routes=True,
         )
+        self._register_experimental_routes()
         self._server: Any | None = None
         self._thread: threading.Thread | None = None
+
+    def _register_experimental_routes(self) -> None:
+        """Expose synthetic-only developer previews behind explicit opt-in and a token."""
+        enabled = os.getenv("CAI_EXPERIMENTS_ENABLED", "").lower() in {"true", "1", "yes"}
+        token = os.getenv("CAI_EXPERIMENTS_TOKEN", "")
+        if not enabled or not token:
+            # There is no API surface to accidentally expose in production.
+            return
+
+        from caiengine.experimental.workbench import (
+            preview_agent_network,
+            preview_goal_graph,
+            preview_goal_loop,
+        )
+
+        def require_token(request: Request) -> None:
+            supplied = request.headers.get("X-Cai-Experiments-Token", "")
+            if not hmac.compare_digest(supplied, token):
+                raise HTTPException(status_code=403, detail="Experimental access denied")
+
+        async def read_payload(request: Request) -> dict[str, Any]:
+            require_token(request)
+            body = await request.body()
+            if len(body) > 32768:
+                raise HTTPException(status_code=413, detail="Experimental payload is too large")
+            try:
+                decoded = json.loads(body)
+            except (ValueError, UnicodeDecodeError):
+                raise HTTPException(status_code=422, detail="Expected a JSON object") from None
+            if not isinstance(decoded, dict):
+                raise HTTPException(status_code=422, detail="Expected a JSON object")
+            return decoded
+
+        @self.app.get("/experimental/capabilities")
+        async def experiment_capabilities(request: Request) -> dict[str, Any]:
+            require_token(request)
+            return {
+                "mode": "isolated_preview",
+                "available": ["goal_loop", "goal_graph", "agent_network"],
+                "live_dispatch": False,
+                "persistent": False,
+            }
+
+        @self.app.post("/experimental/goal-loop/preview")
+        async def goal_loop_preview(request: Request) -> dict[str, Any]:
+            payload = await read_payload(request)
+            try:
+                return preview_goal_loop(payload)
+            except (ValueError, KeyError, TypeError) as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+        @self.app.post("/experimental/goal-graph/preview")
+        async def goal_graph_preview(request: Request) -> dict[str, Any]:
+            payload = await read_payload(request)
+            try:
+                return preview_goal_graph(payload)
+            except (ValueError, KeyError, TypeError) as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+        @self.app.post("/experimental/network/preview")
+        async def network_preview(request: Request) -> dict[str, Any]:
+            payload = await read_payload(request)
+            try:
+                return preview_agent_network(payload)
+            except (ValueError, KeyError, TypeError) as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     def _create_server(self):
         import uvicorn
